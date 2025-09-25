@@ -1,4 +1,4 @@
-from .nodes import NODE_CLASS_MAPPINGS, NODE_DISPLAY_NAME_MAPPINGS
+from .nodes import RC_Image_Compositor, LoadImageWithAlpha
 
 NODE_CLASS_MAPPINGS = {
     "RC_Image_Compositor": RC_Image_Compositor,
