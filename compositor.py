@@ -35,11 +35,11 @@ def hsl_to_rgb_batch(hsl):
     return np.stack([r, g, b], axis=2)
 
 class RC_ImageCompositor:
-    """RC 图像合成器：Photoshop 风格混合模式、精确定位和灵活缩放 | RC Image Compositor: Photoshop-style blend modes, precise positioning, and flexible scaling."""
+    """RC Image Compositor: Photoshop-style blend modes, precise positioning, and flexible scaling."""
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "composite"
     CATEGORY = "RC/Image"
-    DESCRIPTION = "基础图像合成器，支持 Photoshop 兼容混合模式、百分比定位、缩放、旋转和透明度 | Base compositor with Photoshop-compatible blend modes, positioning, scaling, rotation, and opacity."
+    DESCRIPTION = "Base compositor with Photoshop-compatible blend modes, positioning, scaling, rotation, and opacity."
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -49,18 +49,15 @@ class RC_ImageCompositor:
                 "overlay": ("IMAGE",),
                 "x_percent": ("INT", {
                     "default": 100, "min": 0, "max": 100, "step": 1,
-                    "tooltip": "水平百分比位置（0=左，50=居中，100=右）| Horizontal percentage (0=left, 50=center, 100=right)"
+                    "tooltip": "Horizontal percentage (0=left, 50=center, 100=right)"
                 }),
                 "y_percent": ("INT", {
                     "default": 0, "min": 0, "max": 100, "step": 1,
-                    "tooltip": "垂直百分比位置（0=上，50=居中，100=下）| Vertical percentage (0=top, 50=center, 100=bottom)"
+                    "tooltip": "Vertical percentage (0=top, 50=center, 100=bottom)"
                 }),
                 "x_align": (["from_left", "from_right"], {
                     "default": "from_right",
                     "tooltip": (
-                        "水平对齐方式：\n"
-                        "- from_left：从左侧计算偏移\n"
-                        "- from_right：从右侧计算偏移（可实现紧贴右侧效果）\n\n"
                         "Horizontal alignment:\n"
                         "- from_left: Calculate offset from left\n"
                         "- from_right: Calculate offset from right (enables tight right alignment)"
@@ -69,9 +66,6 @@ class RC_ImageCompositor:
                 "y_align": (["from_top", "from_bottom"], {
                     "default": "from_top",
                     "tooltip": (
-                        "垂直对齐方式：\n"
-                        "- from_top：从顶部计算偏移\n"
-                        "- from_bottom：从底部计算偏移（可实现紧贴底部效果）\n\n"
                         "Vertical alignment:\n"
                         "- from_top: Calculate offset from top\n"
                         "- from_bottom: Calculate offset from bottom (enables tight bottom alignment)"
@@ -79,19 +73,15 @@ class RC_ImageCompositor:
                 }),
                 "x_offset": ("INT", {
                     "default": 50, "min": 0, "max": 4096, "step": 1,
-                    "tooltip": "水平偏移像素（正数，配合对齐方式使用）| Horizontal offset pixels (positive, use with alignment)"
+                    "tooltip": "Horizontal offset pixels (positive, use with alignment)"
                 }),
                 "y_offset": ("INT", {
                     "default": 50, "min": 0, "max": 4096, "step": 1,
-                    "tooltip": "垂直偏移像素（正数，配合对齐方式使用）| Vertical offset pixels (positive, use with alignment)"
+                    "tooltip": "Vertical offset pixels (positive, use with alignment)"
                 }),
                 "scale_mode": (["relative_to_overlay", "relative_to_background_width", "relative_to_background_height"], {
                     "default": "relative_to_background_width",
                     "tooltip": (
-                        "缩放参考模式：\n"
-                        "- relative_to_overlay：按贴图原始尺寸缩放\n"
-                        "- relative_to_background_width：贴图宽度 = scale × 背景宽度\n"
-                        "- relative_to_background_height：贴图高度 = scale × 背景高度\n\n"
                         "Scaling mode:\n"
                         "- relative_to_overlay: scale by overlay's size\n"
                         "- relative_to_background_width: width = scale × bg width\n"
@@ -100,15 +90,15 @@ class RC_ImageCompositor:
                 }),
                 "scale": ("FLOAT", {
                     "default": 0.3, "min": 0.01, "max": 10.0, "step": 0.01,
-                    "tooltip": "缩放因子，参考基准由 'scale_mode' 决定 | Scale factor, reference depends on 'scale_mode'"
+                    "tooltip": "Scale factor, reference depends on 'scale_mode'"
                 }),
                 "rotation": ("FLOAT", {
                     "default": 0.0, "min": -180.0, "max": 180.0, "step": 1.0,
-                    "tooltip": "旋转角度（度）| Rotation angle in degrees"
+                    "tooltip": "Rotation angle in degrees"
                 }),
                 "opacity": ("FLOAT", {
                     "default": 0.7, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "整体不透明度（0=完全透明，1=完全不透明）| Opacity (0=transparent, 1=opaque)"
+                    "tooltip": "Opacity (0=transparent, 1=opaque)"
                 }),
                 "blend_mode": ([
                     "normal",           # 正常
@@ -138,40 +128,40 @@ class RC_ImageCompositor:
                 ], {
                     "default": "normal",
                     "tooltip": (
-                        "Photoshop 完整混合模式（中英对照）| Complete Photoshop Blend Modes:\n"
-                        "normal: 正常 - 直接覆盖 | Normal - Direct overlay\n"
-                        "darken: 变暗 - 选择较暗像素 | Darken - Select darker pixels\n"
-                        "multiply: 正片叠底 - 颜色相乘变暗 | Multiply - Colors multiply to darken\n"
-                        "color_burn: 颜色加深 - 增加对比度变暗 | Color Burn - Darken with increased contrast\n"
-                        "linear_burn: 线性加深 - 线性方式变暗 | Linear Burn - Linear darkening\n"
-                        "lighten: 变亮 - 选择较亮像素 | Lighten - Select brighter pixels\n"
-                        "screen: 滤色 - 反向相乘变亮 | Screen - Inverse multiply to lighten\n"
-                        "color_dodge: 颜色减淡 - 减少对比度变亮 | Color Dodge - Lighten with reduced contrast\n"
-                        "linear_dodge: 线性减淡 - 直接相加变亮 | Linear Dodge - Direct addition to lighten\n"
-                        "overlay: 叠加 - 结合正片叠底和滤色 | Overlay - Combines multiply and screen\n"
-                        "soft_light: 柔光 - 柔和的对比增强 | Soft Light - Gentle contrast enhancement\n"
-                        "hard_light: 强光 - 强烈的对比增强 | Hard Light - Strong contrast enhancement\n"
-                        "vivid_light: 亮光 - 极端对比效果 | Vivid Light - Extreme contrast effect\n"
-                        "linear_light: 线性光 - 线性对比调整 | Linear Light - Linear contrast adjustment\n"
-                        "pin_light: 点光 - 替换颜色根据亮度 | Pin Light - Replace colors based on brightness\n"
-                        "hard_mix: 实色混合 - 产生纯色结果 | Hard Mix - Creates solid color results\n"
-                        "difference: 差值 - 颜色差的绝对值 | Difference - Absolute difference of colors\n"
-                        "exclusion: 排除 - 柔和的差值效果 | Exclusion - Softer difference effect\n"
-                        "subtract: 减去 - 直接颜色相减 | Subtract - Direct color subtraction\n"
-                        "divide: 划分 - 颜色除法运算 | Divide - Color division operation\n"
-                        "hue: 色相 - 仅改变色相，保持饱和度和明度 | Hue - Change only hue, keep saturation & lightness\n"
-                        "saturation: 饱和度 - 仅改变饱和度 | Saturation - Change only saturation\n"
-                        "color: 颜色 - 改变色相和饱和度，保持明度 | Color - Change hue & saturation, keep lightness\n"
-                        "luminosity: 明度 - 仅改变明度，保持色相和饱和度 | Luminosity - Change only lightness"
+                        "Complete Photoshop Blend Modes:\n"
+                        "normal: Normal - Direct overlay\n"
+                        "darken: Darken - Select darker pixels\n"
+                        "multiply: Multiply - Colors multiply to darken\n"
+                        "color_burn: Color Burn - Darken with increased contrast\n"
+                        "linear_burn: Linear Burn - Linear darkening\n"
+                        "lighten: Lighten - Select brighter pixels\n"
+                        "screen: Screen - Inverse multiply to lighten\n"
+                        "color_dodge: Color Dodge - Lighten with reduced contrast\n"
+                        "linear_dodge: Linear Dodge - Direct addition to lighten\n"
+                        "overlay: Overlay - Combines multiply and screen\n"
+                        "soft_light: Soft Light - Gentle contrast enhancement\n"
+                        "hard_light: Hard Light - Strong contrast enhancement\n"
+                        "vivid_light: Vivid Light - Extreme contrast effect\n"
+                        "linear_light: Linear Light - Linear contrast adjustment\n"
+                        "pin_light: Pin Light - Replace colors based on brightness\n"
+                        "hard_mix: Hard Mix - Creates solid color results\n"
+                        "difference: Difference - Absolute difference of colors\n"
+                        "exclusion: Exclusion - Softer difference effect\n"
+                        "subtract: Subtract - Direct color subtraction\n"
+                        "divide: Divide - Color division operation\n"
+                        "hue: Hue - Change only hue, keep saturation & lightness\n"
+                        "saturation: Saturation - Change only saturation\n"
+                        "color: Color - Change hue & saturation, keep lightness\n"
+                        "luminosity: Luminosity - Change only lightness"
                     )
                 }),
                 "flip_h": ("BOOLEAN", {
                     "default": False,
-                    "tooltip": "水平翻转贴图 | Flip horizontally"
+                    "tooltip": "Flip horizontally"
                 }),
                 "flip_v": ("BOOLEAN", {
                     "default": False,
-                    "tooltip": "垂直翻转贴图 | Flip vertically"
+                    "tooltip": "Flip vertically"
                 }),
             }
         }
@@ -401,7 +391,7 @@ class RC_LoadImageWithAlpha:
                 "image": (sorted(files), {"image_upload": True}),
             },
             "optional": {
-                "RGBA_mode": ("BOOLEAN", {"default": True, "tooltip": "强制输出 RGBA。若图像无 alpha，将添加全不透明通道 | Force RGBA output. If no alpha, add opaque channel."})
+                "RGBA_mode": ("BOOLEAN", {"default": True, "tooltip": "Force RGBA output. If no alpha, add opaque channel."})
             }
         }
 

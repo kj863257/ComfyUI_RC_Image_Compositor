@@ -7,7 +7,7 @@ license = "MIT"
 
 [tool.comfy]
 name = "RC Image Compositor"
-description = "图像合成器，支持 Photoshop 混合模式、百分比定位、灵活缩放"
+description = "Image compositor with Photoshop blend modes, percentage positioning, flexible scaling"
 author = "Your Name"
 project_url = "https://github.com/yourname/comfyui-rc-image-compositor"
 tags = ["image", "composite", "photoshop", "blend"]

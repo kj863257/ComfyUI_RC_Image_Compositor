@@ -43,39 +43,39 @@ NODE_CLASS_MAPPINGS = {
     "RC_ChannelMixer": RC_ChannelMixer,
 }
 
-# Display name mappings - shown in ComfyUI interface (中英双语)
+# Display name mappings - shown in ComfyUI interface
 NODE_DISPLAY_NAME_MAPPINGS = {
     # Core compositor nodes
-    "RC_ImageCompositor": "RC 图像合成器 (完整版) | RC Image Compositor (Complete)",
-    "RC_LoadImageWithAlpha": "RC 加载透明图像 | RC Load Image (Alpha)",
+    "RC_ImageCompositor": "RC Image Compositor (Complete)",
+    "RC_LoadImageWithAlpha": "RC Load Image (Alpha)",
 
     # Layer style effects
-    "RC_DropShadow": "RC 投影效果 | RC Drop Shadow",
-    "RC_Stroke": "RC 描边效果 | RC Stroke",
-    "RC_OuterGlow": "RC 外发光效果 | RC Outer Glow",
+    "RC_DropShadow": "RC Drop Shadow",
+    "RC_Stroke": "RC Stroke",
+    "RC_OuterGlow": "RC Outer Glow",
 
     # Filters and adjustments
-    "RC_GaussianBlur": "RC 高斯模糊 | RC Gaussian Blur",
-    "RC_Sharpen": "RC 锐化滤镜 | RC Sharpen",
-    "RC_HueSaturation": "RC 色相/饱和度 | RC Hue/Saturation",
+    "RC_GaussianBlur": "RC Gaussian Blur",
+    "RC_Sharpen": "RC Sharpen",
+    "RC_HueSaturation": "RC Hue/Saturation",
 
     # Utility nodes
-    "RC_CanvasPadding": "RC 画布填充 | RC Canvas Padding",
-    "RC_ImageScale": "RC 图像缩放 | RC Image Scale",
-    "RC_ImageCrop": "RC 图像裁剪 | RC Image Crop",
-    "RC_CanvasResize": "RC 画布调整 | RC Canvas Resize",
+    "RC_CanvasPadding": "RC Canvas Padding",
+    "RC_ImageScale": "RC Image Scale",
+    "RC_ImageCrop": "RC Image Crop",
+    "RC_CanvasResize": "RC Canvas Resize",
 
     # Adjustment nodes
-    "RC_OpacityAdjust": "RC 透明度调整 | RC Opacity Adjust",
-    "RC_LevelsAdjust": "RC 色阶调整 | RC Levels",
-    "RC_BrightnessContrast": "RC 亮度/对比度 | RC Brightness/Contrast",
-    "RC_ColorBalance": "RC 色彩平衡 | RC Color Balance",
-    "RC_ChannelMixer": "RC 通道混合器 | RC Channel Mixer",
+    "RC_OpacityAdjust": "RC Opacity Adjust",
+    "RC_LevelsAdjust": "RC Levels",
+    "RC_BrightnessContrast": "RC Brightness/Contrast",
+    "RC_ColorBalance": "RC Color Balance",
+    "RC_ChannelMixer": "RC Channel Mixer",
 }
 
 # Plugin metadata
 __version__ = "2.0.0"
-__description__ = "Professional Photoshop-style layer effects and compositing for ComfyUI | 专业的 Photoshop 风格图层效果和合成工具"
+__description__ = "Professional Photoshop-style layer effects and compositing for ComfyUI"
 __author__ = "RC Studio"
 
 # Inform user about the plugin capabilities
@@ -83,6 +83,6 @@ print(f"\n🎨 RC Image Compositor v{__version__} loaded successfully!")
 print("   ✨ Complete 24 Photoshop Blend Modes + Layer Effects")
 print("   🔧 Utilities: Canvas Padding, Image Scale, Crop, Canvas Resize")
 print("   🎚️  Adjustments: Opacity, Levels, Brightness/Contrast, Color Balance, Channel Mixer")
-print("   🌐 Full bilingual support (中英双语)")
+print("   🌐 Full bilingual support")
 print("   📁 Modular architecture for professional workflows")
 print("   🎯 Professional Photoshop-grade effects\n")
