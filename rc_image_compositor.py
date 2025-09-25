@@ -243,3 +243,70 @@ class RC_Image_Compositor:
 
         result_tensor = torch.from_numpy(result.astype(np.float32) / 255.0).unsqueeze(0)
         return (result_tensor,)
+class LoadImageWithAlpha:
+    @classmethod
+    def INPUT_TYPES(s):
+        input_dir = folder_paths.get_input_directory()
+        files = [f for f in os.listdir(input_dir) if os.path.isfile(os.path.join(input_dir, f))]
+        return {
+            "required": {
+                "image": (sorted(files), {"image_upload": True}),
+            },
+            "optional": {
+                "RGBA_mode": ("BOOLEAN", {"default": True, "tooltip": "强制输出 RGBA。若图像无 alpha，将添加全不透明通道 | Force RGBA output. If no alpha, add opaque channel."})
+            }
+        }
+
+    RETURN_TYPES = ("IMAGE", "MASK")
+    FUNCTION = "load_image"
+    CATEGORY = "RC/Image"
+    DESCRIPTION = "加载图像并保留透明通道（PNG）。输出 IMAGE (RGBA) 和 MASK（alpha）。"
+
+    def load_image(self, image: str, RGBA_mode: bool = True):
+        image_path = folder_paths.get_annotated_filepath(image)
+        img = Image.open(image_path)
+
+        # 转为 RGBA（保留 alpha）
+        if img.mode in ("RGBA", "LA"):
+            # 已有 alpha
+            pass
+        elif img.mode == "RGB":
+            if RGBA_mode:
+                img = img.convert("RGBA")
+            else:
+                img = img.convert("RGB")
+        else:
+            img = img.convert("RGBA")
+
+        # 转为 numpy [H, W, C]
+        img_np = np.array(img).astype(np.float32) / 255.0
+
+        # 确保是 [H, W, 4] if RGBA_mode
+        if RGBA_mode and img_np.shape[2] == 3:
+            alpha = np.ones((img_np.shape[0], img_np.shape[1], 1), dtype=np.float32)
+            img_np = np.concatenate([img_np, alpha], axis=2)
+
+        # 输出 IMAGE: [1, H, W, C]
+        image_tensor = torch.from_numpy(img_np)[None,]
+
+        # 输出 MASK: [H, W] —— alpha 通道（用于后续 inpaint 等）
+        if img_np.shape[2] == 4:
+            mask = 1.0 - img_np[:, :, 3]  # 注意：MASK 是 1-alpha（ComfyUI 惯例：白色=遮罩）
+        else:
+            mask = torch.zeros((img_np.shape[0], img_np.shape[1]), dtype=torch.float32)
+
+        mask_tensor = torch.from_numpy(mask)[None,]  # [1, H, W]
+
+        return (image_tensor, mask_tensor)
+
+    @classmethod
+    def IS_CHANGED(s, image, RGBA_mode=True):
+        image_path = folder_paths.get_annotated_filepath(image)
+        m = os.path.getmtime(image_path)
+        return m
+
+    @classmethod
+    def VALIDATE_INPUTS(s, image, RGBA_mode=True):
+        if not folder_paths.exists_annotated_filepath(image):
+            return "Invalid image file: {}".format(image)
+        return True
