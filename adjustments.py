@@ -5,11 +5,11 @@ import cv2
 
 
 class RC_OpacityAdjust:
-    """透明度调整节点 | Opacity Adjustment Node"""
+    """Opacity Adjustment Node"""
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "adjust_opacity"
     CATEGORY = "RC/Adjustments"
-    DESCRIPTION = "调整图像整体透明度，支持RGBA和RGB图像 | Adjust overall image opacity, supports RGBA and RGB images."
+    DESCRIPTION = "Adjust overall image opacity, supports RGBA and RGB images."
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -18,14 +18,11 @@ class RC_OpacityAdjust:
                 "image": ("IMAGE",),
                 "opacity": ("FLOAT", {
                     "default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "透明度值（0.0=完全透明，1.0=完全不透明）| Opacity value (0.0=fully transparent, 1.0=fully opaque)"
+                    "tooltip": "Opacity value (0.0=fully transparent, 1.0=fully opaque)"
                 }),
                 "ensure_alpha": ("BOOLEAN", {
                     "default": True,
                     "tooltip": (
-                        "确保输出包含Alpha通道：\n"
-                        "- True：强制输出RGBA格式\n"
-                        "- False：保持原始格式（RGB图像不添加Alpha）\n\n"
                         "Ensure alpha channel in output:\n"
                         "- True: Force RGBA output format\n"
                         "- False: Keep original format (RGB stays RGB)"
@@ -65,11 +62,11 @@ class RC_OpacityAdjust:
 
 
 class RC_LevelsAdjust:
-    """色阶调整节点 | Levels Adjustment Node"""
+    """Levels Adjustment Node"""
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "adjust_levels"
     CATEGORY = "RC/Adjustments"
-    DESCRIPTION = "Photoshop风格色阶调整，控制输入和输出范围 | Photoshop-style levels adjustment with input/output range control."
+    DESCRIPTION = "Photoshop-style levels adjustment with input/output range control."
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -78,30 +75,27 @@ class RC_LevelsAdjust:
                 "image": ("IMAGE",),
                 "input_black": ("FLOAT", {
                     "default": 0.0, "min": 0.0, "max": 0.9, "step": 0.01,
-                    "tooltip": "输入黑场（0.0-0.9，提高此值会使暗部变黑）| Input black point (0.0-0.9, raising darkens shadows)"
+                    "tooltip": "Input black point (0.0-0.9, raising darkens shadows)"
                 }),
                 "input_white": ("FLOAT", {
                     "default": 1.0, "min": 0.1, "max": 1.0, "step": 0.01,
-                    "tooltip": "输入白场（0.1-1.0，降低此值会使亮部变白）| Input white point (0.1-1.0, lowering brightens highlights)"
+                    "tooltip": "Input white point (0.1-1.0, lowering brightens highlights)"
                 }),
                 "gamma": ("FLOAT", {
                     "default": 1.0, "min": 0.1, "max": 3.0, "step": 0.01,
-                    "tooltip": "伽马值（<1.0提亮中间调，>1.0压暗中间调）| Gamma value (<1.0 brightens midtones, >1.0 darkens midtones)"
+                    "tooltip": "Gamma value (<1.0 brightens midtones, >1.0 darkens midtones)"
                 }),
                 "output_black": ("FLOAT", {
                     "default": 0.0, "min": 0.0, "max": 0.9, "step": 0.01,
-                    "tooltip": "输出黑场（抬升最暗部分的亮度）| Output black point (lifts darkest areas)"
+                    "tooltip": "Output black point (lifts darkest areas)"
                 }),
                 "output_white": ("FLOAT", {
                     "default": 1.0, "min": 0.1, "max": 1.0, "step": 0.01,
-                    "tooltip": "输出白场（压制最亮部分的亮度）| Output white point (suppresses brightest areas)"
+                    "tooltip": "Output white point (suppresses brightest areas)"
                 }),
                 "channel": (["RGB", "Red", "Green", "Blue"], {
                     "default": "RGB",
                     "tooltip": (
-                        "调整通道：\n"
-                        "- RGB：所有通道同时调整\n"
-                        "- Red/Green/Blue：单独调整指定颜色通道\n\n"
                         "Adjustment channel:\n"
                         "- RGB: Adjust all channels together\n"
                         "- Red/Green/Blue: Adjust individual color channels"
@@ -161,11 +155,11 @@ class RC_LevelsAdjust:
 
 
 class RC_BrightnessContrast:
-    """亮度对比度调整节点 | Brightness/Contrast Adjustment Node"""
+    """Brightness/Contrast Adjustment Node"""
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "adjust_brightness_contrast"
     CATEGORY = "RC/Adjustments"
-    DESCRIPTION = "调整图像亮度和对比度 | Adjust image brightness and contrast."
+    DESCRIPTION = "Adjust image brightness and contrast."
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -174,18 +168,15 @@ class RC_BrightnessContrast:
                 "image": ("IMAGE",),
                 "brightness": ("FLOAT", {
                     "default": 0.0, "min": -100.0, "max": 100.0, "step": 1.0,
-                    "tooltip": "亮度调整（-100到100，负值变暗，正值变亮）| Brightness adjustment (-100 to 100, negative=darker, positive=brighter)"
+                    "tooltip": "Brightness adjustment (-100 to 100, negative=darker, positive=brighter)"
                 }),
                 "contrast": ("FLOAT", {
                     "default": 0.0, "min": -100.0, "max": 100.0, "step": 1.0,
-                    "tooltip": "对比度调整（-100到100，负值降低对比度，正值增强对比度）| Contrast adjustment (-100 to 100, negative=less contrast, positive=more contrast)"
+                    "tooltip": "Contrast adjustment (-100 to 100, negative=less contrast, positive=more contrast)"
                 }),
                 "method": (["PIL", "OpenCV"], {
                     "default": "OpenCV",
                     "tooltip": (
-                        "调整算法：\n"
-                        "- PIL：使用PIL库的算法\n"
-                        "- OpenCV：使用OpenCV算法，更精确\n\n"
                         "Adjustment algorithm:\n"
                         "- PIL: Use PIL library algorithm\n"
                         "- OpenCV: Use OpenCV algorithm, more precise"
@@ -253,11 +244,11 @@ class RC_BrightnessContrast:
 
 
 class RC_ColorBalance:
-    """色彩平衡调整节点 | Color Balance Adjustment Node"""
+    """Color Balance Adjustment Node"""
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "adjust_color_balance"
     CATEGORY = "RC/Adjustments"
-    DESCRIPTION = "Photoshop风格色彩平衡调整 | Photoshop-style color balance adjustment."
+    DESCRIPTION = "Photoshop-style color balance adjustment."
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -266,23 +257,19 @@ class RC_ColorBalance:
                 "image": ("IMAGE",),
                 "cyan_red": ("FLOAT", {
                     "default": 0.0, "min": -100.0, "max": 100.0, "step": 1.0,
-                    "tooltip": "青色-红色平衡（负值偏青色，正值偏红色）| Cyan-Red balance (negative=cyan, positive=red)"
+                    "tooltip": "Cyan-Red balance (negative=cyan, positive=red)"
                 }),
                 "magenta_green": ("FLOAT", {
                     "default": 0.0, "min": -100.0, "max": 100.0, "step": 1.0,
-                    "tooltip": "洋红-绿色平衡（负值偏洋红，正值偏绿色）| Magenta-Green balance (negative=magenta, positive=green)"
+                    "tooltip": "Magenta-Green balance (negative=magenta, positive=green)"
                 }),
                 "yellow_blue": ("FLOAT", {
                     "default": 0.0, "min": -100.0, "max": 100.0, "step": 1.0,
-                    "tooltip": "黄色-蓝色平衡（负值偏黄色，正值偏蓝色）| Yellow-Blue balance (negative=yellow, positive=blue)"
+                    "tooltip": "Yellow-Blue balance (negative=yellow, positive=blue)"
                 }),
                 "tone_range": (["midtones", "shadows", "highlights"], {
                     "default": "midtones",
                     "tooltip": (
-                        "色调范围：\n"
-                        "- midtones：中间调（主要调整区域）\n"
-                        "- shadows：阴影（暗部区域）\n"
-                        "- highlights：高光（亮部区域）\n\n"
                         "Tone range:\n"
                         "- midtones: Midtones (main adjustment area)\n"
                         "- shadows: Shadows (dark areas)\n"
@@ -292,9 +279,6 @@ class RC_ColorBalance:
                 "preserve_luminosity": ("BOOLEAN", {
                     "default": True,
                     "tooltip": (
-                        "保持明度：\n"
-                        "- True：保持图像亮度不变\n"
-                        "- False：允许亮度变化\n\n"
                         "Preserve luminosity:\n"
                         "- True: Keep image brightness unchanged\n"
                         "- False: Allow brightness changes"
@@ -389,11 +373,11 @@ class RC_ColorBalance:
 
 
 class RC_ChannelMixer:
-    """通道混合器节点 | Channel Mixer Node"""
+    """Channel Mixer Node"""
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "mix_channels"
     CATEGORY = "RC/Adjustments"
-    DESCRIPTION = "高级通道混合器，可自定义RGB通道混合比例 | Advanced channel mixer for custom RGB channel blending."
+    DESCRIPTION = "Advanced channel mixer for custom RGB channel blending."
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -403,48 +387,45 @@ class RC_ChannelMixer:
                 # Red output channel
                 "red_from_red": ("FLOAT", {
                     "default": 100.0, "min": -200.0, "max": 200.0, "step": 1.0,
-                    "tooltip": "红色输出中红色通道的贡献百分比 | Red channel contribution to red output (%)"
+                    "tooltip": "Red channel contribution to red output (%)"
                 }),
                 "red_from_green": ("FLOAT", {
                     "default": 0.0, "min": -200.0, "max": 200.0, "step": 1.0,
-                    "tooltip": "红色输出中绿色通道的贡献百分比 | Green channel contribution to red output (%)"
+                    "tooltip": "Green channel contribution to red output (%)"
                 }),
                 "red_from_blue": ("FLOAT", {
                     "default": 0.0, "min": -200.0, "max": 200.0, "step": 1.0,
-                    "tooltip": "红色输出中蓝色通道的贡献百分比 | Blue channel contribution to red output (%)"
+                    "tooltip": "Blue channel contribution to red output (%)"
                 }),
                 # Green output channel
                 "green_from_red": ("FLOAT", {
                     "default": 0.0, "min": -200.0, "max": 200.0, "step": 1.0,
-                    "tooltip": "绿色输出中红色通道的贡献百分比 | Red channel contribution to green output (%)"
+                    "tooltip": "Red channel contribution to green output (%)"
                 }),
                 "green_from_green": ("FLOAT", {
                     "default": 100.0, "min": -200.0, "max": 200.0, "step": 1.0,
-                    "tooltip": "绿色输出中绿色通道的贡献百分比 | Green channel contribution to green output (%)"
+                    "tooltip": "Green channel contribution to green output (%)"
                 }),
                 "green_from_blue": ("FLOAT", {
                     "default": 0.0, "min": -200.0, "max": 200.0, "step": 1.0,
-                    "tooltip": "绿色输出中蓝色通道的贡献百分比 | Blue channel contribution to green output (%)"
+                    "tooltip": "Blue channel contribution to green output (%)"
                 }),
                 # Blue output channel
                 "blue_from_red": ("FLOAT", {
                     "default": 0.0, "min": -200.0, "max": 200.0, "step": 1.0,
-                    "tooltip": "蓝色输出中红色通道的贡献百分比 | Red channel contribution to blue output (%)"
+                    "tooltip": "Red channel contribution to blue output (%)"
                 }),
                 "blue_from_green": ("FLOAT", {
                     "default": 0.0, "min": -200.0, "max": 200.0, "step": 1.0,
-                    "tooltip": "蓝色输出中绿色通道的贡献百分比 | Green channel contribution to blue output (%)"
+                    "tooltip": "Green channel contribution to blue output (%)"
                 }),
                 "blue_from_blue": ("FLOAT", {
                     "default": 100.0, "min": -200.0, "max": 200.0, "step": 1.0,
-                    "tooltip": "蓝色输出中蓝色通道的贡献百分比 | Blue channel contribution to blue output (%)"
+                    "tooltip": "Blue channel contribution to blue output (%)"
                 }),
                 "monochrome": ("BOOLEAN", {
                     "default": False,
                     "tooltip": (
-                        "单色模式：\n"
-                        "- True：输出黑白图像（仅使用红色通道设置）\n"
-                        "- False：输出彩色图像\n\n"
                         "Monochrome mode:\n"
                         "- True: Output grayscale image (uses only red channel settings)\n"
                         "- False: Output color image"

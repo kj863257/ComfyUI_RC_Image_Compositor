@@ -6,11 +6,11 @@ import colorsys
 
 
 class RC_GaussianBlur:
-    """高斯模糊滤镜 | Gaussian Blur Filter"""
+    """Gaussian Blur Filter"""
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "apply_blur"
     CATEGORY = "RC/Filters"
-    DESCRIPTION = "Apply Gaussian blur with professional-grade quality control. 应用专业级高斯模糊效果。"
+    DESCRIPTION = "Apply Gaussian blur with professional-grade quality control."
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -19,14 +19,11 @@ class RC_GaussianBlur:
                 "image": ("IMAGE",),
                 "radius": ("FLOAT", {
                     "default": 2.0, "min": 0.0, "max": 100.0, "step": 0.1,
-                    "tooltip": "模糊半径（像素）| Blur radius in pixels"
+                    "tooltip": "Blur radius in pixels"
                 }),
                 "method": (["PIL", "OpenCV"], {
                     "default": "OpenCV",
                     "tooltip": (
-                        "模糊算法选择：\n"
-                        "- PIL：快速，适合一般用途\n"
-                        "- OpenCV：精确，适合专业处理\n\n"
                         "Blur algorithm:\n"
                         "- PIL: Fast, general purpose\n"
                         "- OpenCV: Precise, professional grade"
@@ -34,7 +31,7 @@ class RC_GaussianBlur:
                 }),
                 "preserve_alpha": ("BOOLEAN", {
                     "default": True,
-                    "tooltip": "保留透明通道不模糊 | Preserve alpha channel without blurring"
+                    "tooltip": "Preserve alpha channel without blurring"
                 }),
             }
         }
@@ -104,11 +101,11 @@ class RC_GaussianBlur:
 
 
 class RC_Sharpen:
-    """锐化滤镜 | Sharpen Filter"""
+    """Sharpen Filter"""
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "apply_sharpen"
     CATEGORY = "RC/Filters"
-    DESCRIPTION = "Apply sharpening effect with customizable intensity and method. 应用可自定义强度的锐化效果。"
+    DESCRIPTION = "Apply sharpening effect with customizable intensity and method."
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -117,15 +114,11 @@ class RC_Sharpen:
                 "image": ("IMAGE",),
                 "strength": ("FLOAT", {
                     "default": 1.0, "min": 0.0, "max": 5.0, "step": 0.1,
-                    "tooltip": "锐化强度（1.0 = 正常，>1.0 = 更锐利）| Sharpening strength (1.0 = normal, >1.0 = sharper)"
+                    "tooltip": "Sharpening strength (1.0 = normal, >1.0 = sharper)"
                 }),
                 "method": (["unsharp_mask", "high_pass", "edge_enhance"], {
                     "default": "unsharp_mask",
                     "tooltip": (
-                        "锐化方法：\n"
-                        "- unsharp_mask：反锐化蒙版（经典方法）\n"
-                        "- high_pass：高通滤波锐化\n"
-                        "- edge_enhance：边缘增强锐化\n\n"
                         "Sharpening method:\n"
                         "- unsharp_mask: Classic unsharp masking\n"
                         "- high_pass: High-pass filter sharpening\n"
@@ -134,11 +127,11 @@ class RC_Sharpen:
                 }),
                 "radius": ("FLOAT", {
                     "default": 1.0, "min": 0.1, "max": 10.0, "step": 0.1,
-                    "tooltip": "锐化半径（用于反锐化蒙版）| Sharpening radius (for unsharp mask)"
+                    "tooltip": "Sharpening radius (for unsharp mask)"
                 }),
                 "threshold": ("FLOAT", {
                     "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "锐化阈值（避免噪声放大）| Sharpening threshold (avoid noise amplification)"
+                    "tooltip": "Sharpening threshold (avoid noise amplification)"
                 }),
             }
         }
@@ -227,11 +220,11 @@ class RC_Sharpen:
 
 
 class RC_HueSaturation:
-    """色相饱和度调整 | Hue/Saturation Adjustment"""
+    """Hue/Saturation Adjustment"""
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "adjust_hue_saturation"
     CATEGORY = "RC/Adjustments"
-    DESCRIPTION = "Photoshop-style Hue/Saturation adjustment with targeted color editing. Photoshop 风格的色相/饱和度调整。"
+    DESCRIPTION = "Photoshop-style Hue/Saturation adjustment with targeted color editing."
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -240,39 +233,31 @@ class RC_HueSaturation:
                 "image": ("IMAGE",),
                 "hue_shift": ("FLOAT", {
                     "default": 0.0, "min": -180.0, "max": 180.0, "step": 1.0,
-                    "tooltip": "色相偏移（度，-180 到 +180）| Hue shift in degrees (-180 to +180)"
+                    "tooltip": "Hue shift in degrees (-180 to +180)"
                 }),
                 "saturation": ("FLOAT", {
                     "default": 0.0, "min": -100.0, "max": 100.0, "step": 1.0,
-                    "tooltip": "饱和度调整（-100 = 灰度，+100 = 双倍饱和）| Saturation adjustment (-100 = grayscale, +100 = double)"
+                    "tooltip": "Saturation adjustment (-100 = grayscale, +100 = double)"
                 }),
                 "lightness": ("FLOAT", {
                     "default": 0.0, "min": -100.0, "max": 100.0, "step": 1.0,
-                    "tooltip": "亮度调整（-100 = 黑色，+100 = 白色）| Lightness adjustment (-100 = black, +100 = white)"
+                    "tooltip": "Lightness adjustment (-100 = black, +100 = white)"
                 }),
                 "colorize": ("BOOLEAN", {
                     "default": False,
-                    "tooltip": "着色模式（将图像转为单色调）| Colorize mode (convert to monochromatic)"
+                    "tooltip": "Colorize mode (convert to monochromatic)"
                 }),
                 "colorize_hue": ("FLOAT", {
                     "default": 0.0, "min": 0.0, "max": 360.0, "step": 1.0,
-                    "tooltip": "着色色相（仅在着色模式下生效）| Colorize hue (only in colorize mode)"
+                    "tooltip": "Colorize hue (only in colorize mode)"
                 }),
                 "colorize_saturation": ("FLOAT", {
                     "default": 50.0, "min": 0.0, "max": 100.0, "step": 1.0,
-                    "tooltip": "着色饱和度（仅在着色模式下生效）| Colorize saturation (only in colorize mode)"
+                    "tooltip": "Colorize saturation (only in colorize mode)"
                 }),
                 "target_color": (["master", "reds", "yellows", "greens", "cyans", "blues", "magentas"], {
                     "default": "master",
                     "tooltip": (
-                        "目标颜色范围：\n"
-                        "- master：全部颜色\n"
-                        "- reds：红色范围\n"
-                        "- yellows：黄色范围\n"
-                        "- greens：绿色范围\n"
-                        "- cyans：青色范围\n"
-                        "- blues：蓝色范围\n"
-                        "- magentas：洋红范围\n\n"
                         "Target color range:\n"
                         "- master: All colors\n"
                         "- reds: Red range\n"

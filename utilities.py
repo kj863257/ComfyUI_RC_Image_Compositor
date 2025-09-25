@@ -5,11 +5,11 @@ from typing import Tuple
 
 
 class RC_CanvasPadding:
-    """画布填充节点 | Canvas Padding Node"""
+    """Canvas Padding Node"""
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "apply_padding"
     CATEGORY = "RC/Utilities"
-    DESCRIPTION = "调整画布大小，添加填充边距 | Adjust canvas size by adding padding margins."
+    DESCRIPTION = "Adjust canvas size by adding padding margins."
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -18,28 +18,23 @@ class RC_CanvasPadding:
                 "image": ("IMAGE",),
                 "top": ("INT", {
                     "default": 50, "min": 0, "max": 2048, "step": 1,
-                    "tooltip": "顶部填充像素数 | Top padding in pixels"
+                    "tooltip": "Top padding in pixels"
                 }),
                 "bottom": ("INT", {
                     "default": 50, "min": 0, "max": 2048, "step": 1,
-                    "tooltip": "底部填充像素数 | Bottom padding in pixels"
+                    "tooltip": "Bottom padding in pixels"
                 }),
                 "left": ("INT", {
                     "default": 50, "min": 0, "max": 2048, "step": 1,
-                    "tooltip": "左侧填充像素数 | Left padding in pixels"
+                    "tooltip": "Left padding in pixels"
                 }),
                 "right": ("INT", {
                     "default": 50, "min": 0, "max": 2048, "step": 1,
-                    "tooltip": "右侧填充像素数 | Right padding in pixels"
+                    "tooltip": "Right padding in pixels"
                 }),
                 "fill_mode": (["color", "edge", "mirror", "transparent"], {
                     "default": "color",
                     "tooltip": (
-                        "填充模式：\n"
-                        "- color：使用纯色填充\n"
-                        "- edge：延伸边缘像素\n"
-                        "- mirror：镜像边缘内容\n"
-                        "- transparent：透明填充（仅RGBA）\n\n"
                         "Fill mode:\n"
                         "- color: Fill with solid color\n"
                         "- edge: Extend edge pixels\n"
@@ -49,15 +44,15 @@ class RC_CanvasPadding:
                 }),
                 "fill_color_r": ("FLOAT", {
                     "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "填充颜色红色分量 | Fill color red component"
+                    "tooltip": "Fill color red component"
                 }),
                 "fill_color_g": ("FLOAT", {
                     "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "填充颜色绿色分量 | Fill color green component"
+                    "tooltip": "Fill color green component"
                 }),
                 "fill_color_b": ("FLOAT", {
                     "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "填充颜色蓝色分量 | Fill color blue component"
+                    "tooltip": "Fill color blue component"
                 }),
             }
         }
@@ -147,11 +142,11 @@ class RC_CanvasPadding:
 
 
 class RC_ImageScale:
-    """图像缩放节点 | Image Scale Node"""
+    """Image Scale Node"""
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "scale_image"
     CATEGORY = "RC/Utilities"
-    DESCRIPTION = "多种方式缩放图像尺寸 | Scale image with multiple resizing methods."
+    DESCRIPTION = "Scale image with multiple resizing methods."
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -161,13 +156,6 @@ class RC_ImageScale:
                 "scale_method": (["percentage", "dimensions", "fit_width", "fit_height", "fit_longest", "fit_shortest"], {
                     "default": "percentage",
                     "tooltip": (
-                        "缩放方法：\n"
-                        "- percentage：按百分比缩放\n"
-                        "- dimensions：指定确切尺寸\n"
-                        "- fit_width：适配宽度（保持比例）\n"
-                        "- fit_height：适配高度（保持比例）\n"
-                        "- fit_longest：适配长边（保持比例）\n"
-                        "- fit_shortest：适配短边（保持比例）\n\n"
                         "Scale method:\n"
                         "- percentage: Scale by percentage\n"
                         "- dimensions: Exact dimensions\n"
@@ -179,24 +167,19 @@ class RC_ImageScale:
                 }),
                 "scale_factor": ("FLOAT", {
                     "default": 1.0, "min": 0.1, "max": 10.0, "step": 0.1,
-                    "tooltip": "缩放因子（用于百分比模式）| Scale factor (for percentage mode)"
+                    "tooltip": "Scale factor (for percentage mode)"
                 }),
                 "width": ("INT", {
                     "default": 512, "min": 64, "max": 8192, "step": 8,
-                    "tooltip": "目标宽度（用于尺寸/适配模式）| Target width (for dimensions/fit modes)"
+                    "tooltip": "Target width (for dimensions/fit modes)"
                 }),
                 "height": ("INT", {
                     "default": 512, "min": 64, "max": 8192, "step": 8,
-                    "tooltip": "目标高度（用于尺寸/适配模式）| Target height (for dimensions/fit modes)"
+                    "tooltip": "Target height (for dimensions/fit modes)"
                 }),
                 "resampling": (["LANCZOS", "BICUBIC", "BILINEAR", "NEAREST"], {
                     "default": "LANCZOS",
                     "tooltip": (
-                        "重采样算法：\n"
-                        "- LANCZOS：最高质量（慢）\n"
-                        "- BICUBIC：高质量\n"
-                        "- BILINEAR：中等质量\n"
-                        "- NEAREST：最快（低质量）\n\n"
                         "Resampling algorithm:\n"
                         "- LANCZOS: Highest quality (slow)\n"
                         "- BICUBIC: High quality\n"
@@ -206,7 +189,7 @@ class RC_ImageScale:
                 }),
                 "keep_aspect_ratio": ("BOOLEAN", {
                     "default": True,
-                    "tooltip": "保持宽高比（用于尺寸模式）| Keep aspect ratio (for dimensions mode)"
+                    "tooltip": "Keep aspect ratio (for dimensions mode)"
                 }),
             }
         }
@@ -294,11 +277,11 @@ class RC_ImageScale:
 
 
 class RC_ImageCrop:
-    """图像裁剪节点 | Image Crop Node"""
+    """Image Crop Node"""
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "crop_image"
     CATEGORY = "RC/Utilities"
-    DESCRIPTION = "裁剪图像到指定区域 | Crop image to specified region."
+    DESCRIPTION = "Crop image to specified region."
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -308,10 +291,6 @@ class RC_ImageCrop:
                 "crop_method": (["manual", "center", "aspect_ratio"], {
                     "default": "manual",
                     "tooltip": (
-                        "裁剪方法：\n"
-                        "- manual：手动指定坐标\n"
-                        "- center：居中裁剪到指定尺寸\n"
-                        "- aspect_ratio：按比例裁剪（居中）\n\n"
                         "Crop method:\n"
                         "- manual: Manual coordinates\n"
                         "- center: Center crop to size\n"
@@ -320,27 +299,27 @@ class RC_ImageCrop:
                 }),
                 "x": ("INT", {
                     "default": 0, "min": 0, "max": 8192, "step": 1,
-                    "tooltip": "裁剪起始X坐标（手动模式）| Crop start X coordinate (manual mode)"
+                    "tooltip": "Crop start X coordinate (manual mode)"
                 }),
                 "y": ("INT", {
                     "default": 0, "min": 0, "max": 8192, "step": 1,
-                    "tooltip": "裁剪起始Y坐标（手动模式）| Crop start Y coordinate (manual mode)"
+                    "tooltip": "Crop start Y coordinate (manual mode)"
                 }),
                 "width": ("INT", {
                     "default": 512, "min": 1, "max": 8192, "step": 1,
-                    "tooltip": "裁剪宽度 | Crop width"
+                    "tooltip": "Crop width"
                 }),
                 "height": ("INT", {
                     "default": 512, "min": 1, "max": 8192, "step": 1,
-                    "tooltip": "裁剪高度 | Crop height"
+                    "tooltip": "Crop height"
                 }),
                 "aspect_width": ("FLOAT", {
                     "default": 16.0, "min": 0.1, "max": 100.0, "step": 0.1,
-                    "tooltip": "目标宽高比的宽度部分（比例模式）| Width part of aspect ratio (ratio mode)"
+                    "tooltip": "Width part of aspect ratio (ratio mode)"
                 }),
                 "aspect_height": ("FLOAT", {
                     "default": 9.0, "min": 0.1, "max": 100.0, "step": 0.1,
-                    "tooltip": "目标宽高比的高度部分（比例模式）| Height part of aspect ratio (ratio mode)"
+                    "tooltip": "Height part of aspect ratio (ratio mode)"
                 }),
             }
         }
@@ -404,11 +383,11 @@ class RC_ImageCrop:
 
 
 class RC_CanvasResize:
-    """画布调整节点 | Canvas Resize Node"""
+    """Canvas Resize Node"""
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "resize_canvas"
     CATEGORY = "RC/Utilities"
-    DESCRIPTION = "调整画布尺寸和图像位置 | Resize canvas and reposition image."
+    DESCRIPTION = "Resize canvas and reposition image."
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -417,27 +396,17 @@ class RC_CanvasResize:
                 "image": ("IMAGE",),
                 "new_width": ("INT", {
                     "default": 512, "min": 64, "max": 8192, "step": 8,
-                    "tooltip": "新画布宽度 | New canvas width"
+                    "tooltip": "New canvas width"
                 }),
                 "new_height": ("INT", {
                     "default": 512, "min": 64, "max": 8192, "step": 8,
-                    "tooltip": "新画布高度 | New canvas height"
+                    "tooltip": "New canvas height"
                 }),
                 "anchor": (["center", "top_left", "top_center", "top_right",
                           "middle_left", "middle_right", "bottom_left",
                           "bottom_center", "bottom_right"], {
                     "default": "center",
                     "tooltip": (
-                        "图像在新画布中的锚点位置：\n"
-                        "- center：居中\n"
-                        "- top_left：左上角\n"
-                        "- top_center：顶部居中\n"
-                        "- top_right：右上角\n"
-                        "- middle_left：左侧居中\n"
-                        "- middle_right：右侧居中\n"
-                        "- bottom_left：左下角\n"
-                        "- bottom_center：底部居中\n"
-                        "- bottom_right：右下角\n\n"
                         "Image anchor position in new canvas:\n"
                         "- center: Center\n"
                         "- top_left: Top-left corner\n"
@@ -452,23 +421,23 @@ class RC_CanvasResize:
                 }),
                 "x_offset": ("INT", {
                     "default": 0, "min": -4096, "max": 4096, "step": 1,
-                    "tooltip": "X轴额外偏移（像素）| Additional X offset (pixels)"
+                    "tooltip": "Additional X offset (pixels)"
                 }),
                 "y_offset": ("INT", {
                     "default": 0, "min": -4096, "max": 4096, "step": 1,
-                    "tooltip": "Y轴额外偏移（像素）| Additional Y offset (pixels)"
+                    "tooltip": "Additional Y offset (pixels)"
                 }),
                 "background_color_r": ("FLOAT", {
                     "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "背景颜色红色分量 | Background color red component"
+                    "tooltip": "Background color red component"
                 }),
                 "background_color_g": ("FLOAT", {
                     "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "背景颜色绿色分量 | Background color green component"
+                    "tooltip": "Background color green component"
                 }),
                 "background_color_b": ("FLOAT", {
                     "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "背景颜色蓝色分量 | Background color blue component"
+                    "tooltip": "Background color blue component"
                 }),
             }
         }
