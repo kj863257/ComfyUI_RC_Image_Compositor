@@ -611,9 +611,15 @@ class RC_OuterGlow:
                 final_mask = glow_mask
 
             # Remove original shape area from glow (outer glow only)
-            original_mask = np.zeros((canvas_h, canvas_w), dtype=np.uint8)
-            original_mask[glow_y:glow_y+h, glow_x:glow_x+w] = mask
-            final_mask = cv2.subtract(final_mask, original_mask)
+            # Use original alpha channel, not processed mask
+            if has_alpha:
+                original_alpha = img[:, :, 3]
+            else:
+                original_alpha = np.full((h, w), 255, dtype=np.uint8)
+
+            original_mask_canvas = np.zeros((canvas_h, canvas_w), dtype=np.uint8)
+            original_mask_canvas[glow_y:glow_y+h, glow_x:glow_x+w] = original_alpha
+            final_mask = cv2.subtract(final_mask, original_mask_canvas)
 
             # Apply glow color and opacity to entire canvas
             glow_color = np.array([color_r, color_g, color_b])
@@ -643,7 +649,13 @@ class RC_OuterGlow:
                 final_mask = work_mask
 
             # Remove original shape area from glow (outer glow only)
-            final_mask = cv2.subtract(final_mask, mask)
+            # Use original alpha channel, not processed mask
+            if has_alpha:
+                original_alpha = img[:, :, 3]
+            else:
+                original_alpha = np.full((h, w), 255, dtype=np.uint8)
+
+            final_mask = cv2.subtract(final_mask, original_alpha)
 
             # Apply glow color and opacity
             glow_color = np.array([color_r, color_g, color_b])
