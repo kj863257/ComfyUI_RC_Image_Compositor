@@ -6,11 +6,11 @@ import cv2
 
 
 class RC_DropShadow:
-    """Drop Shadow layer style with Photoshop-compatible parameters"""
+    """投影图层样式，兼容Photoshop参数 | Drop Shadow layer style with Photoshop-compatible parameters"""
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "apply_drop_shadow"
     CATEGORY = "RC/Layer Effects"
-    DESCRIPTION = "Apply Drop Shadow effect to image with blur, offset, and color controls."
+    DESCRIPTION = "为图像应用投影效果，支持模糊、偏移和颜色控制。| Apply Drop Shadow effect to image with blur, offset, and color controls."
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -19,35 +19,35 @@ class RC_DropShadow:
                 "image": ("IMAGE",),
                 "distance": ("FLOAT", {
                     "default": 5.0, "min": 0.0, "max": 100.0, "step": 0.1,
-                    "tooltip": "Shadow distance in pixels"
+                    "tooltip": "阴影偏移距离（像素）| Shadow distance in pixels"
                 }),
                 "angle": ("FLOAT", {
                     "default": 135.0, "min": 0.0, "max": 360.0, "step": 1.0,
-                    "tooltip": "Shadow angle in degrees (135° = bottom-right)"
+                    "tooltip": "阴影角度（度，135° = 右下角）| Shadow angle in degrees (135° = bottom-right)"
                 }),
                 "size": ("FLOAT", {
                     "default": 5.0, "min": 0.0, "max": 100.0, "step": 0.1,
-                    "tooltip": "Shadow blur size in pixels"
+                    "tooltip": "阴影模糊大小（像素）| Shadow blur size in pixels"
                 }),
                 "spread": ("FLOAT", {
                     "default": 0.0, "min": 0.0, "max": 100.0, "step": 0.1,
-                    "tooltip": "Shadow spread (choke) in pixels"
+                    "tooltip": "阴影扩展（收缩）大小（像素）| Shadow spread (choke) in pixels"
                 }),
                 "opacity": ("FLOAT", {
                     "default": 0.75, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "Shadow opacity"
+                    "tooltip": "阴影透明度| Shadow opacity"
                 }),
                 "color_r": ("FLOAT", {
                     "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "Shadow color red component"
+                    "tooltip": "阴影颜色红色分量| Shadow color red component"
                 }),
                 "color_g": ("FLOAT", {
                     "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "Shadow color green component"
+                    "tooltip": "阴影颜色绿色分量| Shadow color green component"
                 }),
                 "color_b": ("FLOAT", {
                     "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "Shadow color blue component"
+                    "tooltip": "阴影颜色蓝色分量| Shadow color blue component"
                 }),
                 "blend_mode": ([
                     "normal", "multiply", "color_burn", "linear_burn", "darken"
@@ -232,11 +232,11 @@ class RC_DropShadow:
 
 
 class RC_Stroke:
-    """Stroke layer style with inside/outside/center positioning"""
+    """描边图层样式，支持内/外/居中定位 | Stroke layer style with inside/outside/center positioning"""
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "apply_stroke"
     CATEGORY = "RC/Layer Effects"
-    DESCRIPTION = "Apply Stroke effect to image with customizable position, size, and color."
+    DESCRIPTION = "为图像应用描边效果，支持自定义位置、大小和颜色。| Apply Stroke effect to image with customizable position, size, and color."
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -245,27 +245,27 @@ class RC_Stroke:
                 "image": ("IMAGE",),
                 "size": ("FLOAT", {
                     "default": 3.0, "min": 0.0, "max": 50.0, "step": 0.1,
-                    "tooltip": "Stroke width in pixels"
+                    "tooltip": "描边宽度（像素）| Stroke width in pixels"
                 }),
                 "position": (["outside", "inside", "center"], {
                     "default": "outside",
-                    "tooltip": "Stroke position relative to shape"
+                    "tooltip": "描边相对于形状的位置| Stroke position relative to shape"
                 }),
                 "opacity": ("FLOAT", {
                     "default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "Stroke opacity"
+                    "tooltip": "描边透明度| Stroke opacity"
                 }),
                 "color_r": ("FLOAT", {
                     "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "Stroke color red component"
+                    "tooltip": "描边颜色红色分量| Stroke color red component"
                 }),
                 "color_g": ("FLOAT", {
                     "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "Stroke color green component"
+                    "tooltip": "描边颜色绿色分量| Stroke color green component"
                 }),
                 "color_b": ("FLOAT", {
                     "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "Stroke color blue component"
+                    "tooltip": "描边颜色蓝色分量| Stroke color blue component"
                 }),
                 "blend_mode": ([
                     "normal", "multiply", "screen", "overlay", "color_burn"
@@ -405,11 +405,11 @@ class RC_Stroke:
 
 
 class RC_OuterGlow:
-    """Outer Glow layer style with customizable color and spread"""
+    """外发光图层样式，支持自定义颜色和扩展 | Outer Glow layer style with customizable color and spread"""
     RETURN_TYPES = ("IMAGE",)
     FUNCTION = "apply_outer_glow"
     CATEGORY = "RC/Layer Effects"
-    DESCRIPTION = "Apply Outer Glow effect with color, size, and spread controls."
+    DESCRIPTION = "应用外发光效果，支持颜色、大小和扩展控制。| Apply Outer Glow effect with color, size, and spread controls."
 
     @classmethod
     def INPUT_TYPES(cls):
@@ -418,27 +418,27 @@ class RC_OuterGlow:
                 "image": ("IMAGE",),
                 "size": ("FLOAT", {
                     "default": 10.0, "min": 0.0, "max": 100.0, "step": 0.1,
-                    "tooltip": "Glow blur size in pixels"
+                    "tooltip": "发光模糊大小（像素）| Glow blur size in pixels"
                 }),
                 "spread": ("FLOAT", {
                     "default": 0.0, "min": 0.0, "max": 100.0, "step": 0.1,
-                    "tooltip": "Glow spread (choke) in pixels"
+                    "tooltip": "发光扩展（收缩）大小（像素）| Glow spread (choke) in pixels"
                 }),
                 "opacity": ("FLOAT", {
                     "default": 0.75, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "Glow opacity"
+                    "tooltip": "发光透明度| Glow opacity"
                 }),
                 "color_r": ("FLOAT", {
                     "default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "Glow color red component"
+                    "tooltip": "发光颜色红色分量| Glow color red component"
                 }),
                 "color_g": ("FLOAT", {
                     "default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "Glow color green component"
+                    "tooltip": "发光颜色绿色分量| Glow color green component"
                 }),
                 "color_b": ("FLOAT", {
                     "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "Glow color blue component"
+                    "tooltip": "发光颜色蓝色分量| Glow color blue component"
                 }),
                 "blend_mode": ([
                     "normal", "screen", "color_dodge", "linear_dodge", "lighten"
