@@ -37,17 +37,30 @@ class RC_DropShadow:
                     "default": 0.75, "min": 0.0, "max": 1.0, "step": 0.01,
                     "tooltip": "阴影透明度| Shadow opacity"
                 }),
-                "color_r": ("FLOAT", {
-                    "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "阴影颜色红色分量| Shadow color red component"
+                "fill_opacity": ("FLOAT", {
+                    "default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01,
+                    "tooltip": (
+                        "原始图像填充透明度：\n"
+                        "- 1.0：正常显示原图\n"
+                        "- 0.0：镂空效果，只显示投影\n"
+                        "- 0.5：半透明原图+投影\n\n"
+                        "Original image fill opacity:\n"
+                        "- 1.0: Normal image display\n"
+                        "- 0.0: Hollow effect, shadow only\n"
+                        "- 0.5: Semi-transparent image + shadow"
+                    )
                 }),
-                "color_g": ("FLOAT", {
-                    "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "阴影颜色绿色分量| Shadow color green component"
+                "color_r": ("INT", {
+                    "default": 0, "min": 0, "max": 255, "step": 1,
+                    "tooltip": "阴影颜色红色分量 (0-255) | Shadow color red component (0-255)"
                 }),
-                "color_b": ("FLOAT", {
-                    "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "阴影颜色蓝色分量| Shadow color blue component"
+                "color_g": ("INT", {
+                    "default": 0, "min": 0, "max": 255, "step": 1,
+                    "tooltip": "阴影颜色绿色分量 (0-255) | Shadow color green component (0-255)"
+                }),
+                "color_b": ("INT", {
+                    "default": 0, "min": 0, "max": 255, "step": 1,
+                    "tooltip": "阴影颜色蓝色分量 (0-255) | Shadow color blue component (0-255)"
                 }),
                 "blend_mode": ([
                     "normal", "multiply", "color_burn", "linear_burn", "darken"
@@ -68,6 +81,19 @@ class RC_DropShadow:
                         "- darken: Darken, gentle shadow"
                     )
                 }),
+                "fill_opacity": ("FLOAT", {
+                    "default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01,
+                    "tooltip": (
+                        "原始图像填充透明度：\n"
+                        "- 1.0：正常显示原图\n"
+                        "- 0.0：镂空效果，只显示投影\n"
+                        "- 0.5：半透明原图+投影\n\n"
+                        "Original image fill opacity:\n"
+                        "- 1.0: Normal image display\n"
+                        "- 0.0: Hollow effect, shadow only\n"
+                        "- 0.5: Semi-transparent image + shadow"
+                    )
+                }),
                 "auto_expand_canvas": ("BOOLEAN", {
                     "default": True,
                     "tooltip": (
@@ -83,7 +109,7 @@ class RC_DropShadow:
         }
 
     def apply_drop_shadow(self, image, distance, angle, size, spread, opacity,
-                         color_r, color_g, color_b, blend_mode, auto_expand_canvas):
+                         fill_opacity, color_r, color_g, color_b, blend_mode, auto_expand_canvas):
         # Convert to numpy
         img = (image[0].cpu().numpy() * 255).astype(np.uint8)
         h, w = img.shape[:2]
@@ -162,8 +188,13 @@ class RC_DropShadow:
                     final_shadow_mask[orig_pos_y:min(canvas_h-shadow_y+orig_pos_y, orig_pos_y+h),
                                      orig_pos_x:min(canvas_w-shadow_x+orig_pos_x, orig_pos_x+w)]
 
+            # Remove original shape area from shadow (avoid shadow under original image)
+            original_mask_canvas = np.zeros_like(offset_shadow_mask)
+            original_mask_canvas[orig_pos_y:orig_pos_y+h, orig_pos_x:orig_pos_x+w] = mask
+            offset_shadow_mask = cv2.subtract(offset_shadow_mask, original_mask_canvas)
+
             # Apply shadow color and opacity to entire canvas
-            shadow_color = np.array([color_r, color_g, color_b]) * 255
+            shadow_color = np.array([color_r, color_g, color_b])
             for c in range(3):
                 shadow_canvas[:, :, c] = shadow_color[c]
             shadow_canvas[:, :, 3] = (offset_shadow_mask * opacity).astype(np.uint8)
@@ -171,7 +202,7 @@ class RC_DropShadow:
         else:
             # Original behavior for bounded shadow
             # Apply shadow color and opacity
-            shadow_color = np.array([color_r, color_g, color_b]) * 255
+            shadow_color = np.array([color_r, color_g, color_b])
             for c in range(3):
                 shadow_canvas[shadow_y:shadow_y+h, shadow_x:shadow_x+w, c] = shadow_color[c]
             shadow_canvas[shadow_y:shadow_y+h, shadow_x:shadow_x+w, 3] = (mask * opacity).astype(np.uint8)
@@ -189,6 +220,9 @@ class RC_DropShadow:
             orig_rgba = np.dstack([img, np.full((h, w), 255, dtype=np.uint8)])
         else:
             orig_rgba = img.copy()
+
+        # Apply fill_opacity to original image
+        orig_rgba[:, :, 3] = (orig_rgba[:, :, 3].astype(np.float32) * fill_opacity).astype(np.uint8)
 
         # Composite original over shadow
         result = shadow_canvas.copy()
@@ -255,17 +289,17 @@ class RC_Stroke:
                     "default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01,
                     "tooltip": "描边透明度| Stroke opacity"
                 }),
-                "color_r": ("FLOAT", {
-                    "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "描边颜色红色分量| Stroke color red component"
+                "color_r": ("INT", {
+                    "default": 0, "min": 0, "max": 255, "step": 1,
+                    "tooltip": "描边颜色红色分量 (0-255) | Stroke color red component (0-255)"
                 }),
-                "color_g": ("FLOAT", {
-                    "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "描边颜色绿色分量| Stroke color green component"
+                "color_g": ("INT", {
+                    "default": 0, "min": 0, "max": 255, "step": 1,
+                    "tooltip": "描边颜色绿色分量 (0-255) | Stroke color green component (0-255)"
                 }),
-                "color_b": ("FLOAT", {
-                    "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "描边颜色蓝色分量| Stroke color blue component"
+                "color_b": ("INT", {
+                    "default": 0, "min": 0, "max": 255, "step": 1,
+                    "tooltip": "描边颜色蓝色分量 (0-255) | Stroke color blue component (0-255)"
                 }),
                 "blend_mode": ([
                     "normal", "multiply", "screen", "overlay", "color_burn"
@@ -286,6 +320,19 @@ class RC_Stroke:
                         "- color_burn: Color burn, deeper shadows"
                     )
                 }),
+                "fill_opacity": ("FLOAT", {
+                    "default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01,
+                    "tooltip": (
+                        "原始图像填充透明度：\n"
+                        "- 1.0：正常显示原图\n"
+                        "- 0.0：镂空效果，只显示描边\n"
+                        "- 0.5：半透明原图+描边\n\n"
+                        "Original image fill opacity:\n"
+                        "- 1.0: Normal image display\n"
+                        "- 0.0: Hollow effect, stroke only\n"
+                        "- 0.5: Semi-transparent image + stroke"
+                    )
+                }),
                 "auto_expand_canvas": ("BOOLEAN", {
                     "default": True,
                     "tooltip": (
@@ -300,7 +347,7 @@ class RC_Stroke:
             }
         }
 
-    def apply_stroke(self, image, size, position, opacity, color_r, color_g, color_b, blend_mode, auto_expand_canvas):
+    def apply_stroke(self, image, size, position, opacity, color_r, color_g, color_b, blend_mode, fill_opacity, auto_expand_canvas):
         # Convert to numpy
         img = (image[0].cpu().numpy() * 255).astype(np.uint8)
         h, w = img.shape[:2]
@@ -349,7 +396,7 @@ class RC_Stroke:
         pos_y = canvas_expansion
 
         # Apply stroke
-        stroke_color = np.array([color_r, color_g, color_b]) * 255
+        stroke_color = np.array([color_r, color_g, color_b])
 
         if canvas_expansion > 0:
             # Need to create expanded stroke mask
@@ -381,18 +428,35 @@ class RC_Stroke:
         else:
             orig_rgba = img.copy()
 
-        # Blend original over stroke
+        # Apply fill_opacity to original image
+        orig_rgba[:, :, 3] = (orig_rgba[:, :, 3].astype(np.float32) * fill_opacity).astype(np.uint8)
+
+        # Blend original over stroke (or stroke over original for inside position)
         orig_alpha = orig_rgba[:, :, 3:4].astype(np.float32) / 255.0
         stroke_region = result[pos_y:pos_y+h, pos_x:pos_x+w]
         stroke_alpha = stroke_region[:, :, 3:4].astype(np.float32) / 255.0
 
-        combined_alpha = stroke_alpha + orig_alpha * (1 - stroke_alpha)
+        # For inside stroke, render stroke ABOVE original image
+        if position == "inside":
+            combined_alpha = orig_alpha + stroke_alpha * (1 - orig_alpha)
 
-        # Apply blending
-        stroke_rgb = stroke_region[:, :, :3].astype(np.float32) / 255.0
-        orig_rgb = orig_rgba[:, :, :3].astype(np.float32) / 255.0
+            # Apply blending
+            stroke_rgb = stroke_region[:, :, :3].astype(np.float32) / 255.0
+            orig_rgb = orig_rgba[:, :, :3].astype(np.float32) / 255.0
 
-        final_rgb = stroke_rgb * (1 - orig_alpha) + orig_rgb * orig_alpha
+            # Stroke over original
+            final_rgb = orig_rgb * (1 - stroke_alpha) + stroke_rgb * stroke_alpha
+        else:
+            # For outside and center stroke, render original ABOVE stroke
+            combined_alpha = stroke_alpha + orig_alpha * (1 - stroke_alpha)
+
+            # Apply blending
+            stroke_rgb = stroke_region[:, :, :3].astype(np.float32) / 255.0
+            orig_rgb = orig_rgba[:, :, :3].astype(np.float32) / 255.0
+
+            # Original over stroke
+            final_rgb = stroke_rgb * (1 - orig_alpha) + orig_rgb * orig_alpha
+
         final_rgb = np.clip(final_rgb * 255, 0, 255).astype(np.uint8)
         combined_alpha = np.clip(combined_alpha * 255, 0, 255).astype(np.uint8)
 
@@ -428,17 +492,17 @@ class RC_OuterGlow:
                     "default": 0.75, "min": 0.0, "max": 1.0, "step": 0.01,
                     "tooltip": "发光透明度| Glow opacity"
                 }),
-                "color_r": ("FLOAT", {
-                    "default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "发光颜色红色分量| Glow color red component"
+                "color_r": ("INT", {
+                    "default": 255, "min": 0, "max": 255, "step": 1,
+                    "tooltip": "发光颜色红色分量 (0-255) | Glow color red component (0-255)"
                 }),
-                "color_g": ("FLOAT", {
-                    "default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "发光颜色绿色分量| Glow color green component"
+                "color_g": ("INT", {
+                    "default": 255, "min": 0, "max": 255, "step": 1,
+                    "tooltip": "发光颜色绿色分量 (0-255) | Glow color green component (0-255)"
                 }),
-                "color_b": ("FLOAT", {
-                    "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "发光颜色蓝色分量| Glow color blue component"
+                "color_b": ("INT", {
+                    "default": 0, "min": 0, "max": 255, "step": 1,
+                    "tooltip": "发光颜色蓝色分量 (0-255) | Glow color blue component (0-255)"
                 }),
                 "blend_mode": ([
                     "normal", "screen", "color_dodge", "linear_dodge", "lighten"
@@ -459,6 +523,19 @@ class RC_OuterGlow:
                         "- lighten: Lighten, gentle glow"
                     )
                 }),
+                "fill_opacity": ("FLOAT", {
+                    "default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01,
+                    "tooltip": (
+                        "原始图像填充透明度：\n"
+                        "- 1.0：正常显示原图\n"
+                        "- 0.0：镂空效果，只显示外发光\n"
+                        "- 0.5：半透明原图+外发光\n\n"
+                        "Original image fill opacity:\n"
+                        "- 1.0: Normal image display\n"
+                        "- 0.0: Hollow effect, glow only\n"
+                        "- 0.5: Semi-transparent image + glow"
+                    )
+                }),
                 "auto_expand_canvas": ("BOOLEAN", {
                     "default": True,
                     "tooltip": (
@@ -473,7 +550,7 @@ class RC_OuterGlow:
             }
         }
 
-    def apply_outer_glow(self, image, size, spread, opacity, color_r, color_g, color_b, blend_mode, auto_expand_canvas):
+    def apply_outer_glow(self, image, size, spread, opacity, color_r, color_g, color_b, blend_mode, fill_opacity, auto_expand_canvas):
         # Convert to numpy
         img = (image[0].cpu().numpy() * 255).astype(np.uint8)
         h, w = img.shape[:2]
@@ -533,8 +610,13 @@ class RC_OuterGlow:
             else:
                 final_mask = glow_mask
 
+            # Remove original shape area from glow (outer glow only)
+            original_mask = np.zeros((canvas_h, canvas_w), dtype=np.uint8)
+            original_mask[glow_y:glow_y+h, glow_x:glow_x+w] = mask
+            final_mask = cv2.subtract(final_mask, original_mask)
+
             # Apply glow color and opacity to entire canvas
-            glow_color = np.array([color_r, color_g, color_b]) * 255
+            glow_color = np.array([color_r, color_g, color_b])
             for c in range(3):
                 glow_canvas[:, :, c] = glow_color[c]
             glow_canvas[:, :, 3] = (final_mask * opacity).astype(np.uint8)
@@ -560,8 +642,11 @@ class RC_OuterGlow:
             else:
                 final_mask = work_mask
 
+            # Remove original shape area from glow (outer glow only)
+            final_mask = cv2.subtract(final_mask, mask)
+
             # Apply glow color and opacity
-            glow_color = np.array([color_r, color_g, color_b]) * 255
+            glow_color = np.array([color_r, color_g, color_b])
             for c in range(3):
                 glow_canvas[glow_y:glow_y+h, glow_x:glow_x+w, c] = glow_color[c]
             glow_canvas[glow_y:glow_y+h, glow_x:glow_x+w, 3] = (final_mask * opacity).astype(np.uint8)
@@ -575,6 +660,9 @@ class RC_OuterGlow:
             orig_rgba = np.dstack([img, np.full((h, w), 255, dtype=np.uint8)])
         else:
             orig_rgba = img.copy()
+
+        # Apply fill_opacity to original image
+        orig_rgba[:, :, 3] = (orig_rgba[:, :, 3].astype(np.float32) * fill_opacity).astype(np.uint8)
 
         # Composite original over glow
         result = glow_canvas.copy()

@@ -110,59 +110,59 @@ class RC_ImageCompositor:
                     "default": 0.7, "min": 0.0, "max": 1.0, "step": 0.01,
                     "tooltip": "整体不透明度（0=完全透明，1=完全不透明）| Opacity (0=transparent, 1=opaque)"
                 }),
-                \"blend_mode\": ([
-                    \"normal\",           # 正常
-                    \"darken\",           # 变暗
-                    \"multiply\",         # 正片叠底
-                    \"color_burn\",       # 颜色加深
-                    \"linear_burn\",      # 线性加深
-                    \"lighten\",          # 变亮
-                    \"screen\",           # 滤色
-                    \"color_dodge\",      # 颜色减淡
-                    \"linear_dodge\",     # 线性减淡（添加）
-                    \"overlay\",          # 叠加
-                    \"soft_light\",       # 柔光
-                    \"hard_light\",       # 强光
-                    \"vivid_light\",      # 亮光
-                    \"linear_light\",     # 线性光
-                    \"pin_light\",        # 点光
-                    \"hard_mix\",         # 实色混合
-                    \"difference\",       # 差值
-                    \"exclusion\",        # 排除
-                    \"subtract\",         # 减去
-                    \"divide\",           # 划分
-                    \"hue\",              # 色相
-                    \"saturation\",       # 饱和度
-                    \"color\",            # 颜色
-                    \"luminosity\"        # 明度
+                "blend_mode": ([
+                    "normal",           # 正常
+                    "darken",           # 变暗
+                    "multiply",         # 正片叠底
+                    "color_burn",       # 颜色加深
+                    "linear_burn",      # 线性加深
+                    "lighten",          # 变亮
+                    "screen",           # 滤色
+                    "color_dodge",      # 颜色减淡
+                    "linear_dodge",     # 线性减淡（添加）
+                    "overlay",          # 叠加
+                    "soft_light",       # 柔光
+                    "hard_light",       # 强光
+                    "vivid_light",      # 亮光
+                    "linear_light",     # 线性光
+                    "pin_light",        # 点光
+                    "hard_mix",         # 实色混合
+                    "difference",       # 差值
+                    "exclusion",        # 排除
+                    "subtract",         # 减去
+                    "divide",           # 划分
+                    "hue",              # 色相
+                    "saturation",       # 饱和度
+                    "color",            # 颜色
+                    "luminosity"        # 明度
                 ], {
-                    \"default\": \"normal\",
-                    \"tooltip\": (
-                        \"Photoshop 完整混合模式（中英对照）| Complete Photoshop Blend Modes:\\n\"
-                        \"normal: 正常 - 直接覆盖 | Normal - Direct overlay\\n\"
-                        \"darken: 变暗 - 选择较暗像素 | Darken - Select darker pixels\\n\"
-                        \"multiply: 正片叠底 - 颜色相乘变暗 | Multiply - Colors multiply to darken\\n\"
-                        \"color_burn: 颜色加深 - 增加对比度变暗 | Color Burn - Darken with increased contrast\\n\"
-                        \"linear_burn: 线性加深 - 线性方式变暗 | Linear Burn - Linear darkening\\n\"
-                        \"lighten: 变亮 - 选择较亮像素 | Lighten - Select brighter pixels\\n\"
-                        \"screen: 滤色 - 反向相乘变亮 | Screen - Inverse multiply to lighten\\n\"
-                        \"color_dodge: 颜色减淡 - 减少对比度变亮 | Color Dodge - Lighten with reduced contrast\\n\"
-                        \"linear_dodge: 线性减淡 - 直接相加变亮 | Linear Dodge - Direct addition to lighten\\n\"
-                        \"overlay: 叠加 - 结合正片叠底和滤色 | Overlay - Combines multiply and screen\\n\"
-                        \"soft_light: 柔光 - 柔和的对比增强 | Soft Light - Gentle contrast enhancement\\n\"
-                        \"hard_light: 强光 - 强烈的对比增强 | Hard Light - Strong contrast enhancement\\n\"
-                        \"vivid_light: 亮光 - 极端对比效果 | Vivid Light - Extreme contrast effect\\n\"
-                        \"linear_light: 线性光 - 线性对比调整 | Linear Light - Linear contrast adjustment\\n\"
-                        \"pin_light: 点光 - 替换颜色根据亮度 | Pin Light - Replace colors based on brightness\\n\"
-                        \"hard_mix: 实色混合 - 产生纯色结果 | Hard Mix - Creates solid color results\\n\"
-                        \"difference: 差值 - 颜色差的绝对值 | Difference - Absolute difference of colors\\n\"
-                        \"exclusion: 排除 - 柔和的差值效果 | Exclusion - Softer difference effect\\n\"
-                        \"subtract: 减去 - 直接颜色相减 | Subtract - Direct color subtraction\\n\"
-                        \"divide: 划分 - 颜色除法运算 | Divide - Color division operation\\n\"
-                        \"hue: 色相 - 仅改变色相，保持饱和度和明度 | Hue - Change only hue, keep saturation & lightness\\n\"
-                        \"saturation: 饱和度 - 仅改变饱和度 | Saturation - Change only saturation\\n\"
-                        \"color: 颜色 - 改变色相和饱和度，保持明度 | Color - Change hue & saturation, keep lightness\\n\"
-                        \"luminosity: 明度 - 仅改变明度，保持色相和饱和度 | Luminosity - Change only lightness\"
+                    "default": "normal",
+                    "tooltip": (
+                        "Photoshop 完整混合模式（中英对照）| Complete Photoshop Blend Modes:\n"
+                        "normal: 正常 - 直接覆盖 | Normal - Direct overlay\n"
+                        "darken: 变暗 - 选择较暗像素 | Darken - Select darker pixels\n"
+                        "multiply: 正片叠底 - 颜色相乘变暗 | Multiply - Colors multiply to darken\n"
+                        "color_burn: 颜色加深 - 增加对比度变暗 | Color Burn - Darken with increased contrast\n"
+                        "linear_burn: 线性加深 - 线性方式变暗 | Linear Burn - Linear darkening\n"
+                        "lighten: 变亮 - 选择较亮像素 | Lighten - Select brighter pixels\n"
+                        "screen: 滤色 - 反向相乘变亮 | Screen - Inverse multiply to lighten\n"
+                        "color_dodge: 颜色减淡 - 减少对比度变亮 | Color Dodge - Lighten with reduced contrast\n"
+                        "linear_dodge: 线性减淡 - 直接相加变亮 | Linear Dodge - Direct addition to lighten\n"
+                        "overlay: 叠加 - 结合正片叠底和滤色 | Overlay - Combines multiply and screen\n"
+                        "soft_light: 柔光 - 柔和的对比增强 | Soft Light - Gentle contrast enhancement\n"
+                        "hard_light: 强光 - 强烈的对比增强 | Hard Light - Strong contrast enhancement\n"
+                        "vivid_light: 亮光 - 极端对比效果 | Vivid Light - Extreme contrast effect\n"
+                        "linear_light: 线性光 - 线性对比调整 | Linear Light - Linear contrast adjustment\n"
+                        "pin_light: 点光 - 替换颜色根据亮度 | Pin Light - Replace colors based on brightness\n"
+                        "hard_mix: 实色混合 - 产生纯色结果 | Hard Mix - Creates solid color results\n"
+                        "difference: 差值 - 颜色差的绝对值 | Difference - Absolute difference of colors\n"
+                        "exclusion: 排除 - 柔和的差值效果 | Exclusion - Softer difference effect\n"
+                        "subtract: 减去 - 直接颜色相减 | Subtract - Direct color subtraction\n"
+                        "divide: 划分 - 颜色除法运算 | Divide - Color division operation\n"
+                        "hue: 色相 - 仅改变色相，保持饱和度和明度 | Hue - Change only hue, keep saturation & lightness\n"
+                        "saturation: 饱和度 - 仅改变饱和度 | Saturation - Change only saturation\n"
+                        "color: 颜色 - 改变色相和饱和度，保持明度 | Color - Change hue & saturation, keep lightness\n"
+                        "luminosity: 明度 - 仅改变明度，保持色相和饱和度 | Luminosity - Change only lightness"
                     )
                 }),
                 "flip_h": ("BOOLEAN", {
