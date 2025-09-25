@@ -46,7 +46,7 @@ By default, the overlay is positioned at the **top-right corner** with a slight 
 - `y_percent = 0` → top aligned | 顶部对齐  
 - `x_offset = -50` → move 50px left | 向左偏移 50 像素  
 - `y_offset = 50` → move 50px down | 向下偏移 50 像素  
-- `scale_mode = relative_to_background_width`  
+- `scale_mode = relative_to_background_width`  | 相对背景图的等比缩放
 - `scale = 0.3` → overlay width = 30% of background width | 贴图宽度为背景的 30%  
 - `opacity = 0.7` → 70% opaque | 70% 不透明度  
 
@@ -78,41 +78,6 @@ By default, the overlay is positioned at the **top-right corner** with a slight 
 
 ---
 
-## 📦 Installation / 安装方法
-
-### Method 1: Manual Install / 手动安装
-```bash
-cd ComfyUI/custom_nodes
-git clone https://github.com/yourname/comfyui-rc-image-compositor.git
-```
-Then restart ComfyUI.
-然后重启 ComfyUI。
-
-- ### Method 2: ComfyUI Manager (Recommended) / ComfyUI Manager（推荐）
-
-1. Open **ComfyUI Manager**
-   打开 **ComfyUI Manager**
-2. Go to **Custom Nodes Manager** → **Install from URL**
-   进入 **自定义节点管理器** → **从 URL 安装**
-3. Paste the GitHub URL
-   粘贴 GitHub 仓库地址
-4. Click **Install**
-   点击 **安装**
-
-Search for **"RC 图像合成器"** or **"RC Image Compositor"** in the node menu.
-在节点菜单中搜索 **"RC 图像合成器"** 或 **"RC Image Compositor"** 即可使用。
-- ## 📁 Project Structure / 项目结构
-
-```bash
-comfyui-rc-image-compositor/
-├── __init__.py                 # Plugin entry point / 插件入口
-├── rc_image_compositor.py      # Node implementation / 节点实现
-├── README.md                   # This file / 本文件
-└── pyproject.toml              # Metadata for ComfyUI Manager / ComfyUI Manager 元数据
-```
-
-No external dependencies — uses only PyTorch, NumPy, and PIL (all included in ComfyUI).
-无额外依赖 — 仅使用 PyTorch、NumPy 和 PIL（ComfyUI 已自带）。
 
 > Designed for professional image composition workflows in ComfyUI.
 > 专为 ComfyUI 中的专业图像合成工作流设计。
