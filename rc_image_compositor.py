@@ -1,6 +1,9 @@
 import torch
 import numpy as np
-from PIL import Image
+from PIL import Image, ImageOps
+import os
+import folder_paths
+from typing import Optional
 
 class RC_Image_Compositor:
     """RC Image Compositor: Photoshop-style blend modes, precise positioning, and flexible scaling."""
