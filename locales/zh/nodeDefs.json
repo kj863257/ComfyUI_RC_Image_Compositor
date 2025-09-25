@@ -1,0 +1,217 @@
+{
+  "RC_ImageCompositor": {
+    "display_name": "RC 图像合成器",
+    "inputs": {
+      "background": {
+        "name": "背景"
+      },
+      "overlay": {
+        "name": "覆盖图层"
+      },
+      "x_percent": {
+        "name": "水平百分比",
+        "tooltip": "水平百分比位置（0=左，50=居中，100=右）"
+      },
+      "y_percent": {
+        "name": "垂直百分比",
+        "tooltip": "垂直百分比位置（0=上，50=居中，100=下）"
+      },
+      "x_align": {
+        "name": "水平对齐",
+        "tooltip": "水平对齐方式：\n- from_left：从左侧计算偏移\n- from_right：从右侧计算偏移（可实现紧贴右侧效果）"
+      },
+      "y_align": {
+        "name": "垂直对齐",
+        "tooltip": "垂直对齐方式：\n- from_top：从顶部计算偏移\n- from_bottom：从底部计算偏移（可实现紧贴底部效果）"
+      },
+      "x_offset": {
+        "name": "水平偏移",
+        "tooltip": "水平偏移像素（正数，配合对齐方式使用）"
+      },
+      "y_offset": {
+        "name": "垂直偏移",
+        "tooltip": "垂直偏移像素（正数，配合对齐方式使用）"
+      },
+      "scale_mode": {
+        "name": "缩放模式",
+        "tooltip": "缩放参考模式：\n- relative_to_overlay：按贴图原始尺寸缩放\n- relative_to_background_width：贴图宽度 = scale × 背景宽度\n- relative_to_background_height：贴图高度 = scale × 背景高度"
+      },
+      "scale": {
+        "name": "缩放系数",
+        "tooltip": "缩放系数，参考基准由 'scale_mode' 决定"
+      },
+      "rotation": {
+        "name": "旋转",
+        "tooltip": "旋转角度（度）"
+      },
+      "opacity": {
+        "name": "不透明度",
+        "tooltip": "整体不透明度（0=完全透明，1=完全不透明）"
+      },
+      "blend_mode": {
+        "name": "混合模式",
+        "tooltip": "Photoshop 完整混合模式：\nnormal: 正常 - 直接覆盖\ndarken: 变暗 - 选择较暗像素\nmultiply: 正片叠底 - 颜色相乘变暗\ncolor_burn: 颜色加深 - 增加对比度变暗\nlinear_burn: 线性加深 - 线性方式变暗\nlighten: 变亮 - 选择较亮像素\nscreen: 滤色 - 反向相乘变亮\ncolor_dodge: 颜色减淡 - 减少对比度变亮\nlinear_dodge: 线性减淡 - 直接相加变亮\noverlay: 叠加 - 结合正片叠底和滤色\nsoft_light: 柔光 - 柔和的对比增强\nhard_light: 强光 - 强烈的对比增强\nvivid_light: 亮光 - 极端对比效果\nlinear_light: 线性光 - 线性对比调整\npin_light: 点光 - 替换颜色根据亮度\nhard_mix: 实色混合 - 产生纯色结果\ndifference: 差值 - 颜色差的绝对值\nexclusion: 排除 - 柔和的差值效果\nsubtract: 减去 - 直接颜色相减\ndivide: 划分 - 颜色除法运算\nhue: 色相 - 仅改变色相，保持饱和度和明度\nsaturation: 饱和度 - 仅改变饱和度\ncolor: 颜色 - 改变色相和饱和度，保持明度\nluminosity: 明度 - 仅改变明度，保持色相和饱和度"
+      },
+      "flip_h": {
+        "name": "水平翻转",
+        "tooltip": "水平翻转贴图"
+      },
+      "flip_v": {
+        "name": "垂直翻转",
+        "tooltip": "垂直翻转贴图"
+      }
+    }
+  },
+  "RC_LoadImageWithAlpha": {
+    "display_name": "RC 加载透明图像",
+    "inputs": {
+      "image": {
+        "name": "图像"
+      },
+      "RGBA_mode": {
+        "name": "RGBA模式",
+        "tooltip": "强制输出 RGBA。若图像无 alpha，将添加全不透明通道"
+      }
+    }
+  },
+  "RC_DropShadow": {
+    "display_name": "RC 投影效果",
+    "inputs": {
+      "image": {
+        "name": "图像"
+      },
+      "distance": {
+        "name": "距离",
+        "tooltip": "阴影偏移距离（像素）"
+      },
+      "angle": {
+        "name": "角度",
+        "tooltip": "阴影角度（度，135° = 右下角）"
+      },
+      "size": {
+        "name": "大小",
+        "tooltip": "阴影模糊大小（像素）"
+      },
+      "spread": {
+        "name": "扩展",
+        "tooltip": "阴影扩展（收缩）大小（像素）"
+      },
+      "opacity": {
+        "name": "不透明度",
+        "tooltip": "阴影透明度"
+      },
+      "fill_opacity": {
+        "name": "填充不透明度",
+        "tooltip": "原始图像填充透明度：\n- 1.0：正常显示原图\n- 0.0：镂空效果，只显示投影\n- 0.5：半透明原图+投影"
+      },
+      "color_r": {
+        "name": "红色",
+        "tooltip": "阴影颜色红色分量 (0-255)"
+      },
+      "color_g": {
+        "name": "绿色",
+        "tooltip": "阴影颜色绿色分量 (0-255)"
+      },
+      "color_b": {
+        "name": "蓝色",
+        "tooltip": "阴影颜色蓝色分量 (0-255)"
+      },
+      "blend_mode": {
+        "name": "混合模式",
+        "tooltip": "投影混合模式：\n- normal：正常混合\n- multiply：正片叠底，经典阴影\n- color_burn：颜色加深，深层阴影\n- linear_burn：线性加深，柔和阴影\n- darken：变暗，温和阴影"
+      },
+      "auto_expand_canvas": {
+        "name": "自动扩展画布",
+        "tooltip": "自动扩展画布：\n- True：阴影超出时自动放大画布\n- False：阴影被裁剪到原画布大小"
+      }
+    }
+  },
+  "RC_Stroke": {
+    "display_name": "RC 描边效果",
+    "inputs": {
+      "image": {
+        "name": "图像"
+      },
+      "size": {
+        "name": "大小",
+        "tooltip": "描边宽度（像素）"
+      },
+      "position": {
+        "name": "位置",
+        "tooltip": "描边相对于形状的位置"
+      },
+      "opacity": {
+        "name": "不透明度",
+        "tooltip": "描边透明度"
+      },
+      "color_r": {
+        "name": "红色",
+        "tooltip": "描边颜色红色分量 (0-255)"
+      },
+      "color_g": {
+        "name": "绿色",
+        "tooltip": "描边颜色绿色分量 (0-255)"
+      },
+      "color_b": {
+        "name": "蓝色",
+        "tooltip": "描边颜色蓝色分量 (0-255)"
+      },
+      "blend_mode": {
+        "name": "混合模式",
+        "tooltip": "描边混合模式：\n- normal：正常混合，直接覆盖\n- multiply：正片叠底，颜色变暗\n- screen：滤色，颜色变亮\n- overlay：叠加，增强对比度\n- color_burn：颜色加深，阴影更深"
+      },
+      "fill_opacity": {
+        "name": "填充不透明度",
+        "tooltip": "原始图像填充透明度：\n- 1.0：正常显示原图\n- 0.0：镂空效果，只显示描边\n- 0.5：半透明原图+描边"
+      },
+      "auto_expand_canvas": {
+        "name": "自动扩展画布",
+        "tooltip": "自动扩展画布：\n- True：描边超出时自动放大画布\n- False：描边被裁剪到原画布大小"
+      }
+    }
+  },
+  "RC_OuterGlow": {
+    "display_name": "RC 外发光效果",
+    "inputs": {
+      "image": {
+        "name": "图像"
+      },
+      "size": {
+        "name": "大小",
+        "tooltip": "发光模糊大小（像素）"
+      },
+      "spread": {
+        "name": "扩展",
+        "tooltip": "发光扩展（收缩）大小（像素）"
+      },
+      "opacity": {
+        "name": "不透明度",
+        "tooltip": "发光透明度"
+      },
+      "color_r": {
+        "name": "红色",
+        "tooltip": "发光颜色红色分量 (0-255)"
+      },
+      "color_g": {
+        "name": "绿色",
+        "tooltip": "发光颜色绿色分量 (0-255)"
+      },
+      "color_b": {
+        "name": "蓝色",
+        "tooltip": "发光颜色蓝色分量 (0-255)"
+      },
+      "blend_mode": {
+        "name": "混合模式",
+        "tooltip": "外发光混合模式：\n- normal：正常混合\n- screen：滤色，经典发光效果\n- color_dodge：颜色减淡，强烈发光\n- linear_dodge：线性减淡，柔和发光\n- lighten：变亮，温和发光"
+      },
+      "fill_opacity": {
+        "name": "填充不透明度",
+        "tooltip": "原始图像填充透明度：\n- 1.0：正常显示原图\n- 0.0：镂空效果，只显示外发光\n- 0.5：半透明原图+外发光"
+      },
+      "auto_expand_canvas": {
+        "name": "自动扩展画布",
+        "tooltip": "自动扩展画布：\n- True：发光超出时自动放大画布\n- False：发光被裁剪到原画布大小"
+      }
+    }
+  }
+}

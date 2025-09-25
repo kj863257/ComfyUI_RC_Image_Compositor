@@ -1,0 +1,217 @@
+{
+  "RC_ImageCompositor": {
+    "display_name": "RC Image Compositor",
+    "inputs": {
+      "background": {
+        "name": "Background"
+      },
+      "overlay": {
+        "name": "Overlay"
+      },
+      "x_percent": {
+        "name": "X Percentage",
+        "tooltip": "Horizontal percentage (0=left, 50=center, 100=right)"
+      },
+      "y_percent": {
+        "name": "Y Percentage",
+        "tooltip": "Vertical percentage (0=top, 50=center, 100=bottom)"
+      },
+      "x_align": {
+        "name": "X Alignment",
+        "tooltip": "Horizontal alignment:\n- from_left: Calculate offset from left\n- from_right: Calculate offset from right (enables tight right alignment)"
+      },
+      "y_align": {
+        "name": "Y Alignment",
+        "tooltip": "Vertical alignment:\n- from_top: Calculate offset from top\n- from_bottom: Calculate offset from bottom (enables tight bottom alignment)"
+      },
+      "x_offset": {
+        "name": "X Offset",
+        "tooltip": "Horizontal offset pixels (positive, use with alignment)"
+      },
+      "y_offset": {
+        "name": "Y Offset",
+        "tooltip": "Vertical offset pixels (positive, use with alignment)"
+      },
+      "scale_mode": {
+        "name": "Scale Mode",
+        "tooltip": "Scaling mode:\n- relative_to_overlay: scale by overlay's size\n- relative_to_background_width: width = scale × bg width\n- relative_to_background_height: height = scale × bg height"
+      },
+      "scale": {
+        "name": "Scale",
+        "tooltip": "Scale factor, reference depends on 'scale_mode'"
+      },
+      "rotation": {
+        "name": "Rotation",
+        "tooltip": "Rotation angle in degrees"
+      },
+      "opacity": {
+        "name": "Opacity",
+        "tooltip": "Opacity (0=transparent, 1=opaque)"
+      },
+      "blend_mode": {
+        "name": "Blend Mode",
+        "tooltip": "Complete Photoshop Blend Modes:\nnormal: Normal - Direct overlay\ndarken: Darken - Select darker pixels\nmultiply: Multiply - Colors multiply to darken\ncolor_burn: Color Burn - Darken with increased contrast\nlinear_burn: Linear Burn - Linear darkening\nlighten: Lighten - Select brighter pixels\nscreen: Screen - Inverse multiply to lighten\ncolor_dodge: Color Dodge - Lighten with reduced contrast\nlinear_dodge: Linear Dodge - Direct addition to lighten\noverlay: Overlay - Combines multiply and screen\nsoft_light: Soft Light - Gentle contrast enhancement\nhard_light: Hard Light - Strong contrast enhancement\nvivid_light: Vivid Light - Extreme contrast effect\nlinear_light: Linear Light - Linear contrast adjustment\npin_light: Pin Light - Replace colors based on brightness\nhard_mix: Hard Mix - Creates solid color results\ndifference: Difference - Absolute difference of colors\nexclusion: Exclusion - Softer difference effect\nsubtract: Subtract - Direct color subtraction\ndivide: Divide - Color division operation\nhue: Hue - Change only hue, keep saturation & lightness\nsaturation: Saturation - Change only saturation\ncolor: Color - Change hue & saturation, keep lightness\nluminosity: Luminosity - Change only lightness"
+      },
+      "flip_h": {
+        "name": "Flip Horizontal",
+        "tooltip": "Flip horizontally"
+      },
+      "flip_v": {
+        "name": "Flip Vertical",
+        "tooltip": "Flip vertically"
+      }
+    }
+  },
+  "RC_LoadImageWithAlpha": {
+    "display_name": "RC Load Image (Alpha)",
+    "inputs": {
+      "image": {
+        "name": "Image"
+      },
+      "RGBA_mode": {
+        "name": "RGBA Mode",
+        "tooltip": "Force RGBA output. If no alpha, add opaque channel."
+      }
+    }
+  },
+  "RC_DropShadow": {
+    "display_name": "RC Drop Shadow",
+    "inputs": {
+      "image": {
+        "name": "Image"
+      },
+      "distance": {
+        "name": "Distance",
+        "tooltip": "Shadow distance in pixels"
+      },
+      "angle": {
+        "name": "Angle",
+        "tooltip": "Shadow angle in degrees (135° = bottom-right)"
+      },
+      "size": {
+        "name": "Size",
+        "tooltip": "Shadow blur size in pixels"
+      },
+      "spread": {
+        "name": "Spread",
+        "tooltip": "Shadow spread (choke) in pixels"
+      },
+      "opacity": {
+        "name": "Opacity",
+        "tooltip": "Shadow opacity"
+      },
+      "fill_opacity": {
+        "name": "Fill Opacity",
+        "tooltip": "Original image fill opacity:\n- 1.0: Normal image display\n- 0.0: Hollow effect, shadow only\n- 0.5: Semi-transparent image + shadow"
+      },
+      "color_r": {
+        "name": "Red",
+        "tooltip": "Shadow color red component (0-255)"
+      },
+      "color_g": {
+        "name": "Green",
+        "tooltip": "Shadow color green component (0-255)"
+      },
+      "color_b": {
+        "name": "Blue",
+        "tooltip": "Shadow color blue component (0-255)"
+      },
+      "blend_mode": {
+        "name": "Blend Mode",
+        "tooltip": "Drop shadow blend mode:\n- normal: Normal blending\n- multiply: Multiply, classic shadow\n- color_burn: Color burn, deep shadow\n- linear_burn: Linear burn, soft shadow\n- darken: Darken, gentle shadow"
+      },
+      "auto_expand_canvas": {
+        "name": "Auto Expand Canvas",
+        "tooltip": "Auto expand canvas:\n- True: Auto expand canvas when shadow exceeds bounds\n- False: Shadow is clipped to original canvas size"
+      }
+    }
+  },
+  "RC_Stroke": {
+    "display_name": "RC Stroke",
+    "inputs": {
+      "image": {
+        "name": "Image"
+      },
+      "size": {
+        "name": "Size",
+        "tooltip": "Stroke width in pixels"
+      },
+      "position": {
+        "name": "Position",
+        "tooltip": "Stroke position relative to shape"
+      },
+      "opacity": {
+        "name": "Opacity",
+        "tooltip": "Stroke opacity"
+      },
+      "color_r": {
+        "name": "Red",
+        "tooltip": "Stroke color red component (0-255)"
+      },
+      "color_g": {
+        "name": "Green",
+        "tooltip": "Stroke color green component (0-255)"
+      },
+      "color_b": {
+        "name": "Blue",
+        "tooltip": "Stroke color blue component (0-255)"
+      },
+      "blend_mode": {
+        "name": "Blend Mode",
+        "tooltip": "Stroke blend mode:\n- normal: Normal blending, direct overlay\n- multiply: Multiply, darkens colors\n- screen: Screen, lightens colors\n- overlay: Overlay, enhances contrast\n- color_burn: Color burn, deeper shadows"
+      },
+      "fill_opacity": {
+        "name": "Fill Opacity",
+        "tooltip": "Original image fill opacity:\n- 1.0: Normal image display\n- 0.0: Hollow effect, stroke only\n- 0.5: Semi-transparent image + stroke"
+      },
+      "auto_expand_canvas": {
+        "name": "Auto Expand Canvas",
+        "tooltip": "Auto expand canvas:\n- True: Auto expand canvas when stroke exceeds bounds\n- False: Stroke is clipped to original canvas size"
+      }
+    }
+  },
+  "RC_OuterGlow": {
+    "display_name": "RC Outer Glow",
+    "inputs": {
+      "image": {
+        "name": "Image"
+      },
+      "size": {
+        "name": "Size",
+        "tooltip": "Glow blur size in pixels"
+      },
+      "spread": {
+        "name": "Spread",
+        "tooltip": "Glow spread (choke) in pixels"
+      },
+      "opacity": {
+        "name": "Opacity",
+        "tooltip": "Glow opacity"
+      },
+      "color_r": {
+        "name": "Red",
+        "tooltip": "Glow color red component (0-255)"
+      },
+      "color_g": {
+        "name": "Green",
+        "tooltip": "Glow color green component (0-255)"
+      },
+      "color_b": {
+        "name": "Blue",
+        "tooltip": "Glow color blue component (0-255)"
+      },
+      "blend_mode": {
+        "name": "Blend Mode",
+        "tooltip": "Outer glow blend mode:\n- normal: Normal blending\n- screen: Screen, classic glow effect\n- color_dodge: Color dodge, intense glow\n- linear_dodge: Linear dodge, soft glow\n- lighten: Lighten, gentle glow"
+      },
+      "fill_opacity": {
+        "name": "Fill Opacity",
+        "tooltip": "Original image fill opacity:\n- 1.0: Normal image display\n- 0.0: Hollow effect, glow only\n- 0.5: Semi-transparent image + glow"
+      },
+      "auto_expand_canvas": {
+        "name": "Auto Expand Canvas",
+        "tooltip": "Auto expand canvas:\n- True: Auto expand canvas when glow exceeds bounds\n- False: Glow is clipped to original canvas size"
+      }
+    }
+  }
+}
