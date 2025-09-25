@@ -313,3 +313,13 @@ class LoadImageWithAlpha:
         if not folder_paths.exists_annotated_filepath(image):
             return "Invalid image file: {}".format(image)
         return True
+
+NODE_CLASS_MAPPINGS = {
+    "RC_Image_Compositor": RC_Image_Compositor,
+    "RC_LoadImageWithAlpha": LoadImageWithAlpha
+}
+
+NODE_DISPLAY_NAME_MAPPINGS = {
+    "RC_Image_Compositor": "RC 图像合成器 (Photoshop 混合模式)",
+    "RC_LoadImageWithAlpha": "RC 加载图像（带透明通道）"
+}
