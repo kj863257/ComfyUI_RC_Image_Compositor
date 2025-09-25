@@ -62,6 +62,9 @@ By default, the overlay is positioned at the **top-right corner** with a slight 
 
 2. Connect an overlay (with or without alpha) to **`overlay`**  
    将贴图（带或不带透明通道）连接到 **`overlay`** 输入端口
+   
+💡 For transparent PNGs, use the RC_LoadImageWithAlpha node to ensure alpha channel is preserved 
+💡 推荐使用 RC_LoadImageWithAlpha 节点加载透明 PNG，以确保 alpha 通道正确传递
 
 3. Adjust parameters as needed  
    根据需求调整参数
