@@ -79,33 +79,45 @@ class RC_GradientGenerator:
             ]
 
     def create_gradient_lut(self, stops, size=1024):
-        """Create lookup table for gradient colors - 更高效的方法"""
+        """Create lookup table for gradient colors"""
         lut = np.zeros((size, 4), dtype=np.float32)
-        
+
         for i in range(size):
             position = i / (size - 1)
-            
-            # Find surrounding stops
+
+            # Handle positions before first stop
+            if position <= stops[0]["position"]:
+                color = np.array(stops[0]["color"], dtype=np.float32) / 255.0
+                lut[i] = color
+                continue
+
+            # Handle positions after last stop - use last stop color
+            if position >= stops[-1]["position"]:
+                color = np.array(stops[-1]["color"], dtype=np.float32) / 255.0
+                lut[i] = color
+                continue
+
+            # Find surrounding stops for interpolation
             left_stop = stops[0]
             right_stop = stops[-1]
-            
+
             for j in range(len(stops) - 1):
                 if stops[j]["position"] <= position <= stops[j + 1]["position"]:
                     left_stop = stops[j]
                     right_stop = stops[j + 1]
                     break
-            
-            # Interpolate
+
+            # Interpolate between stops
             if right_stop["position"] == left_stop["position"]:
                 t = 0.0
             else:
                 t = (position - left_stop["position"]) / (right_stop["position"] - left_stop["position"])
-            
+
             left_color = np.array(left_stop["color"], dtype=np.float32) / 255.0
             right_color = np.array(right_stop["color"], dtype=np.float32) / 255.0
-            
+
             lut[i] = left_color * (1 - t) + right_color * t
-        
+
         return lut
 
     def generate_gradient(self, gradient_data, gradient_type, angle, size_mode, 
