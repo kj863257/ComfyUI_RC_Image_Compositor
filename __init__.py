@@ -16,6 +16,9 @@ from .adjustments import RC_OpacityAdjust, RC_LevelsAdjust, RC_BrightnessContras
 # Import channel operations
 from .channel_ops import RC_ChannelExtractor, RC_MaskApply
 
+# Import gradient generator
+from .gradient_generator import RC_GradientGenerator
+
 # Node class mappings - used by ComfyUI to register nodes
 NODE_CLASS_MAPPINGS = {
     # Core compositor nodes
@@ -48,6 +51,9 @@ NODE_CLASS_MAPPINGS = {
     # Channel operations
     "RC_ChannelExtractor": RC_ChannelExtractor,
     "RC_MaskApply": RC_MaskApply,
+    
+    # Gradient operations
+    "RC_GradientGenerator": RC_GradientGenerator,
 }
 
 # Display name mappings - shown in ComfyUI interface
@@ -82,7 +88,12 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     # Channel operations
     "RC_ChannelExtractor": "RC Channel Extractor",
     "RC_MaskApply": "RC Mask Apply",
+    
+    # Gradient operations
+    "RC_GradientGenerator": "RC Gradient Generator",
 }
+
+WEB_DIRECTORY = "./js"
 
 # Plugin metadata
 __version__ = "2.0.0"
