@@ -199,33 +199,33 @@ app.registerExtension({
                 const widget = this.widgets.find(w => w.name === "gradient_data");
                 if (!widget) return ret;
                 
-                // 获取国际化文本
+                // 获取国际化文本，优先使用ComfyUI的国际化系统
                 const getI18nText = (key, defaultText) => {
-                    try {
-                        // 尝试从ComfyUI的国际化系统获取文本
+                    if (app.getTranslation) {
+                        // 使用ComfyUI的国际化系统
+                        return app.getTranslation(key) || defaultText;
+                    } else {
+                        // 备用方案：检查localStorage中的语言设置
                         const locale = localStorage.getItem("Comfy.Settings.Locale") || "en";
-                        // 这里可以扩展支持更多语言
                         const i18n = {
                             en: {
-                                position: "Pos",
-                                color: "Color",
-                                alpha: "Alpha",
-                                delete: "Delete",
-                                reverse: "Reverse",
-                                presets: "Presets"
+                                "Pos": "Pos",
+                                "Color": "Color", 
+                                "Alpha": "Alpha",
+                                "Delete": "Delete",
+                                "Reverse": "Reverse",
+                                "Presets": "Presets"
                             },
                             zh: {
-                                position: "位置",
-                                color: "颜色",
-                                alpha: "透明",
-                                delete: "删除",
-                                reverse: "反转",
-                                presets: "预设"
+                                "Pos": "位置",
+                                "Color": "颜色",
+                                "Alpha": "透明",
+                                "Delete": "删除",
+                                "Reverse": "反转",
+                                "Presets": "预设"
                             }
                         };
                         return i18n[locale]?.[key] || defaultText;
-                    } catch {
-                        return defaultText;
                     }
                 };
                 
@@ -259,32 +259,55 @@ app.registerExtension({
                 barContainer.appendChild(gradientBar);
                 container.appendChild(barContainer);
                 
-                // Controls - more compact layout with i18n
-                const controlsHtml = `
-                    <div class="rc-control-row">
-                        <span class="rc-control-label">${getI18nText('position', 'Pos')}:</span>
-                        <input type="range" class="rc-control-input rc-control-slider pos-slider" min="0" max="1" step="0.001" value="0">
-                        <input type="number" class="rc-control-input rc-control-number pos-number" min="0" max="1" step="0.01" value="0">
-                    </div>
-                    <div class="rc-control-row">
-                        <span class="rc-control-label">${getI18nText('color', 'Color')}:</span>
-                        <input type="color" class="rc-color-picker" value="#000000">
-                        <span class="rc-control-label" style="min-width:38px;margin-left:6px">${getI18nText('alpha', 'Alpha')}:</span>
-                        <input type="range" class="rc-control-input rc-control-slider alpha-slider" min="0" max="255" step="1" value="255">
-                        <input type="number" class="rc-control-input rc-control-number alpha-number" min="0" max="255" step="1" value="255">
-                    </div>
-                    <div class="rc-control-row">
-                        <button class="rc-btn danger delete-btn">${getI18nText('delete', 'Delete')}</button>
-                        <button class="rc-btn reverse-btn">${getI18nText('reverse', 'Reverse')}</button>
-                    </div>
-                    <div class="rc-control-row">
-                        <span class="rc-control-label">${getI18nText('presets', 'Presets')}:</span>
-                    </div>
-                    <div class="rc-presets"></div>
-                `;
-                container.insertAdjacentHTML('beforeend', controlsHtml);
+                // 获取翻译文本
+                const posLabel = getI18nText('Pos', 'Pos');
+                const colorLabel = getI18nText('Color', 'Color');
+                const alphaLabel = getI18nText('Alpha', 'Alpha');
+                const deleteLabel = getI18nText('Delete', 'Delete');
+                const reverseLabel = getI18nText('Reverse', 'Reverse');
+                const presetsLabel = getI18nText('Presets', 'Presets');
                 
-                // Get elements
+                // Controls - create elements with translated text
+                const posRow = document.createElement("div");
+                posRow.className = "rc-control-row";
+                posRow.innerHTML = `
+                    <span class="rc-control-label">${posLabel}:</span>
+                    <input type="range" class="rc-control-input rc-control-slider pos-slider" min="0" max="1" step="0.001" value="0">
+                    <input type="number" class="rc-control-input rc-control-number pos-number" min="0" max="1" step="0.01" value="0">
+                `;
+                
+                const colorRow = document.createElement("div");
+                colorRow.className = "rc-control-row";
+                colorRow.innerHTML = `
+                    <span class="rc-control-label">${colorLabel}:</span>
+                    <input type="color" class="rc-color-picker" value="#000000">
+                    <span class="rc-control-label" style="min-width:38px;margin-left:6px">${alphaLabel}:</span>
+                    <input type="range" class="rc-control-input rc-control-slider alpha-slider" min="0" max="255" step="1" value="255">
+                    <input type="number" class="rc-control-input rc-control-number alpha-number" min="0" max="255" step="1" value="255">
+                `;
+                
+                const buttonRow = document.createElement("div");
+                buttonRow.className = "rc-control-row";
+                buttonRow.innerHTML = `
+                    <button class="rc-btn danger delete-btn">${deleteLabel}</button>
+                    <button class="rc-btn reverse-btn">${reverseLabel}</button>
+                `;
+                
+                const presetsRow = document.createElement("div");
+                presetsRow.className = "rc-control-row";
+                presetsRow.innerHTML = `
+                    <span class="rc-control-label">${presetsLabel}:</span>
+                `;
+                
+                const presetsContainer = document.createElement("div");
+                presetsContainer.className = "rc-presets";
+                
+                container.appendChild(posRow);
+                container.appendChild(colorRow);
+                container.appendChild(buttonRow);
+                container.appendChild(presetsRow);
+                container.appendChild(presetsContainer);
+                
                 const posSlider = container.querySelector(".pos-slider");
                 const posNumber = container.querySelector(".pos-number");
                 const colorPicker = container.querySelector(".rc-color-picker");

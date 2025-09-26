@@ -297,5 +297,23 @@
         "tooltip": "Reference image for size (used when size_mode is from_image)"
       }
     }
+  },
+  "Pos": {
+    "name": "Pos"
+  },
+  "Color": {
+    "name": "Color"
+  },
+  "Alpha": {
+    "name": "Alpha"
+  },
+  "Delete": {
+    "name": "Delete"
+  },
+  "Reverse": {
+    "name": "Reverse"
+  },
+  "Presets": {
+    "name": "Presets"
   }
 }

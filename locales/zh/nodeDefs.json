@@ -297,5 +297,23 @@
         "tooltip": "参考图片（当尺寸模式为from_image时使用）"
       }
     }
+  },
+  "Pos": {
+    "name": "位置"
+  },
+  "Color": {
+    "name": "颜色"
+  },
+  "Alpha": {
+    "name": "透明"
+  },
+  "Delete": {
+    "name": "删除"
+  },
+  "Reverse": {
+    "name": "反转"
+  },
+  "Presets": {
+    "name": "预设"
   }
 }
