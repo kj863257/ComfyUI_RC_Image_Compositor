@@ -72,12 +72,12 @@ class RC_ImageCompositor:
                     )
                 }),
                 "x_offset": ("INT", {
-                    "default": 50, "min": 0, "max": 4096, "step": 1,
-                    "tooltip": "Horizontal offset pixels (positive, use with alignment)"
+                    "default": 50, "min": -10000, "max": 10000, "step": 1,
+                    "tooltip": "Horizontal offset pixels, can be negative (use with alignment)"
                 }),
                 "y_offset": ("INT", {
-                    "default": 50, "min": 0, "max": 4096, "step": 1,
-                    "tooltip": "Vertical offset pixels (positive, use with alignment)"
+                    "default": 50, "min": -10000, "max": 10000, "step": 1,
+                    "tooltip": "Vertical offset pixels, can be negative (use with alignment)"
                 }),
                 "scale_mode": (["relative_to_overlay", "relative_to_background_width", "relative_to_background_height"], {
                     "default": "relative_to_background_width",

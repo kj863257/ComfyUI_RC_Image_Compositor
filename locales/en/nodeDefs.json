@@ -26,11 +26,11 @@
       },
       "x_offset": {
         "name": "X Offset",
-        "tooltip": "Horizontal offset pixels (positive, use with alignment)"
+        "tooltip": "Horizontal offset pixels, can be negative (use with alignment)"
       },
       "y_offset": {
         "name": "Y Offset",
-        "tooltip": "Vertical offset pixels (positive, use with alignment)"
+        "tooltip": "Vertical offset pixels, can be negative (use with alignment)"
       },
       "scale_mode": {
         "name": "Scale Mode",
