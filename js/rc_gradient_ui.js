@@ -315,7 +315,6 @@ app.registerExtension({
                 const alphaNumber = container.querySelector(".alpha-number");
                 const deleteBtn = container.querySelector(".delete-btn");
                 const reverseBtn = container.querySelector(".reverse-btn");
-                const presetsContainer = container.querySelector(".rc-presets");
                 
                 // Helper functions
                 const genGradientCSS = (stops) => {
