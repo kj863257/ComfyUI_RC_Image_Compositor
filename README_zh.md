@@ -55,39 +55,39 @@
 
 ## 📦 节点分类
 
-### **RC/Image** - 核心合成
-- `RC 图像合成器 (完整版)` - 支持 24 种混合模式和增强定位的完整合成器（支持可选背景）
-- `RC 加载透明图像` - 完整保留 Alpha 通道的 RGBA 图像加载
+### **RC/Image** - 核心合成 (Core Compositing)
+- `RC 图像合成器 (完整版) | RC Image Compositor (Complete)` - 支持 24 种混合模式和增强定位的完整合成器（支持可选背景）
+- `RC 加载透明图像 | RC Load Image (Alpha)` - 完整保留 Alpha 通道的 RGBA 图像加载
 
-### **RC/Layer Effects** - Photoshop 图层样式
-- `RC 投影效果` - 支持自动画布扩展的专业投影效果
-- `RC 描边效果` - 支持自动画布扩展的内/外/居中描边
-- `RC 外发光效果` - 支持自动画布扩展的柔和外发光效果
+### **RC/Layer Effects** - Photoshop 图层样式 (Photoshop Layer Styles)
+- `RC 投影效果 | RC Drop Shadow` - 支持自动画布扩展的专业投影效果
+- `RC 描边效果 | RC Stroke` - 支持自动画布扩展的内/外/居中描边
+- `RC 外发光效果 | RC Outer Glow` - 支持自动画布扩展的柔和外发光效果
 
-### **RC/Filters** - 图像处理
-- `RC 高斯模糊` - 支持算法选择的专业级模糊
-- `RC 锐化滤镜` - 包括反锐化蒙版在内的多种锐化方法
+### **RC/Filters** - 图像处理 (Image Processing)
+- `RC 高斯模糊 | RC Gaussian Blur` - 支持算法选择的专业级模糊
+- `RC 锐化滤镜 | RC Sharpen` - 包括反锐化蒙版在内的多种锐化方法
 
-### **RC/Adjustments** - 色彩和色调
-- `RC 色相/饱和度` - 带着色模式的目标色彩调整
-- `RC 透明度调整` - 支持 Alpha 通道的精确透明度控制
-- `RC 色阶调整` - 支持伽马校正的专业色阶调整
-- `RC 亮度/对比度` - 双算法亮度和对比度控制
-- `RC 色彩平衡` - 支持色调范围定位的 CMY 色彩平衡
-- `RC 通道混合器` - 支持单色模式的高级 RGB 通道混合
+### **RC/Adjustments** - 色彩和色调 (Color & Tone)
+- `RC 色相/饱和度 | RC Hue/Saturation` - 带着色模式的目标色彩调整
+- `RC 透明度调整 | RC Opacity Adjust` - 支持 Alpha 通道的精确透明度控制
+- `RC 色阶调整 | RC Levels` - 支持伽马校正的专业色阶调整
+- `RC 亮度/对比度 | RC Brightness/Contrast` - 双算法亮度和对比度控制
+- `RC 色彩平衡 | RC Color Balance` - 支持色调范围定位的 CMY 色彩平衡
+- `RC 通道混合器 | RC Channel Mixer` - 支持单色模式的高级 RGB 通道混合
 
-### **RC/Utilities** - 画布和变换
-- `RC 画布填充` - 支持多种填充模式的画布扩展
-- `RC 图像缩放` - 支持 6 种不同方法的专业缩放
-- `RC 图像裁剪` - 支持手动、中心和比例模式的灵活裁剪
-- `RC 画布调整` - 支持 9 个锚点的画布调整
+### **RC/Utilities** - 画布和变换 (Canvas & Transform)
+- `RC 画布填充 | RC Canvas Padding` - 支持多种填充模式的画布扩展
+- `RC 图像缩放 | RC Image Scale` - 支持 6 种不同方法的专业缩放
+- `RC 图像裁剪 | RC Image Crop` - 支持手动、中心和比例模式的灵活裁剪
+- `RC 画布调整 | RC Canvas Resize` - 支持 9 个锚点的画布调整
 
-### **RC/Channel** - 通道和蒙版操作
-- `RC 通道提取器` - 提取 RGB 通道或亮度作为灰度图或蒙版，常用于抠图工作流
-- `RC 蒙版应用器` - 使用蒙版控制图像透明度，实现抠图效果
+### **RC/Channel** - 通道和蒙版操作 (Channel & Mask Operations)
+- `RC 通道提取器 | RC Channel Extractor` - 提取 RGB 通道或亮度作为灰度图或蒙版，常用于抠图工作流
+- `RC 蒙版应用器 | RC Mask Apply` - 使用蒙版控制图像透明度，实现抠图效果
 
-### **RC/Generate** - 生成操作
-- `RC 渐变生成器` - 创建支持透明度和多色的渐变图像，支持线性、径向、角度和反射渐变
+### **RC/Generate** - 生成操作 (Generate Operations)
+- `RC 渐变生成器 | RC Gradient Generator` - 创建支持透明度和多色的渐变图像，支持线性、径向、角度和反射渐变
 
 ---
 
