@@ -5,37 +5,38 @@ import { ComfyWidgets } from "../../scripts/widgets.js";
 const styles = `
 .rc-gradient-editor {
     background: #1e1e1e;
-    padding: 10px;
-    border-radius: 5px;
-    margin: 5px 0;
+    padding: 8px;
+    border-radius: 4px;
+    margin: 2px 0;
+    box-sizing: border-box;
 }
 
 .rc-gradient-bar-container {
     position: relative;
     width: 100%;
-    height: 30px;
+    height: 28px;
     background: #333;
-    border-radius: 4px;
-    margin: 10px 0;
+    border-radius: 3px;
+    margin: 8px 0;
     cursor: crosshair;
 }
 
 .rc-gradient-bar {
     width: 100%;
     height: 100%;
-    border-radius: 4px;
+    border-radius: 3px;
 }
 
 .rc-gradient-stop {
     position: absolute;
-    width: 16px;
-    height: 16px;
-    border: 3px solid white;
+    width: 14px;
+    height: 14px;
+    border: 2px solid white;
     border-radius: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
     cursor: grab;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    box-shadow: 0 1px 3px rgba(0,0,0,0.5);
     z-index: 10;
 }
 
@@ -45,56 +46,63 @@ const styles = `
 
 .rc-gradient-stop.selected {
     border-color: #4a9eff;
-    box-shadow: 0 0 10px rgba(74, 158, 255, 1);
+    box-shadow: 0 0 8px rgba(74, 158, 255, 1);
 }
 
 .rc-control-row {
     display: flex;
     align-items: center;
-    margin: 8px 0;
-    gap: 8px;
+    margin: 6px 0;
+    gap: 6px;
 }
 
 .rc-control-label {
     color: #ccc;
     font-size: 11px;
-    min-width: 50px;
+    min-width: 38px;
+    flex-shrink: 0;
 }
 
 .rc-control-input {
     background: #2a2a2a;
     border: 1px solid #444;
     color: #ddd;
-    padding: 4px 8px;
+    padding: 3px 6px;
     border-radius: 3px;
     font-size: 11px;
+    box-sizing: border-box;
 }
 
 .rc-control-slider {
     flex: 1;
+    min-width: 0;
 }
 
 .rc-control-number {
-    width: 60px;
+    width: 50px;
+    flex-shrink: 0;
 }
 
 .rc-color-picker {
-    width: 40px;
-    height: 24px;
+    width: 35px;
+    height: 22px;
     border: 1px solid #444;
     border-radius: 3px;
     cursor: pointer;
+    padding: 0;
+    flex-shrink: 0;
 }
 
 .rc-btn {
     background: #4a9eff;
     color: white;
     border: none;
-    padding: 6px 12px;
+    padding: 5px 10px;
     border-radius: 3px;
     cursor: pointer;
     font-size: 11px;
-    margin: 2px;
+    margin: 0;
+    flex: 1;
 }
 
 .rc-btn:hover {
@@ -113,15 +121,16 @@ const styles = `
     display: flex;
     gap: 4px;
     flex-wrap: wrap;
-    margin-top: 8px;
+    margin-top: 6px;
 }
 
 .rc-preset {
-    width: 50px;
+    width: 45px;
     height: 18px;
-    border: 2px solid #444;
+    border: 1px solid #444;
     border-radius: 3px;
     cursor: pointer;
+    flex-shrink: 0;
 }
 
 .rc-preset:hover {
@@ -190,6 +199,36 @@ app.registerExtension({
                 const widget = this.widgets.find(w => w.name === "gradient_data");
                 if (!widget) return ret;
                 
+                // 获取国际化文本
+                const getI18nText = (key, defaultText) => {
+                    try {
+                        // 尝试从ComfyUI的国际化系统获取文本
+                        const locale = localStorage.getItem("Comfy.Settings.Locale") || "en";
+                        // 这里可以扩展支持更多语言
+                        const i18n = {
+                            en: {
+                                position: "Pos",
+                                color: "Color",
+                                alpha: "Alpha",
+                                delete: "Delete",
+                                reverse: "Reverse",
+                                presets: "Presets"
+                            },
+                            zh: {
+                                position: "位置",
+                                color: "颜色",
+                                alpha: "透明",
+                                delete: "删除",
+                                reverse: "反转",
+                                presets: "预设"
+                            }
+                        };
+                        return i18n[locale]?.[key] || defaultText;
+                    } catch {
+                        return defaultText;
+                    }
+                };
+                
                 // Hide original widget
                 widget.type = "converted-widget";
                 widget.serializeValue = () => widget.value;
@@ -211,7 +250,6 @@ app.registerExtension({
                 // Create UI
                 const container = document.createElement("div");
                 container.className = "rc-gradient-editor";
-                container.style.width = "calc(100% - 20px)";
                 
                 // Gradient bar
                 const barContainer = document.createElement("div");
@@ -221,26 +259,26 @@ app.registerExtension({
                 barContainer.appendChild(gradientBar);
                 container.appendChild(barContainer);
                 
-                // Controls
+                // Controls - more compact layout with i18n
                 const controlsHtml = `
                     <div class="rc-control-row">
-                        <span class="rc-control-label" data-i18n="Position:">Position:</span>
+                        <span class="rc-control-label">${getI18nText('position', 'Pos')}:</span>
                         <input type="range" class="rc-control-input rc-control-slider pos-slider" min="0" max="1" step="0.001" value="0">
                         <input type="number" class="rc-control-input rc-control-number pos-number" min="0" max="1" step="0.01" value="0">
                     </div>
                     <div class="rc-control-row">
-                        <span class="rc-control-label" data-i18n="Color:">Color:</span>
+                        <span class="rc-control-label">${getI18nText('color', 'Color')}:</span>
                         <input type="color" class="rc-color-picker" value="#000000">
-                        <span class="rc-control-label" style="margin-left:10px" data-i18n="Alpha:">Alpha:</span>
+                        <span class="rc-control-label" style="min-width:38px;margin-left:6px">${getI18nText('alpha', 'Alpha')}:</span>
                         <input type="range" class="rc-control-input rc-control-slider alpha-slider" min="0" max="255" step="1" value="255">
                         <input type="number" class="rc-control-input rc-control-number alpha-number" min="0" max="255" step="1" value="255">
                     </div>
                     <div class="rc-control-row">
-                        <button class="rc-btn danger delete-btn" data-i18n="Delete">Delete</button>
-                        <button class="rc-btn reverse-btn" data-i18n="Reverse">Reverse</button>
+                        <button class="rc-btn danger delete-btn">${getI18nText('delete', 'Delete')}</button>
+                        <button class="rc-btn reverse-btn">${getI18nText('reverse', 'Reverse')}</button>
                     </div>
                     <div class="rc-control-row">
-                        <span class="rc-control-label" data-i18n="Presets:">Presets:</span>
+                        <span class="rc-control-label">${getI18nText('presets', 'Presets')}:</span>
                     </div>
                     <div class="rc-presets"></div>
                 `;
@@ -410,7 +448,7 @@ app.registerExtension({
                 PRESETS.forEach(preset => {
                     const presetEl = document.createElement("div");
                     presetEl.className = "rc-preset";
-                    presetEl.title = app.getTranslation ? app.getTranslation(preset.name) : preset.name;
+                    presetEl.title = preset.name;
                     presetEl.style.background = genGradientCSS(preset.stops);
                     presetEl.onclick = () => {
                         stops = JSON.parse(JSON.stringify(preset.stops));
@@ -426,8 +464,11 @@ app.registerExtension({
                 // Add custom HTML widget
                 const htmlWidget = this.addDOMWidget("gradient_editor", "div", container);
                 htmlWidget.computeSize = function(width) {
-                    return [width, 230];
+                    return [width, 280];  // 恢复合适的高度
                 };
+                
+                // 确保节点足够宽
+                this.setSize([Math.max(this.size[0], 340), this.size[1]]);
                 
                 return ret;
             };

@@ -290,7 +290,7 @@
       },
       "scale": {
         "name": "缩放",
-        "tooltip": "渐变缩放/缩放因子"
+        "tooltip": "渐变缩放/缩放系数"
       },
       "reference_image": {
         "name": "参考图片",
