@@ -6,7 +6,7 @@
         "name": "Background"
       },
       "overlay": {
-        "name": "Overlay"
+        "name": "Foreground"
       },
       "x_percent": {
         "name": "X Percentage",

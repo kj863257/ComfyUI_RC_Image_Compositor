@@ -45,7 +45,6 @@ class RC_ImageCompositor:
     def INPUT_TYPES(cls):
         return {
             "required": {
-                "background": ("IMAGE",),
                 "overlay": ("IMAGE",),
                 "x_percent": ("INT", {
                     "default": 100, "min": 0, "max": 100, "step": 1,
@@ -163,34 +162,46 @@ class RC_ImageCompositor:
                     "default": False,
                     "tooltip": "Flip vertically"
                 }),
+            },
+            "optional": {
+                "background": ("IMAGE", {
+                    "tooltip": "Background image. If not provided, creates transparent background matching overlay size"
+                }),
             }
         }
 
-    def composite(self, background, overlay,
-                  x_percent, y_percent,
-                  x_align, y_align,
-                  x_offset, y_offset,
-                  scale_mode, scale,
-                  rotation, opacity,
-                  blend_mode, flip_h, flip_v):
-        # Convert to [H, W, C] uint8 numpy
-        bg = (background[0].cpu().numpy() * 255).astype(np.uint8)
+    def composite(self, background=None, overlay=None,
+                  x_percent=100, y_percent=0,
+                  x_align="from_right", y_align="from_top",
+                  x_offset=50, y_offset=50,
+                  scale_mode="relative_to_background_width", scale=0.3,
+                  rotation=0.0, opacity=0.7,
+                  blend_mode="normal", flip_h=False, flip_v=False):
+        # Convert overlay to numpy first to get dimensions
         fg = (overlay[0].cpu().numpy() * 255).astype(np.uint8)
-
-        bg_h, bg_w = bg.shape[:2]
         fg_h_orig, fg_w_orig = fg.shape[:2]
 
-        # === 1. Compute target size ===
+        # === 1. Compute target size for overlay ===
         if scale_mode == "relative_to_overlay":
             new_w = int(fg_w_orig * scale)
             new_h = int(fg_h_orig * scale)
         elif scale_mode == "relative_to_background_width":
-            target_width = int(bg_w * scale)
+            if background is not None:
+                bg_temp = (background[0].cpu().numpy() * 255).astype(np.uint8)
+                bg_w_temp = bg_temp.shape[1]
+                target_width = int(bg_w_temp * scale)
+            else:
+                target_width = int(fg_w_orig * scale)
             scale_factor = target_width / fg_w_orig if fg_w_orig > 0 else 1.0
             new_w = target_width
             new_h = int(fg_h_orig * scale_factor)
         elif scale_mode == "relative_to_background_height":
-            target_height = int(bg_h * scale)
+            if background is not None:
+                bg_temp = (background[0].cpu().numpy() * 255).astype(np.uint8)
+                bg_h_temp = bg_temp.shape[0]
+                target_height = int(bg_h_temp * scale)
+            else:
+                target_height = int(fg_h_orig * scale)
             scale_factor = target_height / fg_h_orig if fg_h_orig > 0 else 1.0
             new_h = target_height
             new_w = int(fg_w_orig * scale_factor)
@@ -198,9 +209,11 @@ class RC_ImageCompositor:
             new_w, new_h = fg_w_orig, fg_h_orig
 
         if new_w <= 0 or new_h <= 0:
-            return (background,)
+            # Return empty transparent image
+            empty = torch.zeros(1, fg_h_orig, fg_w_orig, 4)
+            return (empty,)
 
-        # === 2. Resize ===
+        # === 2. Resize overlay ===
         if fg.shape[2] == 4:
             rgb = Image.fromarray(fg[:, :, :3], 'RGB')
             a = Image.fromarray(fg[:, :, 3], 'L')
@@ -222,7 +235,57 @@ class RC_ImageCompositor:
             rotated = pil_img.rotate(rotation, resample=Image.BICUBIC, expand=True)
             fg_resized = np.array(rotated)
 
+        # If no background provided, create transparent background large enough to contain overlay
+        if background is None:
+            fg_h, fg_w = fg_resized.shape[:2]
+
+            # For transparent background, we'll create a canvas and position the overlay properly
+            # Use a larger canvas to accommodate positioning
+            canvas_w = fg_w + abs(x_offset) * 2 + 200
+            canvas_h = fg_h + abs(y_offset) * 2 + 200
+
+            # Create result canvas with transparency
+            result = np.zeros((canvas_h, canvas_w, 4), dtype=np.uint8)
+
+            # Calculate position - for transparent background, use simpler positioning
+            if x_align == "from_left":
+                start_x = abs(x_offset) + 100 + x_offset
+            else:  # from_right
+                start_x = abs(x_offset) + 100 - x_offset
+
+            if y_align == "from_top":
+                start_y = abs(y_offset) + 100 + y_offset
+            else:  # from_bottom
+                start_y = abs(y_offset) + 100 - y_offset
+
+            # Make sure we don't go out of bounds
+            start_x = max(0, min(start_x, canvas_w - fg_w))
+            start_y = max(0, min(start_y, canvas_h - fg_h))
+            end_x = start_x + fg_w
+            end_y = start_y + fg_h
+
+            # Handle foreground alpha channel
+            if fg_resized.shape[2] == 4:
+                # Has alpha channel
+                fg_rgba = fg_resized
+                alpha = fg_rgba[:, :, 3:4].astype(np.float32) / 255.0 * opacity
+            else:
+                # No alpha channel, create one
+                fg_rgba = np.concatenate([fg_resized, np.full((fg_h, fg_w, 1), 255, dtype=np.uint8)], axis=2)
+                alpha = np.full((fg_h, fg_w, 1), opacity, dtype=np.float32)
+
+            # Place the foreground on transparent canvas
+            result[start_y:end_y, start_x:end_x, :3] = fg_rgba[:, :, :3]
+            result[start_y:end_y, start_x:end_x, 3:4] = (alpha * 255).astype(np.uint8)
+
+            result_tensor = torch.from_numpy(result.astype(np.float32) / 255.0).unsqueeze(0)
+            return (result_tensor,)
+        else:
+            # Convert existing background to numpy
+            bg = (background[0].cpu().numpy() * 255).astype(np.uint8)
+
         # === 5. Position with improved alignment system ===
+        bg_h, bg_w = bg.shape[:2]
         fg_h, fg_w = fg_resized.shape[:2]
 
         # Calculate base position from percentage
@@ -265,19 +328,38 @@ class RC_ImageCompositor:
 
                 bg_f = bg_roi.astype(np.float32) / 255.0
 
-                # Apply blend mode
-                blended = self.apply_blend_mode(bg_f, rgb, blend_mode)
+                # Handle channel mismatch: ensure both bg and fg have same number of channels for blending
+                if bg_f.shape[2] == 4 and rgb.shape[2] == 3:
+                    # Background has alpha, foreground doesn't - use only RGB channels for blending
+                    bg_rgb = bg_f[:, :, :3]
+                elif bg_f.shape[2] == 3 and rgb.shape[2] == 4:
+                    # This shouldn't happen in our current logic, but handle it
+                    rgb = rgb[:, :, :3]
+                    bg_rgb = bg_f
+                else:
+                    # Same number of channels, or both RGB
+                    bg_rgb = bg_f[:, :, :3] if bg_f.shape[2] == 4 else bg_f
+
+                # Apply blend mode (only on RGB channels)
+                blended = self.apply_blend_mode(bg_rgb, rgb[:, :, :3] if rgb.shape[2] == 4 else rgb, blend_mode)
 
                 # Clamp blend results to [0, 1]
                 blended = np.clip(blended, 0.0, 1.0)
 
-                out = bg_f * (1 - alpha) + blended * alpha
-                out = np.clip(out, 0, 1) * 255
-                out = out.astype(np.uint8)
-
-                if result.shape[2] == 4:
+                # Composite: handle both RGB and RGBA backgrounds
+                if bg_f.shape[2] == 4:
+                    # RGBA background
+                    bg_rgb = bg_f[:, :, :3]
+                    out = bg_rgb * (1 - alpha) + blended * alpha
+                    out = np.clip(out, 0, 1) * 255
+                    out = out.astype(np.uint8)
                     result[y1:y2, x1:x2, :3] = out
+                    # Keep original alpha channel of background
                 else:
+                    # RGB background
+                    out = bg_f * (1 - alpha) + blended * alpha
+                    out = np.clip(out, 0, 1) * 255
+                    out = out.astype(np.uint8)
                     result[y1:y2, x1:x2] = out
 
         result_tensor = torch.from_numpy(result.astype(np.float32) / 255.0).unsqueeze(0)

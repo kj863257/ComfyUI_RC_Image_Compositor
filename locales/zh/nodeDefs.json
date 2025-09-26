@@ -6,7 +6,7 @@
         "name": "背景"
       },
       "overlay": {
-        "name": "覆盖图层"
+        "name": "前景"
       },
       "x_percent": {
         "name": "水平百分比",
