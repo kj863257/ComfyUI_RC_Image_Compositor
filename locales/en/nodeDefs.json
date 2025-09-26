@@ -213,5 +213,44 @@
         "tooltip": "Auto expand canvas:\n- True: Auto expand canvas when glow exceeds bounds\n- False: Glow is clipped to original canvas size"
       }
     }
+  },
+  "RC_ChannelExtractor": {
+    "display_name": "RC Channel Extractor",
+    "inputs": {
+      "image": {
+        "name": "Image"
+      },
+      "channel": {
+        "name": "Channel",
+        "tooltip": "Channel to extract:\n- red: Red channel\n- green: Green channel (often best for green screen)\n- blue: Blue channel\n- alpha: Alpha channel (if available)\n- luminance: Luminance (0.299*R + 0.587*G + 0.114*B)"
+      },
+      "invert": {
+        "name": "Invert",
+        "tooltip": "Invert the extracted channel"
+      }
+    }
+  },
+  "RC_MaskApply": {
+    "display_name": "RC Mask Apply",
+    "inputs": {
+      "image": {
+        "name": "Image"
+      },
+      "mask": {
+        "name": "Mask"
+      },
+      "mask_mode": {
+        "name": "Mask Mode",
+        "tooltip": "Mask application mode:\n- alpha: Use mask as alpha channel\n- multiply: Multiply image by mask (darken)"
+      },
+      "threshold": {
+        "name": "Threshold",
+        "tooltip": "Threshold for mask (values below this become transparent)"
+      },
+      "feather": {
+        "name": "Feather",
+        "tooltip": "Feather/smooth the mask edges"
+      }
+    }
   }
 }

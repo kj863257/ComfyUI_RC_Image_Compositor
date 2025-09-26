@@ -213,5 +213,44 @@
         "tooltip": "自动扩展画布：\n- True：发光超出时自动放大画布\n- False：发光被裁剪到原画布大小"
       }
     }
+  },
+  "RC_ChannelExtractor": {
+    "display_name": "RC 通道提取器",
+    "inputs": {
+      "image": {
+        "name": "图像"
+      },
+      "channel": {
+        "name": "通道",
+        "tooltip": "要提取的通道：\n- red：红色通道\n- green：绿色通道（绿幕抠图常用）\n- blue：蓝色通道\n- alpha：透明通道（如果有）\n- luminance：亮度（0.299*R + 0.587*G + 0.114*B）"
+      },
+      "invert": {
+        "name": "反转",
+        "tooltip": "反转提取的通道"
+      }
+    }
+  },
+  "RC_MaskApply": {
+    "display_name": "RC 蒙版应用器",
+    "inputs": {
+      "image": {
+        "name": "图像"
+      },
+      "mask": {
+        "name": "蒙版"
+      },
+      "mask_mode": {
+        "name": "蒙版模式",
+        "tooltip": "蒙版应用模式：\n- alpha：将蒙版用作透明通道\n- multiply：图像乘以蒙版（变暗）"
+      },
+      "threshold": {
+        "name": "阈值",
+        "tooltip": "蒙版阈值（低于此值的部分变透明）"
+      },
+      "feather": {
+        "name": "羽化",
+        "tooltip": "羽化/平滑蒙版边缘"
+      }
+    }
   }
 }

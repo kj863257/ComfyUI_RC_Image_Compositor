@@ -13,6 +13,9 @@ from .utilities import RC_CanvasPadding, RC_ImageScale, RC_ImageCrop, RC_CanvasR
 # Import adjustment nodes
 from .adjustments import RC_OpacityAdjust, RC_LevelsAdjust, RC_BrightnessContrast, RC_ColorBalance, RC_ChannelMixer
 
+# Import channel operations
+from .channel_ops import RC_ChannelExtractor, RC_MaskApply
+
 # Node class mappings - used by ComfyUI to register nodes
 NODE_CLASS_MAPPINGS = {
     # Core compositor nodes
@@ -41,6 +44,10 @@ NODE_CLASS_MAPPINGS = {
     "RC_BrightnessContrast": RC_BrightnessContrast,
     "RC_ColorBalance": RC_ColorBalance,
     "RC_ChannelMixer": RC_ChannelMixer,
+
+    # Channel operations
+    "RC_ChannelExtractor": RC_ChannelExtractor,
+    "RC_MaskApply": RC_MaskApply,
 }
 
 # Display name mappings - shown in ComfyUI interface
@@ -71,6 +78,10 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "RC_BrightnessContrast": "RC Brightness/Contrast",
     "RC_ColorBalance": "RC Color Balance",
     "RC_ChannelMixer": "RC Channel Mixer",
+
+    # Channel operations
+    "RC_ChannelExtractor": "RC Channel Extractor",
+    "RC_MaskApply": "RC Mask Apply",
 }
 
 # Plugin metadata
