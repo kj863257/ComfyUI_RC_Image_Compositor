@@ -42,7 +42,6 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 
 ### 🌈 **Gradient Generation | 渐变生成**
 - **Gradient Generator | 渐变生成器** - 创建支持透明度和多色的渐变图像，支持线性、径向、角度和反射渐变
-- **透明度可视化 | Transparency Visualization** - 使用棋盘格背景显示透明区域，类似Photoshop效果
 
 ---
 
