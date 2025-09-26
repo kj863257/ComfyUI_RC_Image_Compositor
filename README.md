@@ -111,12 +111,9 @@ Then restart ComfyUI
 
 ---
 
-## 🎨 Enhanced Positioning System
+## 🎨 Precise Positioning System
 
-**Old Problem:** Want to place image at right edge? Can't use "-0" offset.
-
-**New Solution:** Use alignment system!
-
+### **Edge Alignment**
 - **Right edge, tight fit**: `x_percent=100`, `x_align=from_right`, `x_offset=0`
 - **Left edge, tight fit**: `x_percent=0`, `x_align=from_left`, `x_offset=0`
 - **Bottom edge, tight fit**: `y_percent=100`, `y_align=from_bottom`, `y_offset=0`
