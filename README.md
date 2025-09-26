@@ -40,6 +40,9 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 - **Channel Extractor | 通道提取器** - 提取 RGB 通道或亮度作为灰度图或蒙版，常用于抠图工作流
 - **Mask Apply | 蒙版应用器** - 使用蒙版控制图像透明度，实现抠图效果
 
+### 🌈 **Gradient Generation | 渐变生成**
+- **Gradient Generator | 渐变生成器** - 创建支持透明度和多色的渐变图像，支持线性、径向、角度和反射渐变
+
 ---
 
 ## 🎯 Perfect For | 适用场景
@@ -90,6 +93,9 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 ### **RC/Channel** - Channel & Mask Operations | 通道和蒙版操作
 - `RC 通道提取器 | RC Channel Extractor` - 提取 RGB 通道或亮度作为灰度图或蒙版，常用于抠图工作流
 - `RC 蒙版应用器 | RC Mask Apply` - 使用蒙版控制图像透明度，实现抠图效果
+
+### **RC/Generate** - Generate Operations | 生成操作
+- `RC 渐变生成器 | RC Gradient Generator` - 创建支持透明度和多色的渐变图像，支持线性、径向、角度和反射渐变
 
 ---
 
