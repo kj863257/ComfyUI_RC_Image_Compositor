@@ -18,6 +18,7 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 - **24 专业混合模式** 包括全部 HSL 模式（色相、饱和度、颜色、明度）
 - **增强定位系统** - 使用对齐选项实现精确定位控制
 - **详细工具提示** - 每种混合模式都配有视觉描述，支持中英双语
+- **可选背景支持** - 当未指定背景时自动创建透明画布，便于纯前景处理
 
 ### 🔧 **Professional Filters & Adjustments | 专业滤镜和调整**
 - **Gaussian Blur | 高斯模糊** - 专业级模糊效果，支持 PIL/OpenCV 算法选择
@@ -34,6 +35,10 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 - **Image Scale | 图像缩放** - 6 种缩放方法，支持高质量重采样
 - **Image Crop | 图像裁剪** - 支持手动、中心和宽高比裁剪
 - **Canvas Resize | 画布调整** - 9 个锚点位置，支持背景色控制
+
+### 🎞️ **Channel Operations | 通道操作**
+- **Channel Extractor | 通道提取器** - 提取 RGB 通道或亮度作为灰度图或蒙版，常用于抠图工作流
+- **Mask Apply | 蒙版应用器** - 使用蒙版控制图像透明度，实现抠图效果
 
 ---
 
@@ -56,7 +61,7 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 ## 📦 Node Categories | 节点分类
 
 ### **RC/Image** - Core Compositing | 核心合成
-- `RC 图像合成器 (完整版) | RC Image Compositor (Complete)` - 支持 24 种混合模式和增强定位的完整合成器
+- `RC 图像合成器 (完整版) | RC Image Compositor (Complete)` - 支持 24 种混合模式和增强定位的完整合成器（支持可选背景）
 - `RC 加载透明图像 | RC Load Image (Alpha)` - 完整保留 Alpha 通道的 RGBA 图像加载
 
 ### **RC/Layer Effects** - Photoshop Layer Styles | Photoshop 图层样式
@@ -81,6 +86,10 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 - `RC 图像缩放 | RC Image Scale` - 支持 6 种不同方法的专业缩放
 - `RC 图像裁剪 | RC Image Crop` - 支持手动、中心和比例模式的灵活裁剪
 - `RC 画布调整 | RC Canvas Resize` - 支持 9 个锚点的画布调整
+
+### **RC/Channel** - Channel & Mask Operations | 通道和蒙版操作
+- `RC 通道提取器 | RC Channel Extractor` - 提取 RGB 通道或亮度作为灰度图或蒙版，常用于抠图工作流
+- `RC 蒙版应用器 | RC Mask Apply` - 使用蒙版控制图像透明度，实现抠图效果
 
 ---
 
@@ -158,6 +167,11 @@ All 24 blend modes are mathematically identical to Photoshop's implementation wi
 - 在色彩平衡调整中保留明度
 - 通道特定的色阶调整（RGB、红、绿、蓝）
 - 带自定义通道混合的单色转换
+
+### **Advanced Masking & Channel Operations | 高级蒙版和通道操作**
+- **通道提取** - 从图像中提取特定通道（红、绿、蓝、透明或亮度）用于抠图
+- **蒙版应用** - 使用蒙版控制图像透明度，实现精确的抠图效果
+- **透明背景支持** - 当不提供背景时自动创建透明画布，便于处理独立前景元素
 
 ---
 
