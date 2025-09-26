@@ -252,5 +252,50 @@
         "tooltip": "Feather/smooth the mask edges"
       }
     }
+  },
+  "RC_GradientGenerator": {
+    "display_name": "RC Gradient Generator",
+    "inputs": {
+      "gradient_data": {
+        "name": "Gradient Data",
+        "tooltip": "Gradient color stops data (JSON format)"
+      },
+      "gradient_type": {
+        "name": "Gradient Type",
+        "tooltip": "Gradient type:\n- linear: Linear gradient\n- radial: Radial gradient from center\n- angular: Angular/conical gradient\n- reflected: Reflected linear gradient"
+      },
+      "angle": {
+        "name": "Angle",
+        "tooltip": "Gradient angle in degrees (for linear and reflected types)"
+      },
+      "size_mode": {
+        "name": "Size Mode",
+        "tooltip": "Size mode:\n- from_image: Use reference image size\n- custom: Specify custom width and height"
+      },
+      "width": {
+        "name": "Width",
+        "tooltip": "Width in pixels (used in custom mode)"
+      },
+      "height": {
+        "name": "Height",
+        "tooltip": "Height in pixels (used in custom mode)"
+      },
+      "center_x": {
+        "name": "Center X",
+        "tooltip": "Horizontal center position (0-1, for radial and angular)"
+      },
+      "center_y": {
+        "name": "Center Y",
+        "tooltip": "Vertical center position (0-1, for radial and angular)"
+      },
+      "scale": {
+        "name": "Scale",
+        "tooltip": "Gradient scale/zoom factor"
+      },
+      "reference_image": {
+        "name": "Reference Image",
+        "tooltip": "Reference image for size (used when size_mode is from_image)"
+      }
+    }
   }
 }

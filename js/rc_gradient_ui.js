@@ -1,12 +1,13 @@
 import { app } from "../../scripts/app.js";
 import { ComfyWidgets } from "../../scripts/widgets.js";
 
-// CSS styles for gradient editor
+// CSS styles
 const styles = `
 .rc-gradient-editor {
-    width: 100%;
-    margin: 10px 0;
-    font-family: Arial, sans-serif;
+    background: #1e1e1e;
+    padding: 10px;
+    border-radius: 5px;
+    margin: 5px 0;
 }
 
 .rc-gradient-bar-container {
@@ -23,136 +24,128 @@ const styles = `
     width: 100%;
     height: 100%;
     border-radius: 4px;
-    position: relative;
 }
 
 .rc-gradient-stop {
     position: absolute;
-    width: 14px;
-    height: 14px;
-    border: 2px solid white;
+    width: 16px;
+    height: 16px;
+    border: 3px solid white;
     border-radius: 50%;
     top: 50%;
     transform: translate(-50%, -50%);
-    cursor: pointer;
-    box-shadow: 0 0 4px rgba(0,0,0,0.5);
-    transition: transform 0.1s;
+    cursor: grab;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.5);
+    z-index: 10;
 }
 
-.rc-gradient-stop:hover {
-    transform: translate(-50%, -50%) scale(1.2);
+.rc-gradient-stop:active {
+    cursor: grabbing;
 }
 
 .rc-gradient-stop.selected {
     border-color: #4a9eff;
-    box-shadow: 0 0 8px rgba(74, 158, 255, 0.8);
+    box-shadow: 0 0 10px rgba(74, 158, 255, 1);
 }
 
-.rc-gradient-controls {
-    display: flex;
-    flex-direction: column;
-    gap: 8px;
-    margin-top: 10px;
-    padding: 10px;
-    background: #2a2a2a;
-    border-radius: 4px;
-}
-
-.rc-gradient-control-row {
+.rc-control-row {
     display: flex;
     align-items: center;
-    gap: 10px;
+    margin: 8px 0;
+    gap: 8px;
 }
 
-.rc-gradient-control-label {
-    min-width: 60px;
+.rc-control-label {
+    color: #ccc;
+    font-size: 11px;
+    min-width: 50px;
+}
+
+.rc-control-input {
+    background: #2a2a2a;
+    border: 1px solid #444;
     color: #ddd;
-    font-size: 12px;
+    padding: 4px 8px;
+    border-radius: 3px;
+    font-size: 11px;
 }
 
-.rc-gradient-color-input {
-    width: 50px;
-    height: 25px;
-    border: 1px solid #555;
+.rc-control-slider {
+    flex: 1;
+}
+
+.rc-control-number {
+    width: 60px;
+}
+
+.rc-color-picker {
+    width: 40px;
+    height: 24px;
+    border: 1px solid #444;
     border-radius: 3px;
     cursor: pointer;
 }
 
-.rc-gradient-slider {
-    flex: 1;
-    height: 4px;
-}
-
-.rc-gradient-number {
-    width: 50px;
-    background: #1a1a1a;
-    border: 1px solid #555;
-    color: #ddd;
-    padding: 4px;
-    border-radius: 3px;
-    font-size: 12px;
-}
-
-.rc-gradient-button {
-    padding: 5px 12px;
+.rc-btn {
     background: #4a9eff;
     color: white;
     border: none;
+    padding: 6px 12px;
     border-radius: 3px;
     cursor: pointer;
-    font-size: 12px;
-    transition: background 0.2s;
+    font-size: 11px;
+    margin: 2px;
 }
 
-.rc-gradient-button:hover {
+.rc-btn:hover {
     background: #3a8eef;
 }
 
-.rc-gradient-button.delete {
+.rc-btn.danger {
     background: #ff4a4a;
 }
 
-.rc-gradient-button.delete:hover {
+.rc-btn.danger:hover {
     background: #ef3a3a;
 }
 
-.rc-gradient-presets {
+.rc-presets {
     display: flex;
-    gap: 5px;
+    gap: 4px;
     flex-wrap: wrap;
-    margin-top: 5px;
+    margin-top: 8px;
 }
 
-.rc-gradient-preset {
-    width: 60px;
-    height: 20px;
-    border: 2px solid #555;
+.rc-preset {
+    width: 50px;
+    height: 18px;
+    border: 2px solid #444;
     border-radius: 3px;
     cursor: pointer;
-    transition: border-color 0.2s;
 }
 
-.rc-gradient-preset:hover {
+.rc-preset:hover {
     border-color: #4a9eff;
 }
 `;
 
-// Add styles to document
-const styleSheet = document.createElement("style");
-styleSheet.textContent = styles;
-document.head.appendChild(styleSheet);
+if (!document.getElementById("rc-gradient-styles")) {
+    const styleEl = document.createElement("style");
+    styleEl.id = "rc-gradient-styles";
+    styleEl.textContent = styles;
+    document.head.appendChild(styleEl);
+}
 
-// Gradient presets
-const GRADIENT_PRESETS = [
+const PRESETS = [
     {
-        name: "Black to White",
+        name: "BW",
         stops: [
             { position: 0.0, color: [0, 0, 0, 255] },
             { position: 1.0, color: [255, 255, 255, 255] }
         ]
     },
     {
-        name: "Transparent to Black",
+        name: "Trans",
         stops: [
             { position: 0.0, color: [0, 0, 0, 0] },
             { position: 1.0, color: [0, 0, 0, 255] }
@@ -162,10 +155,9 @@ const GRADIENT_PRESETS = [
         name: "Rainbow",
         stops: [
             { position: 0.0, color: [255, 0, 0, 255] },
-            { position: 0.2, color: [255, 255, 0, 255] },
-            { position: 0.4, color: [0, 255, 0, 255] },
-            { position: 0.6, color: [0, 255, 255, 255] },
-            { position: 0.8, color: [0, 0, 255, 255] },
+            { position: 0.25, color: [255, 255, 0, 255] },
+            { position: 0.5, color: [0, 255, 0, 255] },
+            { position: 0.75, color: [0, 0, 255, 255] },
             { position: 1.0, color: [255, 0, 255, 255] }
         ]
     },
@@ -173,7 +165,6 @@ const GRADIENT_PRESETS = [
         name: "Sunset",
         stops: [
             { position: 0.0, color: [255, 94, 77, 255] },
-            { position: 0.5, color: [245, 140, 60, 255] },
             { position: 1.0, color: [252, 206, 77, 255] }
         ]
     },
@@ -186,328 +177,6 @@ const GRADIENT_PRESETS = [
     }
 ];
 
-class GradientEditor {
-    constructor(node, inputName, inputData, app) {
-        this.node = node;
-        this.inputName = inputName;
-        this.selectedStop = 0;
-        
-        // Initialize gradient stops
-        this.stops = [
-            { position: 0.0, color: [0, 0, 0, 255] },
-            { position: 1.0, color: [255, 255, 255, 255] }
-        ];
-        
-        this.createWidget();
-    }
-    
-    createWidget() {
-        const container = document.createElement("div");
-        container.className = "rc-gradient-editor";
-        
-        // Gradient bar
-        const barContainer = document.createElement("div");
-        barContainer.className = "rc-gradient-bar-container";
-        
-        const gradientBar = document.createElement("div");
-        gradientBar.className = "rc-gradient-bar";
-        barContainer.appendChild(gradientBar);
-        
-        // Add click handler to create new stops
-        barContainer.addEventListener("click", (e) => {
-            if (e.target === barContainer || e.target === gradientBar) {
-                const rect = barContainer.getBoundingClientRect();
-                const position = (e.clientX - rect.left) / rect.width;
-                this.addStop(position);
-            }
-        });
-        
-        container.appendChild(barContainer);
-        
-        // Controls
-        const controls = document.createElement("div");
-        controls.className = "rc-gradient-controls";
-        
-        // Position control
-        const posRow = this.createControlRow("Position:", "range", 0, 1, 0.01);
-        controls.appendChild(posRow);
-        
-        // Color control
-        const colorRow = document.createElement("div");
-        colorRow.className = "rc-gradient-control-row";
-        const colorLabel = document.createElement("span");
-        colorLabel.className = "rc-gradient-control-label";
-        colorLabel.textContent = "Color:";
-        const colorInput = document.createElement("input");
-        colorInput.type = "color";
-        colorInput.className = "rc-gradient-color-input";
-        colorRow.appendChild(colorLabel);
-        colorRow.appendChild(colorInput);
-        controls.appendChild(colorRow);
-        
-        // Alpha control
-        const alphaRow = this.createControlRow("Alpha:", "range", 0, 255, 1);
-        controls.appendChild(alphaRow);
-        
-        // Buttons
-        const buttonRow = document.createElement("div");
-        buttonRow.className = "rc-gradient-control-row";
-        
-        const deleteBtn = document.createElement("button");
-        deleteBtn.className = "rc-gradient-button delete";
-        deleteBtn.textContent = "Delete Stop";
-        deleteBtn.addEventListener("click", () => this.deleteSelectedStop());
-        
-        const reverseBtn = document.createElement("button");
-        reverseBtn.className = "rc-gradient-button";
-        reverseBtn.textContent = "Reverse";
-        reverseBtn.addEventListener("click", () => this.reverseGradient());
-        
-        buttonRow.appendChild(deleteBtn);
-        buttonRow.appendChild(reverseBtn);
-        controls.appendChild(buttonRow);
-        
-        // Presets
-        const presetsLabel = document.createElement("div");
-        presetsLabel.style.color = "#ddd";
-        presetsLabel.style.fontSize = "12px";
-        presetsLabel.style.marginTop = "10px";
-        presetsLabel.textContent = "Presets:";
-        controls.appendChild(presetsLabel);
-        
-        const presets = document.createElement("div");
-        presets.className = "rc-gradient-presets";
-        GRADIENT_PRESETS.forEach(preset => {
-            const presetDiv = document.createElement("div");
-            presetDiv.className = "rc-gradient-preset";
-            presetDiv.title = preset.name;
-            presetDiv.style.background = this.generateGradientCSS(preset.stops);
-            presetDiv.addEventListener("click", () => this.loadPreset(preset));
-            presets.appendChild(presetDiv);
-        });
-        controls.appendChild(presets);
-        
-        container.appendChild(controls);
-        
-        // Store references
-        this.container = container;
-        this.gradientBar = gradientBar;
-        this.barContainer = barContainer;
-        this.positionSlider = posRow.querySelector("input[type='range']");
-        this.positionNumber = posRow.querySelector("input[type='number']");
-        this.colorInput = colorInput;
-        this.alphaSlider = alphaRow.querySelector("input[type='range']");
-        this.alphaNumber = alphaRow.querySelector("input[type='number']");
-        
-        // Add event listeners
-        this.positionSlider.addEventListener("input", () => this.updateStopPosition());
-        this.positionNumber.addEventListener("input", () => this.updateStopPosition());
-        this.colorInput.addEventListener("input", () => this.updateStopColor());
-        this.alphaSlider.addEventListener("input", () => this.updateStopAlpha());
-        this.alphaNumber.addEventListener("input", () => this.updateStopAlpha());
-        
-        this.updateDisplay();
-        this.updateGradientData();
-    }
-    
-    createControlRow(label, type, min, max, step) {
-        const row = document.createElement("div");
-        row.className = "rc-gradient-control-row";
-        
-        const labelEl = document.createElement("span");
-        labelEl.className = "rc-gradient-control-label";
-        labelEl.textContent = label;
-        
-        const slider = document.createElement("input");
-        slider.type = type;
-        slider.className = "rc-gradient-slider";
-        slider.min = min;
-        slider.max = max;
-        slider.step = step;
-        
-        const number = document.createElement("input");
-        number.type = "number";
-        number.className = "rc-gradient-number";
-        number.min = min;
-        number.max = max;
-        number.step = step;
-        
-        row.appendChild(labelEl);
-        row.appendChild(slider);
-        row.appendChild(number);
-        
-        return row;
-    }
-    
-    addStop(position) {
-        const color = this.interpolateColor(position);
-        this.stops.push({ position, color });
-        this.stops.sort((a, b) => a.position - b.position);
-        this.selectedStop = this.stops.findIndex(s => s.position === position);
-        this.updateDisplay();
-        this.updateGradientData();
-    }
-    
-    deleteSelectedStop() {
-        if (this.stops.length <= 2) return;
-        this.stops.splice(this.selectedStop, 1);
-        this.selectedStop = Math.max(0, this.selectedStop - 1);
-        this.updateDisplay();
-        this.updateGradientData();
-    }
-    
-    reverseGradient() {
-        this.stops.forEach(stop => stop.position = 1 - stop.position);
-        this.stops.sort((a, b) => a.position - b.position);
-        this.updateDisplay();
-        this.updateGradientData();
-    }
-    
-    loadPreset(preset) {
-        this.stops = JSON.parse(JSON.stringify(preset.stops));
-        this.selectedStop = 0;
-        this.updateDisplay();
-        this.updateGradientData();
-    }
-    
-    interpolateColor(position) {
-        const sortedStops = [...this.stops].sort((a, b) => a.position - b.position);
-        
-        let leftStop = sortedStops[0];
-        let rightStop = sortedStops[sortedStops.length - 1];
-        
-        for (let i = 0; i < sortedStops.length - 1; i++) {
-            if (sortedStops[i].position <= position && position <= sortedStops[i + 1].position) {
-                leftStop = sortedStops[i];
-                rightStop = sortedStops[i + 1];
-                break;
-            }
-        }
-        
-        const t = (position - leftStop.position) / (rightStop.position - leftStop.position + 0.0001);
-        const color = leftStop.color.map((c, i) => 
-            Math.round(c * (1 - t) + rightStop.color[i] * t)
-        );
-        
-        return color;
-    }
-    
-    updateStopPosition() {
-        const pos = parseFloat(this.positionSlider.value);
-        this.stops[this.selectedStop].position = pos;
-        this.stops.sort((a, b) => a.position - b.position);
-        this.selectedStop = this.stops.findIndex(s => s.position === pos);
-        this.updateDisplay();
-        this.updateGradientData();
-    }
-    
-    updateStopColor() {
-        const hex = this.colorInput.value;
-        const r = parseInt(hex.substr(1, 2), 16);
-        const g = parseInt(hex.substr(3, 2), 16);
-        const b = parseInt(hex.substr(5, 2), 16);
-        const a = this.stops[this.selectedStop].color[3];
-        this.stops[this.selectedStop].color = [r, g, b, a];
-        this.updateDisplay();
-        this.updateGradientData();
-    }
-    
-    updateStopAlpha() {
-        const alpha = parseInt(this.alphaSlider.value);
-        this.stops[this.selectedStop].color[3] = alpha;
-        this.updateDisplay();
-        this.updateGradientData();
-    }
-    
-    generateGradientCSS(stops) {
-        const stopStrings = stops.map(stop => {
-            const [r, g, b, a] = stop.color;
-            return `rgba(${r},${g},${b},${a/255}) ${stop.position * 100}%`;
-        });
-        return `linear-gradient(to right, ${stopStrings.join(', ')})`;
-    }
-    
-    updateDisplay() {
-        // Update gradient bar
-        this.gradientBar.style.background = this.generateGradientCSS(this.stops);
-        
-        // Remove old stop elements
-        const oldStops = this.barContainer.querySelectorAll(".rc-gradient-stop");
-        oldStops.forEach(el => el.remove());
-        
-        // Create stop elements
-        this.stops.forEach((stop, index) => {
-            const stopEl = document.createElement("div");
-            stopEl.className = "rc-gradient-stop";
-            if (index === this.selectedStop) {
-                stopEl.classList.add("selected");
-            }
-            stopEl.style.left = `${stop.position * 100}%`;
-            const [r, g, b, a] = stop.color;
-            stopEl.style.backgroundColor = `rgba(${r},${g},${b},${a/255})`;
-            
-            stopEl.addEventListener("click", (e) => {
-                e.stopPropagation();
-                this.selectedStop = index;
-                this.updateDisplay();
-            });
-            
-            // Drag functionality
-            let isDragging = false;
-            stopEl.addEventListener("mousedown", (e) => {
-                e.preventDefault();
-                isDragging = true;
-            });
-            
-            document.addEventListener("mousemove", (e) => {
-                if (!isDragging) return;
-                const rect = this.barContainer.getBoundingClientRect();
-                let pos = (e.clientX - rect.left) / rect.width;
-                pos = Math.max(0, Math.min(1, pos));
-                this.stops[index].position = pos;
-                this.updateDisplay();
-                this.updateGradientData();
-            });
-            
-            document.addEventListener("mouseup", () => {
-                if (isDragging) {
-                    isDragging = false;
-                    this.stops.sort((a, b) => a.position - b.position);
-                    this.selectedStop = this.stops.findIndex(s => s === stop);
-                    this.updateDisplay();
-                }
-            });
-            
-            this.barContainer.appendChild(stopEl);
-        });
-        
-        // Update controls
-        const currentStop = this.stops[this.selectedStop];
-        this.positionSlider.value = currentStop.position;
-        this.positionNumber.value = currentStop.position.toFixed(2);
-        
-        const [r, g, b, a] = currentStop.color;
-        const hex = `#${r.toString(16).padStart(2, '0')}${g.toString(16).padStart(2, '0')}${b.toString(16).padStart(2, '0')}`;
-        this.colorInput.value = hex;
-        
-        this.alphaSlider.value = a;
-        this.alphaNumber.value = a;
-    }
-    
-    updateGradientData() {
-        const data = { stops: this.stops };
-        const widget = this.node.widgets.find(w => w.name === "gradient_data");
-        if (widget) {
-            widget.value = JSON.stringify(data);
-        }
-    }
-    
-    getWidget() {
-        return { widget: this.container };
-    }
-}
-
-// Register the extension
 app.registerExtension({
     name: "RC.GradientGenerator",
     
@@ -516,23 +185,251 @@ app.registerExtension({
             const onNodeCreated = nodeType.prototype.onNodeCreated;
             
             nodeType.prototype.onNodeCreated = function() {
-                const result = onNodeCreated?.apply(this, arguments);
+                const ret = onNodeCreated?.apply(this, arguments);
                 
-                // Find the gradient_data widget
-                const gradientDataWidget = this.widgets.find(w => w.name === "gradient_data");
-                if (gradientDataWidget) {
-                    // Hide the default string widget
-                    gradientDataWidget.type = "converted-widget";
-                    gradientDataWidget.computeSize = () => [0, -4];
-                    
-                    // Create custom gradient editor
-                    const editor = new GradientEditor(this, "gradient_data", {}, app);
-                    
-                    // Add editor to node
-                    this.addCustomWidget(editor.getWidget());
+                const widget = this.widgets.find(w => w.name === "gradient_data");
+                if (!widget) return ret;
+                
+                // Hide original widget
+                widget.type = "converted-widget";
+                widget.serializeValue = () => widget.value;
+                
+                // Parse initial data
+                let stops;
+                try {
+                    const data = JSON.parse(widget.value);
+                    stops = data.stops;
+                } catch {
+                    stops = [
+                        { position: 0.0, color: [0, 0, 0, 255] },
+                        { position: 1.0, color: [255, 255, 255, 255] }
+                    ];
                 }
                 
-                return result;
+                let selectedStop = 0;
+                
+                // Create UI
+                const container = document.createElement("div");
+                container.className = "rc-gradient-editor";
+                container.style.width = "calc(100% - 20px)";
+                
+                // Gradient bar
+                const barContainer = document.createElement("div");
+                barContainer.className = "rc-gradient-bar-container";
+                const gradientBar = document.createElement("div");
+                gradientBar.className = "rc-gradient-bar";
+                barContainer.appendChild(gradientBar);
+                container.appendChild(barContainer);
+                
+                // Controls
+                const controlsHtml = `
+                    <div class="rc-control-row">
+                        <span class="rc-control-label" data-i18n="Position:">Position:</span>
+                        <input type="range" class="rc-control-input rc-control-slider pos-slider" min="0" max="1" step="0.001" value="0">
+                        <input type="number" class="rc-control-input rc-control-number pos-number" min="0" max="1" step="0.01" value="0">
+                    </div>
+                    <div class="rc-control-row">
+                        <span class="rc-control-label" data-i18n="Color:">Color:</span>
+                        <input type="color" class="rc-color-picker" value="#000000">
+                        <span class="rc-control-label" style="margin-left:10px" data-i18n="Alpha:">Alpha:</span>
+                        <input type="range" class="rc-control-input rc-control-slider alpha-slider" min="0" max="255" step="1" value="255">
+                        <input type="number" class="rc-control-input rc-control-number alpha-number" min="0" max="255" step="1" value="255">
+                    </div>
+                    <div class="rc-control-row">
+                        <button class="rc-btn danger delete-btn" data-i18n="Delete">Delete</button>
+                        <button class="rc-btn reverse-btn" data-i18n="Reverse">Reverse</button>
+                    </div>
+                    <div class="rc-control-row">
+                        <span class="rc-control-label" data-i18n="Presets:">Presets:</span>
+                    </div>
+                    <div class="rc-presets"></div>
+                `;
+                container.insertAdjacentHTML('beforeend', controlsHtml);
+                
+                // Get elements
+                const posSlider = container.querySelector(".pos-slider");
+                const posNumber = container.querySelector(".pos-number");
+                const colorPicker = container.querySelector(".rc-color-picker");
+                const alphaSlider = container.querySelector(".alpha-slider");
+                const alphaNumber = container.querySelector(".alpha-number");
+                const deleteBtn = container.querySelector(".delete-btn");
+                const reverseBtn = container.querySelector(".reverse-btn");
+                const presetsContainer = container.querySelector(".rc-presets");
+                
+                // Helper functions
+                const genGradientCSS = (stops) => {
+                    const strs = stops.map(s => {
+                        const [r, g, b, a] = s.color;
+                        return `rgba(${r},${g},${b},${a/255}) ${s.position*100}%`;
+                    });
+                    return `linear-gradient(to right, ${strs.join(', ')})`;
+                };
+                
+                const interpolateColor = (pos) => {
+                    const sorted = [...stops].sort((a,b) => a.position - b.position);
+                    let left = sorted[0], right = sorted[sorted.length-1];
+                    for (let i = 0; i < sorted.length - 1; i++) {
+                        if (sorted[i].position <= pos && pos <= sorted[i+1].position) {
+                            left = sorted[i];
+                            right = sorted[i+1];
+                            break;
+                        }
+                    }
+                    const t = (pos - left.position) / (right.position - left.position + 0.0001);
+                    return left.color.map((c, i) => Math.round(c * (1-t) + right.color[i] * t));
+                };
+                
+                const updateData = () => {
+                    widget.value = JSON.stringify({ stops });
+                };
+                
+                const updateUI = () => {
+                    gradientBar.style.background = genGradientCSS(stops);
+                    
+                    // Remove old stops
+                    barContainer.querySelectorAll(".rc-gradient-stop").forEach(el => el.remove());
+                    
+                    // Create stop elements
+                    stops.forEach((stop, idx) => {
+                        const stopEl = document.createElement("div");
+                        stopEl.className = "rc-gradient-stop" + (idx === selectedStop ? " selected" : "");
+                        stopEl.style.left = `${stop.position * 100}%`;
+                        const [r, g, b, a] = stop.color;
+                        stopEl.style.backgroundColor = `rgba(${r},${g},${b},${a/255})`;
+                        
+                        stopEl.onclick = (e) => {
+                            e.stopPropagation();
+                            selectedStop = idx;
+                            updateUI();
+                        };
+                        
+                        let dragging = false;
+                        stopEl.onmousedown = (e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            dragging = true;
+                            selectedStop = idx;
+                            updateUI();
+                        };
+                        
+                        const onMouseMove = (e) => {
+                            if (!dragging) return;
+                            const rect = barContainer.getBoundingClientRect();
+                            let pos = (e.clientX - rect.left) / rect.width;
+                            pos = Math.max(0, Math.min(1, pos));
+                            stops[idx].position = pos;
+                            updateUI();
+                            updateData();
+                        };
+                        
+                        const onMouseUp = () => {
+                            if (dragging) {
+                                dragging = false;
+                                stops.sort((a, b) => a.position - b.position);
+                                selectedStop = stops.indexOf(stop);
+                                updateUI();
+                            }
+                        };
+                        
+                        document.addEventListener("mousemove", onMouseMove);
+                        document.addEventListener("mouseup", onMouseUp);
+                        
+                        barContainer.appendChild(stopEl);
+                    });
+                    
+                    // Update controls
+                    const curr = stops[selectedStop];
+                    posSlider.value = curr.position;
+                    posNumber.value = curr.position.toFixed(3);
+                    const [r, g, b, a] = curr.color;
+                    colorPicker.value = `#${r.toString(16).padStart(2,'0')}${g.toString(16).padStart(2,'0')}${b.toString(16).padStart(2,'0')}`;
+                    alphaSlider.value = a;
+                    alphaNumber.value = a;
+                };
+                
+                // Bar click to add stop
+                barContainer.onclick = (e) => {
+                    if (e.target === barContainer || e.target === gradientBar) {
+                        const rect = barContainer.getBoundingClientRect();
+                        const pos = (e.clientX - rect.left) / rect.width;
+                        stops.push({ position: pos, color: interpolateColor(pos) });
+                        stops.sort((a, b) => a.position - b.position);
+                        selectedStop = stops.findIndex(s => s.position === pos);
+                        updateUI();
+                        updateData();
+                    }
+                };
+                
+                // Event listeners
+                posSlider.oninput = posNumber.oninput = () => {
+                    const pos = parseFloat(posSlider.value);
+                    posNumber.value = pos.toFixed(3);
+                    posSlider.value = pos;
+                    stops[selectedStop].position = pos;
+                    stops.sort((a, b) => a.position - b.position);
+                    selectedStop = stops.findIndex(s => s.position === pos);
+                    updateUI();
+                    updateData();
+                };
+                
+                colorPicker.oninput = () => {
+                    const hex = colorPicker.value;
+                    const r = parseInt(hex.substr(1, 2), 16);
+                    const g = parseInt(hex.substr(3, 2), 16);
+                    const b = parseInt(hex.substr(5, 2), 16);
+                    stops[selectedStop].color = [r, g, b, stops[selectedStop].color[3]];
+                    updateUI();
+                    updateData();
+                };
+                
+                alphaSlider.oninput = alphaNumber.oninput = () => {
+                    const a = parseInt(alphaSlider.value);
+                    alphaNumber.value = a;
+                    alphaSlider.value = a;
+                    stops[selectedStop].color[3] = a;
+                    updateUI();
+                    updateData();
+                };
+                
+                deleteBtn.onclick = () => {
+                    if (stops.length <= 2) return;
+                    stops.splice(selectedStop, 1);
+                    selectedStop = Math.max(0, selectedStop - 1);
+                    updateUI();
+                    updateData();
+                };
+                
+                reverseBtn.onclick = () => {
+                    stops.forEach(s => s.position = 1 - s.position);
+                    stops.sort((a, b) => a.position - b.position);
+                    updateUI();
+                    updateData();
+                };
+                
+                // Create presets
+                PRESETS.forEach(preset => {
+                    const presetEl = document.createElement("div");
+                    presetEl.className = "rc-preset";
+                    presetEl.title = app.getTranslation ? app.getTranslation(preset.name) : preset.name;
+                    presetEl.style.background = genGradientCSS(preset.stops);
+                    presetEl.onclick = () => {
+                        stops = JSON.parse(JSON.stringify(preset.stops));
+                        selectedStop = 0;
+                        updateUI();
+                        updateData();
+                    };
+                    presetsContainer.appendChild(presetEl);
+                });
+                
+                updateUI();
+                
+                // Add custom HTML widget
+                const htmlWidget = this.addDOMWidget("gradient_editor", "div", container);
+                htmlWidget.computeSize = function(width) {
+                    return [width, 230];
+                };
+                
+                return ret;
             };
         }
     }

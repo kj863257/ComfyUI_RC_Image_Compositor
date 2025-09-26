@@ -252,5 +252,50 @@
         "tooltip": "羽化/平滑蒙版边缘"
       }
     }
+  },
+  "RC_GradientGenerator": {
+    "display_name": "RC 渐变生成器",
+    "inputs": {
+      "gradient_data": {
+        "name": "渐变数据",
+        "tooltip": "渐变色标数据（JSON格式）"
+      },
+      "gradient_type": {
+        "name": "渐变类型",
+        "tooltip": "渐变类型：\n- linear: 线性渐变\n- radial: 径向渐变（从中心向外）\n- angular: 角度渐变（圆锥形）\n- reflected: 反射线性渐变"
+      },
+      "angle": {
+        "name": "角度",
+        "tooltip": "渐变角度（度数，用于线性和反射类型）"
+      },
+      "size_mode": {
+        "name": "尺寸模式",
+        "tooltip": "尺寸模式：\n- from_image: 使用参考图片尺寸\n- custom: 指定自定义宽度和高度"
+      },
+      "width": {
+        "name": "宽度",
+        "tooltip": "图片宽度（像素，用于自定义模式）"
+      },
+      "height": {
+        "name": "高度",
+        "tooltip": "图片高度（像素，用于自定义模式）"
+      },
+      "center_x": {
+        "name": "中心X",
+        "tooltip": "水平中心位置（0-1，用于径向和角度渐变）"
+      },
+      "center_y": {
+        "name": "中心Y",
+        "tooltip": "垂直中心位置（0-1，用于径向和角度渐变）"
+      },
+      "scale": {
+        "name": "缩放",
+        "tooltip": "渐变缩放/缩放因子"
+      },
+      "reference_image": {
+        "name": "参考图片",
+        "tooltip": "参考图片（当尺寸模式为from_image时使用）"
+      }
+    }
   }
 }
