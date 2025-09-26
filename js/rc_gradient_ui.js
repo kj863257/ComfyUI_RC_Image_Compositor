@@ -199,34 +199,15 @@ app.registerExtension({
                 const widget = this.widgets.find(w => w.name === "gradient_data");
                 if (!widget) return ret;
                 
-                // 获取国际化文本，优先使用ComfyUI的国际化系统
+                // 获取国际化文本，使用ComfyUI的国际化系统
                 const getI18nText = (key, defaultText) => {
-                    if (app.getTranslation) {
+                    if (app?.getTranslation) {
                         // 使用ComfyUI的国际化系统
-                        return app.getTranslation(key) || defaultText;
-                    } else {
-                        // 备用方案：检查localStorage中的语言设置
-                        const locale = localStorage.getItem("Comfy.Settings.Locale") || "en";
-                        const i18n = {
-                            en: {
-                                "Pos": "Pos",
-                                "Color": "Color", 
-                                "Alpha": "Alpha",
-                                "Delete": "Delete",
-                                "Reverse": "Reverse",
-                                "Presets": "Presets"
-                            },
-                            zh: {
-                                "Pos": "位置",
-                                "Color": "颜色",
-                                "Alpha": "透明",
-                                "Delete": "删除",
-                                "Reverse": "反转",
-                                "Presets": "预设"
-                            }
-                        };
-                        return i18n[locale]?.[key] || defaultText;
+                        // 传递完整的路径以获取翻译
+                        const translation = app.getTranslation(key);
+                        return translation !== key ? translation : defaultText; // 如果没有翻译，返回默认文本
                     }
+                    return defaultText;
                 };
                 
                 // Hide original widget
@@ -267,11 +248,11 @@ app.registerExtension({
                 const reverseLabel = getI18nText('Reverse', 'Reverse');
                 const presetsLabel = getI18nText('Presets', 'Presets');
                 
-                // Controls - create elements with translated text
+                // Controls - create elements with placeholders first
                 const posRow = document.createElement("div");
                 posRow.className = "rc-control-row";
                 posRow.innerHTML = `
-                    <span class="rc-control-label">${posLabel}:</span>
+                    <span class="rc-control-label">Pos:</span>
                     <input type="range" class="rc-control-input rc-control-slider pos-slider" min="0" max="1" step="0.001" value="0">
                     <input type="number" class="rc-control-input rc-control-number pos-number" min="0" max="1" step="0.01" value="0">
                 `;
@@ -279,9 +260,9 @@ app.registerExtension({
                 const colorRow = document.createElement("div");
                 colorRow.className = "rc-control-row";
                 colorRow.innerHTML = `
-                    <span class="rc-control-label">${colorLabel}:</span>
+                    <span class="rc-control-label">Color:</span>
                     <input type="color" class="rc-color-picker" value="#000000">
-                    <span class="rc-control-label" style="min-width:38px;margin-left:6px">${alphaLabel}:</span>
+                    <span class="rc-control-label" style="min-width:38px;margin-left:6px">Alpha:</span>
                     <input type="range" class="rc-control-input rc-control-slider alpha-slider" min="0" max="255" step="1" value="255">
                     <input type="number" class="rc-control-input rc-control-number alpha-number" min="0" max="255" step="1" value="255">
                 `;
@@ -289,14 +270,14 @@ app.registerExtension({
                 const buttonRow = document.createElement("div");
                 buttonRow.className = "rc-control-row";
                 buttonRow.innerHTML = `
-                    <button class="rc-btn danger delete-btn">${deleteLabel}</button>
-                    <button class="rc-btn reverse-btn">${reverseLabel}</button>
+                    <button class="rc-btn danger delete-btn">Delete</button>
+                    <button class="rc-btn reverse-btn">Reverse</button>
                 `;
                 
                 const presetsRow = document.createElement("div");
                 presetsRow.className = "rc-control-row";
                 presetsRow.innerHTML = `
-                    <span class="rc-control-label">${presetsLabel}:</span>
+                    <span class="rc-control-label">Presets:</span>
                 `;
                 
                 const presetsContainer = document.createElement("div");
@@ -315,6 +296,21 @@ app.registerExtension({
                 const alphaNumber = container.querySelector(".alpha-number");
                 const deleteBtn = container.querySelector(".delete-btn");
                 const reverseBtn = container.querySelector(".reverse-btn");
+                
+                // Apply translations after elements are added to DOM
+                const posLabel = getI18nText('Pos', 'Pos');
+                const colorLabel = getI18nText('Color', 'Color');
+                const alphaLabel = getI18nText('Alpha', 'Alpha');
+                const deleteLabel = getI18nText('Delete', 'Delete');
+                const reverseLabel = getI18nText('Reverse', 'Reverse');
+                const presetsLabel = getI18nText('Presets', 'Presets');
+                
+                posRow.querySelector('.rc-control-label').textContent = posLabel + ':';
+                colorRow.querySelector('.rc-control-label').textContent = colorLabel + ':';
+                colorRow.querySelectorAll('.rc-control-label')[1].textContent = alphaLabel + ':';
+                deleteBtn.textContent = deleteLabel;
+                reverseBtn.textContent = reverseLabel;
+                presetsRow.querySelector('.rc-control-label').textContent = presetsLabel + ':';
                 
                 // Helper functions
                 const genGradientCSS = (stops) => {
