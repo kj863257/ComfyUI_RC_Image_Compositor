@@ -21,6 +21,15 @@ const styles = `
     cursor: crosshair;
 }
 
+.rc-gradient-bar-container {
+    position: relative;
+    background-image: 
+        linear-gradient(45deg, #ccc 25%, transparent 25%, transparent 75%, #ccc 75%),
+        linear-gradient(45deg, #ccc 25%, #eee 25%, #eee 75%, #ccc 75%);
+    background-size: 12px 12px;
+    background-position: 0 0, 6px 6px;
+}
+
 .rc-gradient-bar {
     width: 100%;
     height: 100%;
@@ -76,6 +85,13 @@ const styles = `
 .rc-control-slider {
     flex: 1;
     min-width: 0;
+    height: 18px;
+    margin: 0;
+    padding: 0;
+}
+
+.alpha-slider {
+    flex: 1.2;  /* 让透明度滑块稍微宽一些 */
 }
 
 .rc-control-number {
@@ -199,13 +215,36 @@ app.registerExtension({
                 const widget = this.widgets.find(w => w.name === "gradient_data");
                 if (!widget) return ret;
                 
-                // 获取国际化文本，使用ComfyUI的国际化系统
+                // 基于浏览器语言的国际化函数
                 const getI18nText = (key, defaultText) => {
-                    if (app?.getTranslation) {
-                        // 使用ComfyUI的国际化系统
-                        // 传递完整的路径以获取翻译
-                        const translation = app.getTranslation(key);
-                        return translation !== key ? translation : defaultText; // 如果没有翻译，返回默认文本
+                    // 获取浏览器语言或ComfyUI设置
+                    let lang = 'en'; // 默认语言
+                    
+                    // 尝试从ComfyUI设置获取语言
+                    if (typeof localStorage !== 'undefined') {
+                        const comfyLang = localStorage.getItem("Comfy.Settings.Locale");
+                        if (comfyLang) {
+                            lang = comfyLang.toLowerCase().substring(0, 2); // 获取语言代码前两位
+                        } else {
+                            // 如果没有ComfyUI设置，则使用浏览器语言
+                            lang = (navigator.language || navigator.userLanguage || 'en').toLowerCase().substring(0, 2);
+                        }
+                    }
+                    
+                    // 翻译映射
+                    const translations = {
+                        'Pos': { en: 'Pos', zh: '位置', 'zh-cn': '位置' },
+                        'Color': { en: 'Color', zh: '颜色', 'zh-cn': '颜色' },
+                        'Alpha': { en: 'Alpha', zh: '透明', 'zh-cn': '透明' },
+                        'Delete': { en: 'Delete', zh: '删除', 'zh-cn': '删除' },
+                        'Reverse': { en: 'Reverse', zh: '反转', 'zh-cn': '反转' },
+                        'Presets': { en: 'Presets', zh: '预设', 'zh-cn': '预设' }
+                    };
+                    
+                    const langTranslations = translations[key];
+                    if (langTranslations) {
+                        // 优先使用完整语言代码，否则使用语言前缀
+                        return langTranslations[lang] || langTranslations[lang.substring(0, 2)] || defaultText;
                     }
                     return defaultText;
                 };
@@ -252,7 +291,7 @@ app.registerExtension({
                 const posRow = document.createElement("div");
                 posRow.className = "rc-control-row";
                 posRow.innerHTML = `
-                    <span class="rc-control-label">Pos:</span>
+                    <span class="rc-control-label" data-i18n-key="Pos">Pos:</span>
                     <input type="range" class="rc-control-input rc-control-slider pos-slider" min="0" max="1" step="0.001" value="0">
                     <input type="number" class="rc-control-input rc-control-number pos-number" min="0" max="1" step="0.01" value="0">
                 `;
@@ -260,9 +299,14 @@ app.registerExtension({
                 const colorRow = document.createElement("div");
                 colorRow.className = "rc-control-row";
                 colorRow.innerHTML = `
-                    <span class="rc-control-label">Color:</span>
+                    <span class="rc-control-label" data-i18n-key="Color">Color:</span>
                     <input type="color" class="rc-color-picker" value="#000000">
-                    <span class="rc-control-label" style="min-width:38px;margin-left:6px">Alpha:</span>
+                `;
+                
+                const alphaRow = document.createElement("div");
+                alphaRow.className = "rc-control-row";
+                alphaRow.innerHTML = `
+                    <span class="rc-control-label" data-i18n-key="Alpha">Alpha:</span>
                     <input type="range" class="rc-control-input rc-control-slider alpha-slider" min="0" max="255" step="1" value="255">
                     <input type="number" class="rc-control-input rc-control-number alpha-number" min="0" max="255" step="1" value="255">
                 `;
@@ -270,14 +314,14 @@ app.registerExtension({
                 const buttonRow = document.createElement("div");
                 buttonRow.className = "rc-control-row";
                 buttonRow.innerHTML = `
-                    <button class="rc-btn danger delete-btn">Delete</button>
-                    <button class="rc-btn reverse-btn">Reverse</button>
+                    <button class="rc-btn danger delete-btn" data-i18n-key="Delete">Delete</button>
+                    <button class="rc-btn reverse-btn" data-i18n-key="Reverse">Reverse</button>
                 `;
                 
                 const presetsRow = document.createElement("div");
                 presetsRow.className = "rc-control-row";
                 presetsRow.innerHTML = `
-                    <span class="rc-control-label">Presets:</span>
+                    <span class="rc-control-label" data-i18n-key="Presets">Presets:</span>
                 `;
                 
                 const presetsContainer = document.createElement("div");
@@ -285,6 +329,7 @@ app.registerExtension({
                 
                 container.appendChild(posRow);
                 container.appendChild(colorRow);
+                container.appendChild(alphaRow);
                 container.appendChild(buttonRow);
                 container.appendChild(presetsRow);
                 container.appendChild(presetsContainer);
@@ -297,24 +342,35 @@ app.registerExtension({
                 const deleteBtn = container.querySelector(".delete-btn");
                 const reverseBtn = container.querySelector(".reverse-btn");
                 
-                // Apply translations after elements are added to DOM
-                const posLabel = getI18nText('Pos', 'Pos');
-                const colorLabel = getI18nText('Color', 'Color');
-                const alphaLabel = getI18nText('Alpha', 'Alpha');
-                const deleteLabel = getI18nText('Delete', 'Delete');
-                const reverseLabel = getI18nText('Reverse', 'Reverse');
-                const presetsLabel = getI18nText('Presets', 'Presets');
-                
                 posRow.querySelector('.rc-control-label').textContent = posLabel + ':';
                 colorRow.querySelector('.rc-control-label').textContent = colorLabel + ':';
-                colorRow.querySelectorAll('.rc-control-label')[1].textContent = alphaLabel + ':';
+                alphaRow.querySelector('.rc-control-label').textContent = alphaLabel + ':';
                 deleteBtn.textContent = deleteLabel;
                 reverseBtn.textContent = reverseLabel;
                 presetsRow.querySelector('.rc-control-label').textContent = presetsLabel + ':';
                 
                 // Helper functions
                 const genGradientCSS = (stops) => {
-                    const strs = stops.map(s => {
+                    if (!stops || stops.length === 0) {
+                        return 'linear-gradient(to right, rgba(0,0,0,1) 0%, rgba(255,255,255,1) 100%)';
+                    }
+                    
+                    // 确保有起始和结束点
+                    let sortedStops = [...stops].sort((a, b) => a.position - b.position);
+                    
+                    // 如果第一个停止点不是0，则从相同颜色添加一个0%的点
+                    if (sortedStops[0].position > 0) {
+                        const firstColor = sortedStops[0].color;
+                        sortedStops = [{ position: 0, color: firstColor }, ...sortedStops];
+                    }
+                    
+                    // 如果最后一个停止点不是1，则从相同颜色添加一个100%的点
+                    if (sortedStops[sortedStops.length - 1].position < 1) {
+                        const lastColor = sortedStops[sortedStops.length - 1].color;
+                        sortedStops = [...sortedStops, { position: 1, color: lastColor }];
+                    }
+                    
+                    const strs = sortedStops.map(s => {
                         const [r, g, b, a] = s.color;
                         return `rgba(${r},${g},${b},${a/255}) ${s.position*100}%`;
                     });
@@ -417,15 +473,48 @@ app.registerExtension({
                 };
                 
                 // Event listeners
-                posSlider.oninput = posNumber.oninput = () => {
-                    const pos = parseFloat(posSlider.value);
+                posSlider.oninput = () => {
+                    let pos = parseFloat(posSlider.value);
+                    // 确保值在有效范围内
+                    pos = Math.max(0, Math.min(1, pos));
                     posNumber.value = pos.toFixed(3);
                     posSlider.value = pos;
                     stops[selectedStop].position = pos;
                     stops.sort((a, b) => a.position - b.position);
-                    selectedStop = stops.findIndex(s => s.position === pos);
+                    selectedStop = stops.indexOf(stops.find(s => Math.abs(s.position - pos) < 0.001));
                     updateUI();
                     updateData();
+                };
+                
+                posNumber.oninput = () => {
+                    let pos = parseFloat(posNumber.value);
+                    if (!isNaN(pos)) {
+                        // 确保值在有效范围内
+                        pos = Math.max(0, Math.min(1, pos));
+                        posSlider.value = pos;
+                        posNumber.value = pos.toFixed(3);
+                        stops[selectedStop].position = pos;
+                        stops.sort((a, b) => a.position - b.position);
+                        selectedStop = stops.indexOf(stops.find(s => Math.abs(s.position - pos) < 0.001));
+                        updateUI();
+                        updateData();
+                    }
+                };
+                
+                // 同时处理输入框的change事件，确保值被正确应用
+                posNumber.onchange = () => {
+                    let pos = parseFloat(posNumber.value);
+                    if (!isNaN(pos)) {
+                        // 确保值在有效范围内
+                        pos = Math.max(0, Math.min(1, pos));
+                        posSlider.value = pos;
+                        posNumber.value = pos.toFixed(3);
+                        stops[selectedStop].position = pos;
+                        stops.sort((a, b) => a.position - b.position);
+                        selectedStop = stops.indexOf(stops.find(s => Math.abs(s.position - pos) < 0.001));
+                        updateUI();
+                        updateData();
+                    }
                 };
                 
                 colorPicker.oninput = () => {
@@ -438,8 +527,29 @@ app.registerExtension({
                     updateData();
                 };
                 
-                alphaSlider.oninput = alphaNumber.oninput = () => {
+                alphaSlider.oninput = () => {
                     const a = parseInt(alphaSlider.value);
+                    alphaNumber.value = a;
+                    stops[selectedStop].color[3] = a;
+                    updateUI();
+                    updateData();
+                };
+                
+                alphaNumber.oninput = () => {
+                    const a = parseInt(alphaNumber.value);
+                    if (!isNaN(a)) {
+                        alphaSlider.value = a;
+                        stops[selectedStop].color[3] = a;
+                        updateUI();
+                        updateData();
+                    }
+                };
+                
+                // 同时处理输入框的change事件，确保值被正确应用
+                alphaNumber.onchange = () => {
+                    let a = parseInt(alphaNumber.value);
+                    // 确保值在有效范围内
+                    a = Math.max(0, Math.min(255, a));
                     alphaNumber.value = a;
                     alphaSlider.value = a;
                     stops[selectedStop].color[3] = a;
