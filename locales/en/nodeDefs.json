@@ -297,5 +297,377 @@
         "tooltip": "Reference image for size (used when size_mode is from_image)"
       }
     }
+  },
+  "RC_GaussianBlur": {
+    "display_name": "RC Gaussian Blur",
+    "inputs": {
+      "image": {
+        "name": "Image"
+      },
+      "radius": {
+        "name": "Radius",
+        "tooltip": "Blur radius in pixels"
+      },
+      "method": {
+        "name": "Method",
+        "tooltip": "Blur algorithm:\\n- PIL: Fast, general purpose\\n- OpenCV: Precise, professional grade"
+      },
+      "preserve_alpha": {
+        "name": "Preserve Alpha",
+        "tooltip": "Preserve alpha channel without blurring"
+      }
+    }
+  },
+  "RC_Sharpen": {
+    "display_name": "RC Sharpen",
+    "inputs": {
+      "image": {
+        "name": "Image"
+      },
+      "strength": {
+        "name": "Strength",
+        "tooltip": "Sharpening strength (1.0 = normal, >1.0 = sharper)"
+      },
+      "method": {
+        "name": "Method",
+        "tooltip": "Sharpening method:\\n- unsharp_mask: Classic unsharp masking\\n- high_pass: High-pass filter sharpening\\n- edge_enhance: Edge enhancement sharpening"
+      },
+      "radius": {
+        "name": "Radius",
+        "tooltip": "Sharpening radius (for unsharp mask)"
+      },
+      "threshold": {
+        "name": "Threshold",
+        "tooltip": "Sharpening threshold (avoid noise amplification)"
+      }
+    }
+  },
+  "RC_HueSaturation": {
+    "display_name": "RC Hue/Saturation",
+    "inputs": {
+      "image": {
+        "name": "Image"
+      },
+      "hue_shift": {
+        "name": "Hue Shift",
+        "tooltip": "Hue shift in degrees (-180 to +180)"
+      },
+      "saturation": {
+        "name": "Saturation",
+        "tooltip": "Saturation adjustment (-100 = grayscale, +100 = double)"
+      },
+      "lightness": {
+        "name": "Lightness",
+        "tooltip": "Lightness adjustment (-100 = black, +100 = white)"
+      },
+      "colorize": {
+        "name": "Colorize",
+        "tooltip": "Colorize mode (convert to monochromatic)"
+      },
+      "colorize_hue": {
+        "name": "Colorize Hue",
+        "tooltip": "Colorize hue (only in colorize mode)"
+      },
+      "colorize_saturation": {
+        "name": "Colorize Saturation",
+        "tooltip": "Colorize saturation (only in colorize mode)"
+      },
+      "target_color": {
+        "name": "Target Color",
+        "tooltip": "Target color range:\\n- master: All colors\\n- reds: Red range\\n- yellows: Yellow range\\n- greens: Green range\\n- cyans: Cyan range\\n- blues: Blue range\\n- magentas: Magenta range"
+      }
+    }
+  },
+  "RC_CanvasPadding": {
+    "display_name": "RC Canvas Padding",
+    "inputs": {
+      "image": {
+        "name": "Image"
+      },
+      "top": {
+        "name": "Top Padding",
+        "tooltip": "Top padding in pixels"
+      },
+      "bottom": {
+        "name": "Bottom Padding",
+        "tooltip": "Bottom padding in pixels"
+      },
+      "left": {
+        "name": "Left Padding",
+        "tooltip": "Left padding in pixels"
+      },
+      "right": {
+        "name": "Right Padding",
+        "tooltip": "Right padding in pixels"
+      },
+      "fill_mode": {
+        "name": "Fill Mode",
+        "tooltip": "Fill mode:\\n- color: Fill with solid color\\n- edge: Extend edge pixels\\n- mirror: Mirror edge content\\n- transparent: Transparent fill (RGBA only)"
+      },
+      "fill_color_r": {
+        "name": "Fill Color R",
+        "tooltip": "Fill color red component"
+      },
+      "fill_color_g": {
+        "name": "Fill Color G",
+        "tooltip": "Fill color green component"
+      },
+      "fill_color_b": {
+        "name": "Fill Color B",
+        "tooltip": "Fill color blue component"
+      }
+    }
+  },
+  "RC_ImageScale": {
+    "display_name": "RC Image Scale",
+    "inputs": {
+      "image": {
+        "name": "Image"
+      },
+      "scale_method": {
+        "name": "Scale Method",
+        "tooltip": "Scale method:\\n- percentage: Scale by percentage\\n- dimensions: Exact dimensions\\n- fit_width: Fit to width (keep ratio)\\n- fit_height: Fit to height (keep ratio)\\n- fit_longest: Fit to longest side (keep ratio)\\n- fit_shortest: Fit to shortest side (keep ratio)"
+      },
+      "scale_factor": {
+        "name": "Scale Factor",
+        "tooltip": "Scale factor (for percentage mode)"
+      },
+      "width": {
+        "name": "Width",
+        "tooltip": "Target width (for dimensions/fit modes)"
+      },
+      "height": {
+        "name": "Height",
+        "tooltip": "Target height (for dimensions/fit modes)"
+      },
+      "resampling": {
+        "name": "Resampling",
+        "tooltip": "Resampling algorithm:\\n- LANCZOS: Highest quality (slow)\\n- BICUBIC: High quality\\n- BILINEAR: Medium quality\\n- NEAREST: Fastest (low quality)"
+      },
+      "keep_aspect_ratio": {
+        "name": "Keep Aspect Ratio",
+        "tooltip": "Keep aspect ratio (for dimensions mode)"
+      }
+    }
+  },
+  "RC_ImageCrop": {
+    "display_name": "RC Image Crop",
+    "inputs": {
+      "image": {
+        "name": "Image"
+      },
+      "crop_method": {
+        "name": "Crop Method",
+        "tooltip": "Crop method:\\n- manual: Manual coordinates\\n- center: Center crop to size\\n- aspect_ratio: Crop by ratio (centered)"
+      },
+      "x": {
+        "name": "X",
+        "tooltip": "Crop start X coordinate (manual mode)"
+      },
+      "y": {
+        "name": "Y",
+        "tooltip": "Crop start Y coordinate (manual mode)"
+      },
+      "width": {
+        "name": "Width",
+        "tooltip": "Crop width"
+      },
+      "height": {
+        "name": "Height",
+        "tooltip": "Crop height"
+      },
+      "aspect_width": {
+        "name": "Aspect Width",
+        "tooltip": "Width part of aspect ratio (ratio mode)"
+      },
+      "aspect_height": {
+        "name": "Aspect Height",
+        "tooltip": "Height part of aspect ratio (ratio mode)"
+      }
+    }
+  },
+  "RC_CanvasResize": {
+    "display_name": "RC Canvas Resize",
+    "inputs": {
+      "image": {
+        "name": "Image"
+      },
+      "new_width": {
+        "name": "New Width",
+        "tooltip": "New canvas width"
+      },
+      "new_height": {
+        "name": "New Height",
+        "tooltip": "New canvas height"
+      },
+      "anchor": {
+        "name": "Anchor",
+        "tooltip": "Image anchor position in new canvas:\\n- center: Center\\n- top_left: Top-left corner\\n- top_center: Top center\\n- top_right: Top-right corner\\n- middle_left: Middle left\\n- middle_right: Middle right\\n- bottom_left: Bottom-left corner\\n- bottom_center: Bottom center\\n- bottom_right: Bottom-right corner"
+      },
+      "x_offset": {
+        "name": "X Offset",
+        "tooltip": "Additional X offset (pixels)"
+      },
+      "y_offset": {
+        "name": "Y Offset",
+        "tooltip": "Additional Y offset (pixels)"
+      },
+      "background_color_r": {
+        "name": "Background Color R",
+        "tooltip": "Background color red component"
+      },
+      "background_color_g": {
+        "name": "Background Color G",
+        "tooltip": "Background color green component"
+      },
+      "background_color_b": {
+        "name": "Background Color B",
+        "tooltip": "Background color blue component"
+      }
+    }
+  },
+  "RC_OpacityAdjust": {
+    "display_name": "RC Opacity Adjust",
+    "inputs": {
+      "image": {
+        "name": "Image"
+      },
+      "opacity": {
+        "name": "Opacity",
+        "tooltip": "Opacity value (0.0=fully transparent, 1.0=fully opaque)"
+      },
+      "ensure_alpha": {
+        "name": "Ensure Alpha",
+        "tooltip": "Ensure alpha channel in output:\\n- True: Force RGBA output format\\n- False: Keep original format (RGB stays RGB)"
+      }
+    }
+  },
+  "RC_LevelsAdjust": {
+    "display_name": "RC Levels",
+    "inputs": {
+      "image": {
+        "name": "Image"
+      },
+      "input_black": {
+        "name": "Input Black",
+        "tooltip": "Input black point (0.0-0.9, raising darkens shadows)"
+      },
+      "input_white": {
+        "name": "Input White",
+        "tooltip": "Input white point (0.1-1.0, lowering brightens highlights)"
+      },
+      "gamma": {
+        "name": "Gamma",
+        "tooltip": "Gamma value (<1.0 brightens midtones, >1.0 darkens midtones)"
+      },
+      "output_black": {
+        "name": "Output Black",
+        "tooltip": "Output black point (lifts darkest areas)"
+      },
+      "output_white": {
+        "name": "Output White",
+        "tooltip": "Output white point (suppresses brightest areas)"
+      },
+      "channel": {
+        "name": "Channel",
+        "tooltip": "Adjustment channel:\\n- RGB: Adjust all channels together\\n- Red/Green/Blue: Adjust individual color channels"
+      }
+    }
+  },
+  "RC_BrightnessContrast": {
+    "display_name": "RC Brightness/Contrast",
+    "inputs": {
+      "image": {
+        "name": "Image"
+      },
+      "brightness": {
+        "name": "Brightness",
+        "tooltip": "Brightness adjustment (-100 to 100, negative=darker, positive=brighter)"
+      },
+      "contrast": {
+        "name": "Contrast",
+        "tooltip": "Contrast adjustment (-100 to 100, negative=less contrast, positive=more contrast)"
+      },
+      "method": {
+        "name": "Method",
+        "tooltip": "Adjustment algorithm:\\n- PIL: Use PIL library algorithm\\n- OpenCV: Use OpenCV algorithm, more precise"
+      }
+    }
+  },
+  "RC_ColorBalance": {
+    "display_name": "RC Color Balance",
+    "inputs": {
+      "image": {
+        "name": "Image"
+      },
+      "cyan_red": {
+        "name": "Cyan/Red",
+        "tooltip": "Cyan-Red balance (negative=cyan, positive=red)"
+      },
+      "magenta_green": {
+        "name": "Magenta/Green",
+        "tooltip": "Magenta-Green balance (negative=magenta, positive=green)"
+      },
+      "yellow_blue": {
+        "name": "Yellow/Blue",
+        "tooltip": "Yellow-Blue balance (negative=yellow, positive=blue)"
+      },
+      "tone_range": {
+        "name": "Tone Range",
+        "tooltip": "Tone range:\\n- midtones: Midtones (main adjustment area)\\n- shadows: Shadows (dark areas)\\n- highlights: Highlights (bright areas)"
+      },
+      "preserve_luminosity": {
+        "name": "Preserve Luminosity",
+        "tooltip": "Preserve luminosity:\\n- True: Keep image brightness unchanged\\n- False: Allow brightness changes"
+      }
+    }
+  },
+  "RC_ChannelMixer": {
+    "display_name": "RC Channel Mixer",
+    "inputs": {
+      "image": {
+        "name": "Image"
+      },
+      "red_from_red": {
+        "name": "Red from Red",
+        "tooltip": "Red channel contribution to red output (%)"
+      },
+      "red_from_green": {
+        "name": "Red from Green",
+        "tooltip": "Green channel contribution to red output (%)"
+      },
+      "red_from_blue": {
+        "name": "Red from Blue",
+        "tooltip": "Blue channel contribution to red output (%)"
+      },
+      "green_from_red": {
+        "name": "Green from Red",
+        "tooltip": "Red channel contribution to green output (%)"
+      },
+      "green_from_green": {
+        "name": "Green from Green",
+        "tooltip": "Green channel contribution to green output (%)"
+      },
+      "green_from_blue": {
+        "name": "Green from Blue",
+        "tooltip": "Blue channel contribution to green output (%)"
+      },
+      "blue_from_red": {
+        "name": "Blue from Red",
+        "tooltip": "Red channel contribution to blue output (%)"
+      },
+      "blue_from_green": {
+        "name": "Blue from Green",
+        "tooltip": "Green channel contribution to blue output (%)"
+      },
+      "blue_from_blue": {
+        "name": "Blue from Blue",
+        "tooltip": "Blue channel contribution to blue output (%)"
+      },
+      "monochrome": {
+        "name": "Monochrome",
+        "tooltip": "Monochrome mode:\\n- True: Output grayscale image (uses only red channel settings)\\n- False: Output color image"
+      }
+    }
   }
 }

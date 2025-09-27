@@ -80,43 +80,20 @@ class RC_GradientGenerator:
 
     def create_gradient_lut(self, stops, size=1024):
         """Create lookup table for gradient colors"""
-        lut = np.zeros((size, 4), dtype=np.float32)
+        positions = np.linspace(0.0, 1.0, size, dtype=np.float32)
+        stop_positions = np.array([stop["position"] for stop in stops], dtype=np.float32)
+        stop_positions = np.clip(stop_positions, 0.0, 1.0)
+        stop_colors = np.array([stop["color"] for stop in stops], dtype=np.float32) / 255.0
 
-        for i in range(size):
-            position = i / (size - 1)
+        unique_positions, unique_indices = np.unique(stop_positions, return_index=True)
+        stop_colors = stop_colors[unique_indices]
 
-            # Handle positions before first stop
-            if position <= stops[0]["position"]:
-                color = np.array(stops[0]["color"], dtype=np.float32) / 255.0
-                lut[i] = color
-                continue
+        if unique_positions.size == 1:
+            return np.tile(stop_colors[0], (size, 1))
 
-            # Handle positions after last stop - use last stop color
-            if position >= stops[-1]["position"]:
-                color = np.array(stops[-1]["color"], dtype=np.float32) / 255.0
-                lut[i] = color
-                continue
-
-            # Find surrounding stops for interpolation
-            left_stop = stops[0]
-            right_stop = stops[-1]
-
-            for j in range(len(stops) - 1):
-                if stops[j]["position"] <= position <= stops[j + 1]["position"]:
-                    left_stop = stops[j]
-                    right_stop = stops[j + 1]
-                    break
-
-            # Interpolate between stops
-            if right_stop["position"] == left_stop["position"]:
-                t = 0.0
-            else:
-                t = (position - left_stop["position"]) / (right_stop["position"] - left_stop["position"])
-
-            left_color = np.array(left_stop["color"], dtype=np.float32) / 255.0
-            right_color = np.array(right_stop["color"], dtype=np.float32) / 255.0
-
-            lut[i] = left_color * (1 - t) + right_color * t
+        lut = np.empty((size, 4), dtype=np.float32)
+        for channel in range(4):
+            lut[:, channel] = np.interp(positions, unique_positions, stop_colors[:, channel])
 
         return lut
 

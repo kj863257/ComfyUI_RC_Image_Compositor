@@ -2,7 +2,6 @@ import torch
 import numpy as np
 from PIL import Image, ImageFilter, ImageEnhance
 import cv2
-import colorsys
 
 
 class RC_GaussianBlur:
@@ -329,17 +328,16 @@ class RC_HueSaturation:
         else:
             rgb = img
 
-        # Convert RGB to HSV for processing
+        # Convert RGB to HSV using OpenCV for vectorized processing
         rgb_float = rgb.astype(np.float32) / 255.0
-        hsv = np.zeros_like(rgb_float)
+        hsv = cv2.cvtColor(rgb_float, cv2.COLOR_RGB2HSV).astype(np.float32)
 
-        for i in range(rgb.shape[0]):
-            for j in range(rgb.shape[1]):
-                h, s, v = colorsys.rgb_to_hsv(rgb_float[i, j, 0], rgb_float[i, j, 1], rgb_float[i, j, 2])
-                hsv[i, j] = [h, s, v]
+        # OpenCV returns hue in degrees (0-360) for float32, saturation/value in 0-1
+        hue = hsv[:, :, 0] / 360.0
+        sat = hsv[:, :, 1]
+        val = hsv[:, :, 2]
 
-        # Convert hue to degrees for easier processing
-        hue_degrees = hsv[:, :, 0] * 360.0
+        hue_degrees = hue * 360.0
 
         # Create mask for target color
         if target_color != "master":
@@ -348,56 +346,44 @@ class RC_HueSaturation:
             color_mask = np.ones_like(hue_degrees)
 
         if colorize:
-            # Colorize mode: convert to grayscale then apply single color
-            # Convert to lightness
-            lightness_values = np.dot(rgb_float, [0.299, 0.587, 0.114])
-
-            # Apply new hue and saturation
-            new_h = colorize_hue / 360.0
-            new_s = colorize_saturation / 100.0
-
-            result_hsv = np.stack([
-                np.full_like(lightness_values, new_h),
-                np.full_like(lightness_values, new_s),
-                lightness_values
-            ], axis=2)
+            lightness_values = np.dot(rgb_float, [0.299, 0.587, 0.114]).astype(np.float32)
+            result_h = np.full_like(lightness_values, colorize_hue / 360.0)
+            result_s = np.full_like(lightness_values, colorize_saturation / 100.0)
+            result_v = lightness_values
         else:
-            # Normal HSL adjustment
-            result_hsv = hsv.copy()
+            result_h = hue.copy()
+            result_s = sat.copy()
+            result_v = val.copy()
 
-            # Apply hue shift
             if hue_shift != 0:
-                hue_shift_norm = hue_shift / 360.0
-                new_hue = (hsv[:, :, 0] + hue_shift_norm) % 1.0
-                result_hsv[:, :, 0] = hsv[:, :, 0] * (1 - color_mask) + new_hue * color_mask
+                hue_shift_norm = (hue_shift / 360.0) % 1.0
+                new_hue = (hue + hue_shift_norm) % 1.0
+                result_h = hue * (1 - color_mask) + new_hue * color_mask
 
-            # Apply saturation adjustment
             if saturation != 0:
                 sat_factor = (saturation + 100.0) / 100.0
-                new_sat = np.clip(hsv[:, :, 1] * sat_factor, 0, 1)
-                result_hsv[:, :, 1] = hsv[:, :, 1] * (1 - color_mask) + new_sat * color_mask
+                new_sat = np.clip(sat * sat_factor, 0.0, 1.0)
+                result_s = sat * (1 - color_mask) + new_sat * color_mask
 
-            # Apply lightness adjustment
             if lightness != 0:
                 light_factor = lightness / 100.0
-                if light_factor > 0:
-                    # Brighten
-                    new_val = hsv[:, :, 2] + (1.0 - hsv[:, :, 2]) * light_factor
-                else:
-                    # Darken
-                    new_val = hsv[:, :, 2] * (1.0 + light_factor)
-                new_val = np.clip(new_val, 0, 1)
-                result_hsv[:, :, 2] = hsv[:, :, 2] * (1 - color_mask) + new_val * color_mask
+                brighter = light_factor > 0
+                new_val = np.where(
+                    brighter,
+                    val + (1.0 - val) * light_factor,
+                    val * (1.0 + light_factor)
+                )
+                new_val = np.clip(new_val, 0.0, 1.0)
+                result_v = val * (1 - color_mask) + new_val * color_mask
 
-        # Convert back to RGB
-        result_rgb = np.zeros_like(rgb_float)
-        for i in range(rgb.shape[0]):
-            for j in range(rgb.shape[1]):
-                h, s, v = result_hsv[i, j]
-                r, g, b = colorsys.hsv_to_rgb(h, s, v)
-                result_rgb[i, j] = [r, g, b]
+        hsv_adjusted = np.stack([
+            np.clip(result_h * 360.0, 0.0, 360.0),
+            np.clip(result_s, 0.0, 1.0),
+            np.clip(result_v, 0.0, 1.0)
+        ], axis=2).astype(np.float32)
 
-        result_rgb = np.clip(result_rgb * 255, 0, 255).astype(np.uint8)
+        result_rgb = cv2.cvtColor(hsv_adjusted, cv2.COLOR_HSV2RGB)
+        result_rgb = np.clip(result_rgb * 255.0, 0, 255).astype(np.uint8)
 
         # Reassemble with alpha if needed
         if has_alpha:

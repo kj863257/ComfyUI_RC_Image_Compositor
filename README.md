@@ -22,7 +22,7 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 ### 🔧 **Professional Filters & Adjustments**
 - **Gaussian Blur** - Professional-grade blur effect with PIL/OpenCV algorithm selection
 - **Unsharp Mask Sharpening** - Multiple sharpening algorithms
-- **Hue/Saturation Adjustment** - Photoshop-like targeted color editing
+- **Hue/Saturation Adjustment** - Photoshop-like targeted color editing with efficient batch processing
 - **Opacity Control** - Precise transparency adjustment with alpha channel support
 - **Levels Adjustment** - Input/output levels with gamma correction
 - **Brightness/Contrast** - Professional brightness and contrast control
@@ -37,10 +37,10 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 
 ### 🎞️ **Channel Operations**
 - **Channel Extractor** - Extract RGB channels or luminance as grayscale or mask, commonly used for matting workflows
-- **Mask Apply** - Use mask to control image transparency, achieving matting effects
+- **Mask Apply** - Use mask to control image transparency, achieving matting effects with smooth feathering
 
 ### 🌈 **Gradient Generation**
-- **Gradient Generator** - Create gradient images with transparency support and multiple color stops
+- **Gradient Generator** - Create gradient images with transparency support and multiple color stops, computed with high-efficiency lookup tables
 
 ---
 
@@ -85,10 +85,10 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 
 ### **RC/Channel** - Channel & Mask Operations
 - `RC Channel Extractor` - Extract RGB channels or luminance as grayscale or mask, commonly used for matting workflows
-- `RC Mask Apply` - Use mask to control image transparency, achieving matting effects
+- `RC Mask Apply` - Use mask to control image transparency, with efficient feathering for smooth edges
 
 ### **RC/Generate** - Generate Operations
-- `RC Gradient Generator` - Create gradient images with transparency support and multiple color stops
+- `RC Gradient Generator` - Create gradient images with transparency support and multiple color stops via lookup-table acceleration
 
 ---
 
@@ -178,7 +178,7 @@ Layer effects automatically expand the canvas when effects exceed original bound
 - **🌐 Bilingual Support**: Complete Chinese/English interface and documentation
 - **🔧 Professional Grade**: Built for production workflows with auto-canvas expansion
 - **📱 User Friendly**: Detailed tooltips explain every parameter and blend mode
-- **🚀 High Performance**: Optimized algorithms with multiple implementation choices
+- **🚀 High Performance**: Vectorized algorithms (NumPy/OpenCV/PIL) keep large images responsive
 - **🛠️ Extensible**: Clean modular architecture for easy customization
 
 ---

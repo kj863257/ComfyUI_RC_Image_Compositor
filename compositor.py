@@ -3,36 +3,75 @@ import numpy as np
 from PIL import Image, ImageOps
 import os
 import folder_paths
-import colorsys
-from typing import Optional
 
 
-def rgb_to_hsl_batch(rgb):
-    """Convert RGB batch to HSL batch"""
-    r, g, b = rgb[:, :, 0], rgb[:, :, 1], rgb[:, :, 2]
-    h = np.zeros_like(r)
-    s = np.zeros_like(r)
-    l = np.zeros_like(r)
+def rgb_to_hsl_batch(rgb: np.ndarray) -> np.ndarray:
+    """Convert RGB image array in [0,1] to HSL (matching colorsys.rgb_to_hls)."""
+    rgb = np.clip(rgb.astype(np.float32), 0.0, 1.0)
+    r, g, b = rgb[..., 0], rgb[..., 1], rgb[..., 2]
 
-    for i in range(rgb.shape[0]):
-        for j in range(rgb.shape[1]):
-            h[i, j], l[i, j], s[i, j] = colorsys.rgb_to_hls(r[i, j], g[i, j], b[i, j])
+    maxc = np.max(rgb, axis=2)
+    minc = np.min(rgb, axis=2)
+    l = (maxc + minc) * 0.5
+    delta = maxc - minc
+
+    s = np.zeros_like(l)
+    non_zero = delta > 1e-12
+    light_mask = (l <= 0.5) & non_zero
+    s[light_mask] = delta[light_mask] / (maxc[light_mask] + minc[light_mask])
+    heavy_mask = (l > 0.5) & non_zero
+    s[heavy_mask] = delta[heavy_mask] / (2.0 - maxc[heavy_mask] - minc[heavy_mask])
+
+    h = np.zeros_like(l)
+    if np.any(non_zero):
+        delta_safe = np.where(non_zero, delta, 1.0)
+        idx_r = non_zero & (maxc == r)
+        idx_g = non_zero & (maxc == g)
+        idx_b = non_zero & (maxc == b)
+
+        h[idx_r] = (g[idx_r] - b[idx_r]) / delta_safe[idx_r]
+        h[idx_g] = 2.0 + (b[idx_g] - r[idx_g]) / delta_safe[idx_g]
+        h[idx_b] = 4.0 + (r[idx_b] - g[idx_b]) / delta_safe[idx_b]
+
+        h = (h / 6.0) % 1.0
 
     return np.stack([h, s, l], axis=2)
 
 
-def hsl_to_rgb_batch(hsl):
-    """Convert HSL batch to RGB batch"""
-    h, s, l = hsl[:, :, 0], hsl[:, :, 1], hsl[:, :, 2]
-    r = np.zeros_like(h)
-    g = np.zeros_like(h)
-    b = np.zeros_like(h)
+def hsl_to_rgb_batch(hsl: np.ndarray) -> np.ndarray:
+    """Convert HSL image array (as produced by rgb_to_hsl_batch) back to RGB in [0,1]."""
+    hsl = np.clip(hsl.astype(np.float32), 0.0, 1.0)
+    h, s, l = hsl[..., 0], hsl[..., 1], hsl[..., 2]
 
-    for i in range(hsl.shape[0]):
-        for j in range(hsl.shape[1]):
-            r[i, j], g[i, j], b[i, j] = colorsys.hls_to_rgb(h[i, j], l[i, j], s[i, j])
+    rgb = np.zeros_like(hsl)
 
-    return np.stack([r, g, b], axis=2)
+    q = np.where(l < 0.5, l * (1 + s), l + s - l * s)
+    p = 2 * l - q
+
+    def hue_to_rgb(p_channel, q_channel, t):
+        t = (t + 1.0) % 1.0
+        result = np.empty_like(t)
+        cond = t < 1/6
+        result[cond] = p_channel[cond] + (q_channel[cond] - p_channel[cond]) * 6.0 * t[cond]
+        cond = (t >= 1/6) & (t < 0.5)
+        result[cond] = q_channel[cond]
+        cond = (t >= 0.5) & (t < 2/3)
+        result[cond] = p_channel[cond] + (q_channel[cond] - p_channel[cond]) * (2/3 - t[cond]) * 6.0
+        cond = t >= 2/3
+        result[cond] = p_channel[cond]
+        return result
+
+    mask = s < 1e-12
+    if np.any(~mask):
+        r = hue_to_rgb(p[~mask], q[~mask], h[~mask] + 1/3)
+        g = hue_to_rgb(p[~mask], q[~mask], h[~mask])
+        b = hue_to_rgb(p[~mask], q[~mask], h[~mask] - 1/3)
+        rgb[~mask] = np.stack([r, g, b], axis=1)
+
+    if np.any(mask):
+        rgb[mask] = np.stack([l[mask], l[mask], l[mask]], axis=1)
+
+    return np.clip(rgb, 0.0, 1.0)
 
 class RC_ImageCompositor:
     """RC Image Compositor: Photoshop-style blend modes, precise positioning, and flexible scaling."""

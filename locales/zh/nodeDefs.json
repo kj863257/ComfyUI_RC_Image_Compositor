@@ -297,5 +297,377 @@
         "tooltip": "参考图片（当尺寸模式为from_image时使用）"
       }
     }
+  },
+  "RC_GaussianBlur": {
+    "display_name": "RC 高斯模糊",
+    "inputs": {
+      "image": {
+        "name": "图像"
+      },
+      "radius": {
+        "name": "半径",
+        "tooltip": "模糊半径（像素）"
+      },
+      "method": {
+        "name": "算法",
+        "tooltip": "模糊算法：\\n- PIL：快速、通用\\n- OpenCV：精确、专业级"
+      },
+      "preserve_alpha": {
+        "name": "保留Alpha",
+        "tooltip": "是否保持 Alpha 通道不参与模糊"
+      }
+    }
+  },
+  "RC_Sharpen": {
+    "display_name": "RC 锐化",
+    "inputs": {
+      "image": {
+        "name": "图像"
+      },
+      "strength": {
+        "name": "强度",
+        "tooltip": "锐化强度（1.0=标准，>1.0 更锐利）"
+      },
+      "method": {
+        "name": "方法",
+        "tooltip": "锐化方式：\\n- unsharp_mask：传统反锐化蒙版\\n- high_pass：高通滤波锐化\\n- edge_enhance：边缘增强锐化"
+      },
+      "radius": {
+        "name": "半径",
+        "tooltip": "锐化半径（用于反锐化蒙版）"
+      },
+      "threshold": {
+        "name": "阈值",
+        "tooltip": "锐化阈值（避免放大噪点）"
+      }
+    }
+  },
+  "RC_HueSaturation": {
+    "display_name": "RC 色相/饱和度",
+    "inputs": {
+      "image": {
+        "name": "图像"
+      },
+      "hue_shift": {
+        "name": "色相偏移",
+        "tooltip": "色相偏移角度（-180 至 +180）"
+      },
+      "saturation": {
+        "name": "饱和度",
+        "tooltip": "饱和度调整（-100=灰度，+100=翻倍）"
+      },
+      "lightness": {
+        "name": "明度",
+        "tooltip": "明度调整（-100=全黑，+100=全白）"
+      },
+      "colorize": {
+        "name": "着色模式",
+        "tooltip": "着色模式（转换为单色调）"
+      },
+      "colorize_hue": {
+        "name": "着色色相",
+        "tooltip": "着色模式下使用的色相"
+      },
+      "colorize_saturation": {
+        "name": "着色饱和度",
+        "tooltip": "着色模式下使用的饱和度"
+      },
+      "target_color": {
+        "name": "目标色域",
+        "tooltip": "目标色域：\\n- master：全局\\n- reds：红色范围\\n- yellows：黄色范围\\n- greens：绿色范围\\n- cyans：青色范围\\n- blues：蓝色范围\\n- magentas：洋红范围"
+      }
+    }
+  },
+  "RC_CanvasPadding": {
+    "display_name": "RC 画布留白",
+    "inputs": {
+      "image": {
+        "name": "图像"
+      },
+      "top": {
+        "name": "上边距",
+        "tooltip": "上侧留白像素"
+      },
+      "bottom": {
+        "name": "下边距",
+        "tooltip": "下侧留白像素"
+      },
+      "left": {
+        "name": "左边距",
+        "tooltip": "左侧留白像素"
+      },
+      "right": {
+        "name": "右边距",
+        "tooltip": "右侧留白像素"
+      },
+      "fill_mode": {
+        "name": "填充模式",
+        "tooltip": "填充模式：\\n- color：纯色填充\\n- edge：延伸边缘像素\\n- mirror：镜像边缘内容\\n- transparent：透明填充（仅 RGBA）"
+      },
+      "fill_color_r": {
+        "name": "填充红",
+        "tooltip": "填充颜色红色分量"
+      },
+      "fill_color_g": {
+        "name": "填充绿",
+        "tooltip": "填充颜色绿色分量"
+      },
+      "fill_color_b": {
+        "name": "填充蓝",
+        "tooltip": "填充颜色蓝色分量"
+      }
+    }
+  },
+  "RC_ImageScale": {
+    "display_name": "RC 图像缩放",
+    "inputs": {
+      "image": {
+        "name": "图像"
+      },
+      "scale_method": {
+        "name": "缩放模式",
+        "tooltip": "缩放模式：\\n- percentage：按百分比缩放\\n- dimensions：指定尺寸\\n- fit_width：适配宽度（保持比例）\\n- fit_height：适配高度（保持比例）\\n- fit_longest：适配最长边（保持比例）\\n- fit_shortest：适配最短边（保持比例）"
+      },
+      "scale_factor": {
+        "name": "缩放系数",
+        "tooltip": "缩放系数（百分比模式使用）"
+      },
+      "width": {
+        "name": "目标宽度",
+        "tooltip": "目标宽度（尺寸/适配模式）"
+      },
+      "height": {
+        "name": "目标高度",
+        "tooltip": "目标高度（尺寸/适配模式）"
+      },
+      "resampling": {
+        "name": "重采样",
+        "tooltip": "重采样算法：\\n- LANCZOS：最高画质（较慢）\\n- BICUBIC：高画质\\n- BILINEAR：中等画质\\n- NEAREST：最快（画质较低）"
+      },
+      "keep_aspect_ratio": {
+        "name": "保持比例",
+        "tooltip": "尺寸模式下是否保持纵横比"
+      }
+    }
+  },
+  "RC_ImageCrop": {
+    "display_name": "RC 图像裁剪",
+    "inputs": {
+      "image": {
+        "name": "图像"
+      },
+      "crop_method": {
+        "name": "裁剪方式",
+        "tooltip": "裁剪方式：\\n- manual：手动坐标\\n- center：居中裁剪到指定尺寸\\n- aspect_ratio：按比例裁剪（居中）"
+      },
+      "x": {
+        "name": "起始X",
+        "tooltip": "裁剪起始 X 坐标（手动模式）"
+      },
+      "y": {
+        "name": "起始Y",
+        "tooltip": "裁剪起始 Y 坐标（手动模式）"
+      },
+      "width": {
+        "name": "裁剪宽度",
+        "tooltip": "裁剪宽度"
+      },
+      "height": {
+        "name": "裁剪高度",
+        "tooltip": "裁剪高度"
+      },
+      "aspect_width": {
+        "name": "比例宽",
+        "tooltip": "比例模式中的宽度份额"
+      },
+      "aspect_height": {
+        "name": "比例高",
+        "tooltip": "比例模式中的高度份额"
+      }
+    }
+  },
+  "RC_CanvasResize": {
+    "display_name": "RC 画布尺寸调整",
+    "inputs": {
+      "image": {
+        "name": "图像"
+      },
+      "new_width": {
+        "name": "画布宽度",
+        "tooltip": "新的画布宽度"
+      },
+      "new_height": {
+        "name": "画布高度",
+        "tooltip": "新的画布高度"
+      },
+      "anchor": {
+        "name": "锚点",
+        "tooltip": "新画布中的图像锚点：\\n- center：居中\\n- top_left：左上角\\n- top_center：顶部居中\\n- top_right：右上角\\n- middle_left：左中\\n- middle_right：右中\\n- bottom_left：左下角\\n- bottom_center：底部居中\\n- bottom_right：右下角"
+      },
+      "x_offset": {
+        "name": "水平偏移",
+        "tooltip": "额外水平偏移（像素）"
+      },
+      "y_offset": {
+        "name": "垂直偏移",
+        "tooltip": "额外垂直偏移（像素）"
+      },
+      "background_color_r": {
+        "name": "背景红",
+        "tooltip": "背景颜色红色分量"
+      },
+      "background_color_g": {
+        "name": "背景绿",
+        "tooltip": "背景颜色绿色分量"
+      },
+      "background_color_b": {
+        "name": "背景蓝",
+        "tooltip": "背景颜色蓝色分量"
+      }
+    }
+  },
+  "RC_OpacityAdjust": {
+    "display_name": "RC 不透明度调整",
+    "inputs": {
+      "image": {
+        "name": "图像"
+      },
+      "opacity": {
+        "name": "不透明度",
+        "tooltip": "不透明度值（0.0=完全透明，1.0=完全不透明）"
+      },
+      "ensure_alpha": {
+        "name": "确保Alpha",
+        "tooltip": "输出是否确保带 Alpha 通道：\\n- True：强制输出 RGBA\\n- False：保持原始格式（RGB 保持 RGB）"
+      }
+    }
+  },
+  "RC_LevelsAdjust": {
+    "display_name": "RC 色阶调整",
+    "inputs": {
+      "image": {
+        "name": "图像"
+      },
+      "input_black": {
+        "name": "输入黑场",
+        "tooltip": "输入黑场（0.0-0.9，提高会压暗阴影）"
+      },
+      "input_white": {
+        "name": "输入白场",
+        "tooltip": "输入白场（0.1-1.0，降低会提亮高光）"
+      },
+      "gamma": {
+        "name": "伽马",
+        "tooltip": "伽马值（<1.0 提亮中间调，>1.0 压暗中间调）"
+      },
+      "output_black": {
+        "name": "输出黑场",
+        "tooltip": "输出黑场（抬升最暗区域）"
+      },
+      "output_white": {
+        "name": "输出白场",
+        "tooltip": "输出白场（压制最亮区域）"
+      },
+      "channel": {
+        "name": "通道",
+        "tooltip": "调整通道：\\n- RGB：同时调整全部通道\\n- Red/Green/Blue：分别调整单独颜色通道"
+      }
+    }
+  },
+  "RC_BrightnessContrast": {
+    "display_name": "RC 亮度/对比度",
+    "inputs": {
+      "image": {
+        "name": "图像"
+      },
+      "brightness": {
+        "name": "亮度",
+        "tooltip": "亮度调整（-100 至 100，负值变暗，正值变亮）"
+      },
+      "contrast": {
+        "name": "对比度",
+        "tooltip": "对比度调整（-100 至 100，负值降低对比，正值增强对比）"
+      },
+      "method": {
+        "name": "算法",
+        "tooltip": "调整算法：\\n- PIL：使用 PIL 算法\\n- OpenCV：使用 OpenCV 算法，更精确"
+      }
+    }
+  },
+  "RC_ColorBalance": {
+    "display_name": "RC 色彩平衡",
+    "inputs": {
+      "image": {
+        "name": "图像"
+      },
+      "cyan_red": {
+        "name": "青/红",
+        "tooltip": "青-红平衡（负值偏青，正值偏红）"
+      },
+      "magenta_green": {
+        "name": "洋红/绿",
+        "tooltip": "洋红-绿平衡（负值偏洋红，正值偏绿色）"
+      },
+      "yellow_blue": {
+        "name": "黄/蓝",
+        "tooltip": "黄-蓝平衡（负值偏黄，正值偏蓝）"
+      },
+      "tone_range": {
+        "name": "调节范围",
+        "tooltip": "调节范围：\\n- midtones：中间调（主要调整区域）\\n- shadows：阴影（暗部）\\n- highlights：高光（亮部）"
+      },
+      "preserve_luminosity": {
+        "name": "保持亮度",
+        "tooltip": "是否保持亮度：\\n- True：保持整体亮度不变\\n- False：允许亮度变化"
+      }
+    }
+  },
+  "RC_ChannelMixer": {
+    "display_name": "RC 通道混合器",
+    "inputs": {
+      "image": {
+        "name": "图像"
+      },
+      "red_from_red": {
+        "name": "红<-红",
+        "tooltip": "红通道对红色输出的贡献（%）"
+      },
+      "red_from_green": {
+        "name": "红<-绿",
+        "tooltip": "绿通道对红色输出的贡献（%）"
+      },
+      "red_from_blue": {
+        "name": "红<-蓝",
+        "tooltip": "蓝通道对红色输出的贡献（%）"
+      },
+      "green_from_red": {
+        "name": "绿<-红",
+        "tooltip": "红通道对绿色输出的贡献（%）"
+      },
+      "green_from_green": {
+        "name": "绿<-绿",
+        "tooltip": "绿通道对绿色输出的贡献（%）"
+      },
+      "green_from_blue": {
+        "name": "绿<-蓝",
+        "tooltip": "蓝通道对绿色输出的贡献（%）"
+      },
+      "blue_from_red": {
+        "name": "蓝<-红",
+        "tooltip": "红通道对蓝色输出的贡献（%）"
+      },
+      "blue_from_green": {
+        "name": "蓝<-绿",
+        "tooltip": "绿通道对蓝色输出的贡献（%）"
+      },
+      "blue_from_blue": {
+        "name": "蓝<-蓝",
+        "tooltip": "蓝通道对蓝色输出的贡献（%）"
+      },
+      "monochrome": {
+        "name": "单色模式",
+        "tooltip": "单色模式：\\n- True：输出灰度图（仅使用红通道设置）\\n- False：输出彩色图像"
+      }
+    }
   }
 }

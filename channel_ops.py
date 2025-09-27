@@ -1,6 +1,7 @@
 import torch
 import numpy as np
 from PIL import Image
+import cv2
 
 
 class RC_ChannelExtractor:
@@ -104,7 +105,7 @@ class RC_MaskApply:
     def apply_mask(self, image, mask, mask_mode, threshold, feather):
         # Convert to numpy
         img_np = image[0].cpu().numpy()  # [H, W, 3]
-        mask_np = mask[0].cpu().numpy()  # [H, W]
+        mask_np = mask[0].cpu().numpy().astype(np.float32)  # [H, W]
 
         # Apply threshold
         if threshold > 0:
@@ -117,22 +118,11 @@ class RC_MaskApply:
 
         # Apply feathering (simple gaussian-like smoothing)
         if feather > 0:
-            # Simple box blur approximation of gaussian blur
             kernel_size = max(3, int(feather * min(mask_np.shape) * 0.2))
             if kernel_size % 2 == 0:
                 kernel_size += 1
-
-            # Simple averaging blur
-            pad_size = kernel_size // 2
-            mask_padded = np.pad(mask_np, pad_size, mode='edge')
-            mask_blurred = np.zeros_like(mask_np)
-
-            for i in range(mask_np.shape[0]):
-                for j in range(mask_np.shape[1]):
-                    window = mask_padded[i:i+kernel_size, j:j+kernel_size]
-                    mask_blurred[i, j] = np.mean(window)
-
-            mask_np = mask_blurred
+            sigma = max(kernel_size * 0.15, 1e-3)
+            mask_np = cv2.GaussianBlur(mask_np, (kernel_size, kernel_size), sigmaX=sigma, sigmaY=sigma, borderType=cv2.BORDER_REPLICATE)
 
         mask_np = np.clip(mask_np, 0.0, 1.0)
 
