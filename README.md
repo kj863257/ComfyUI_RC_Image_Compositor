@@ -22,13 +22,14 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 ### 🔧 **Professional Filters & Adjustments**
 - **Gaussian Blur** - Professional-grade blur effect with PIL/OpenCV algorithm selection
 - **Unsharp Mask Sharpening** - Multiple sharpening algorithms
-- **Hue/Saturation Adjustment** - Photoshop-like targeted color editing with efficient batch processing
+- **Hue/Saturation Adjustment** - Photoshop-like targeted color editing with **intelligent presets** (Cyanotype, Sepia, Vibrance, etc.)
 - **Opacity Control** - Precise transparency adjustment with alpha channel support
-- **Levels Adjustment** - Input/output levels with gamma correction
+- **Levels Adjustment** - Input/output levels with gamma correction and **quick-access presets** (Increase Contrast, Lighten, Darken, High Contrast)
 - **Curves Adjustment** - Photoshop-style multi-channel curves with interactive editor, natural cubic spline interpolation, RGB/individual channel support, and preset library
 - **Brightness/Contrast** - Professional brightness and contrast control
 - **Color Balance** - CMY color balance with tonal range selection
-- **Channel Mixer** - Advanced RGB channel mixing with monochrome option
+- **Channel Mixer** - Advanced RGB channel mixing with **B&W filter presets** (Red, Orange, Yellow, Green, Blue, Infrared filters)
+- **Auto Color Correction** - **NEW!** Photoshop-style automatic color correction with 4 algorithms (Enhance Monochromatic, Per-Channel, Dark/Light Colors, Brightness/Contrast)
 
 ### 🛠️ **Utility Tools**
 - **Canvas Padding** - Multiple padding modes (solid color, edge, mirror, transparent)
@@ -42,6 +43,7 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 
 ### 🌈 **Gradient Generation**
 - **Gradient Generator** - Create gradient images with transparency support and multiple color stops, computed with high-efficiency lookup tables
+- **Enhanced Presets** - Professional gradient presets including Gold, Purple, Fire, and more for quick creative workflows
 
 ---
 

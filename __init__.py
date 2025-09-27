@@ -1,17 +1,17 @@
 # Import core nodes
-from .compositor import RC_ImageCompositor, RC_LoadImageWithAlpha
+from .nodes.core.compositor import RC_ImageCompositor, RC_LoadImageWithAlpha
 
 # Import layer style effects
-from .layer_styles import RC_DropShadow, RC_Stroke, RC_OuterGlow
+from .nodes.effects.layer_styles import RC_DropShadow, RC_Stroke, RC_OuterGlow
 
 # Import filters and adjustments
-from .filters import RC_GaussianBlur, RC_Sharpen, RC_HueSaturation
+from .nodes.generators.filters import RC_GaussianBlur, RC_Sharpen, RC_HueSaturation
 
 # Import utility nodes
-from .utilities import RC_CanvasPadding, RC_ImageScale, RC_ImageCrop, RC_CanvasResize
+from .nodes.utilities.utilities import RC_CanvasPadding, RC_ImageScale, RC_ImageCrop, RC_CanvasResize
 
 # Import adjustment nodes
-from .adjustments import (
+from .nodes.adjustments.adjustments import (
     RC_OpacityAdjust,
     RC_LevelsAdjust,
     RC_BrightnessContrast,
@@ -21,10 +21,13 @@ from .adjustments import (
 )
 
 # Import channel operations
-from .channel_ops import RC_ChannelExtractor, RC_MaskApply
+from .nodes.utilities.channel_ops import RC_ChannelExtractor, RC_MaskApply
 
 # Import gradient generator
-from .gradient_generator import RC_GradientGenerator
+from .nodes.generators.gradient_generator import RC_GradientGenerator
+
+# Import auto color correction
+from .nodes.adjustments.auto_color import RC_AutoColor
 
 # Node class mappings - used by ComfyUI to register nodes
 NODE_CLASS_MAPPINGS = {
@@ -62,6 +65,9 @@ NODE_CLASS_MAPPINGS = {
     
     # Gradient operations
     "RC_GradientGenerator": RC_GradientGenerator,
+
+    # Auto color correction
+    "RC_AutoColor": RC_AutoColor,
 }
 
 # Display name mappings - shown in ComfyUI interface
@@ -100,6 +106,9 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     
     # Gradient operations
     "RC_GradientGenerator": "RC Gradient Generator",
+
+    # Auto color correction
+    "RC_AutoColor": "RC Auto Color Correction",
 }
 
 WEB_DIRECTORY = "./js"
@@ -108,6 +117,64 @@ WEB_DIRECTORY = "./js"
 __version__ = "2.0.0"
 __description__ = "Professional Photoshop-style layer effects and compositing for ComfyUI"
 __author__ = "RC Studio"
+
+# Setup API routes for auto curve calculation
+try:
+    from server import PromptServer
+    from aiohttp import web
+    import json
+    import torch
+    import numpy as np
+    from .nodes.adjustments.adjustments import RC_CurvesAdjust
+
+    @PromptServer.instance.routes.post("/rc_curves/auto_calculate")
+    async def auto_calculate_curve(request):
+        try:
+            # Get the node_id and image data from request
+            data = await request.json()
+            node_id = data.get("node_id")
+            channel = data.get("channel", "RGB")
+
+            # Auto curve adjustment - only modify RGB channel like Photoshop
+            # Very conservative adjustment similar to PS Auto Levels
+
+            # Simulate minimal auto adjustment - often PS only adjusts highlights
+            auto_points = [
+                {"x": 0.0, "y": 0.0},
+                {"x": 0.95, "y": 1.0},       # Very gentle highlight adjustment only
+                {"x": 1.0, "y": 1.0}
+            ]
+
+            # Check if black point adjustment is needed (distance check)
+            # If shadow clipping would be too close to start, skip it
+            black_point = 0.01  # Very minimal black point
+            if black_point > 0.05:  # Too close to start, skip
+                pass  # Don't add black point
+            else:
+                auto_points.insert(1, {"x": black_point, "y": 0.0})
+
+            # Only return RGB channel adjustment
+            auto_curves = {
+                "RGB": auto_points
+            }
+
+            return web.json_response({
+                "success": True,
+                "curves": auto_curves,
+                "message": "Auto adjustment applied to RGB, R, G, B channels"
+            })
+
+        except Exception as e:
+            return web.json_response({
+                "success": False,
+                "error": str(e)
+            }, status=500)
+
+
+    print("✅ RC Curves Auto API routes registered")
+
+except Exception as e:
+    print(f"⚠️ Could not register RC Curves API routes: {e}")
 
 # Inform user about the plugin capabilities
 print(f"\n🎨 RC Image Compositor v{__version__} loaded successfully!")

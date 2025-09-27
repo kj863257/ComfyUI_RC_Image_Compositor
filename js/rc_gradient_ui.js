@@ -199,6 +199,32 @@ const PRESETS = [
             { position: 0.0, color: [0, 32, 96, 255] },
             { position: 1.0, color: [0, 150, 200, 255] }
         ]
+    },
+    {
+        name: "Gold",
+        stops: [
+            { position: 0.0, color: [212, 175, 55, 255] },
+            { position: 0.3, color: [255, 223, 128, 255] },
+            { position: 0.6, color: [218, 165, 32, 255] },
+            { position: 0.85, color: [184, 134, 11, 255] },
+            { position: 1.0, color: [139, 101, 8, 255] }
+        ]
+    },
+    {
+        name: "Purple",
+        stops: [
+            { position: 0.0, color: [131, 58, 180, 255] },
+            { position: 0.5, color: [189, 93, 214, 255] },
+            { position: 1.0, color: [253, 145, 213, 255] }
+        ]
+    },
+    {
+        name: "Fire",
+        stops: [
+            { position: 0.0, color: [255, 0, 0, 255] },
+            { position: 0.5, color: [255, 140, 0, 255] },
+            { position: 1.0, color: [255, 255, 0, 255] }
+        ]
     }
 ];
 

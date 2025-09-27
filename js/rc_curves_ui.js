@@ -51,7 +51,7 @@ const styles = `
 .rc-curves-canvas-wrapper {
     position: relative;
     width: 100%;
-    height: 240px;
+    height: 320px;
     background: #141414;
     border: 1px solid #2b2b2b;
     border-radius: 4px;
@@ -174,98 +174,89 @@ const PRESETS = [
         ]
     },
     {
-        id: "contrast",
-        key: "Contrast",
+        id: "color_negative",
+        key: "ColorNegative",
+        channels: {
+            R: [{x: 0.0, y: 1.0}, {x: 0.1304, y: 1.0}, {x: 0.4667, y: 0.498}, {x: 0.7255, y: 0.0}, {x: 1.0, y: 0.0}],
+            G: [{x: 0.0, y: 1.0}, {x: 0.1098, y: 1.0}, {x: 0.302, y: 0.498}, {x: 0.5176, y: 0.0}, {x: 1.0, y: 0.0}],
+            B: [{x: 0.0, y: 1.0}, {x: 0.098, y: 1.0}, {x: 0.2353, y: 0.498}, {x: 0.4235, y: 0.0}, {x: 1.0, y: 0.0}]
+        }
+    },
+    {
+        id: "cross_process",
+        key: "CrossProcess",
+        channels: {
+            R: [{x: 0.0, y: 0.0}, {x: 0.251, y: 0.1569}, {x: 0.502, y: 0.4902}, {x: 0.6863, y: 0.7451}, {x: 1.0, y: 1.0}],
+            G: [{x: 0.0, y: 0.0}, {x: 0.251, y: 0.1882}, {x: 0.3804, y: 0.502}, {x: 0.7451, y: 0.8157}, {x: 1.0, y: 0.8157}],
+            B: [{x: 0.0, y: 0.0}, {x: 0.2314, y: 0.0941}, {x: 0.7098, y: 0.8745}, {x: 1.0, y: 1.0}]
+        }
+    },
+    {
+        id: "darker",
+        key: "Darker",
         points: [
-            { x: 0.0, y: 0.0 },
-            { x: 0.25, y: 0.18 },
-            { x: 0.5, y: 0.5 },
-            { x: 0.75, y: 0.82 },
-            { x: 1.0, y: 1.0 }
+            {x: 0.0, y: 0.0},
+            {x: 0.5098, y: 0.3961},
+            {x: 1.0, y: 1.0}
         ]
     },
     {
-        id: "brighten",
-        key: "Brighten",
+        id: "increase_contrast",
+        key: "IncreaseContrast",
         points: [
-            { x: 0.0, y: 0.12 },
-            { x: 1.0, y: 1.0 }
+            {x: 0.0, y: 0.0},
+            {x: 0.149, y: 0.0667},
+            {x: 0.8314, y: 0.9059},
+            {x: 0.9059, y: 0.9804},
+            {x: 1.0, y: 1.0}
         ]
     },
     {
-        id: "darken",
-        key: "Darken",
+        id: "lighter",
+        key: "Lighter",
         points: [
-            { x: 0.0, y: 0.0 },
-            { x: 1.0, y: 0.88 }
+            {x: 0.0, y: 0.0},
+            {x: 0.4039, y: 0.4902},
+            {x: 1.0, y: 1.0}
         ]
     },
     {
-        id: "invert",
-        key: "Invert",
+        id: "linear_contrast",
+        key: "LinearContrast",
+        points: [
+            {x: 0.0, y: 0.0},
+            {x: 0.3059, y: 0.2863},
+            {x: 0.6941, y: 0.7137},
+            {x: 1.0, y: 1.0}
+        ]
+    },
+    {
+        id: "medium_contrast",
+        key: "MediumContrast",
+        points: [
+            {x: 0.0, y: 0.0},
+            {x: 0.2863, y: 0.2196},
+            {x: 0.6392, y: 0.6431},
+            {x: 1.0, y: 1.0}
+        ]
+    },
+    {
+        id: "strong_contrast",
+        key: "StrongContrast",
+        points: [
+            {x: 0.0, y: 0.0},
+            {x: 0.302, y: 0.1961},
+            {x: 0.5922, y: 0.6},
+            {x: 0.6863, y: 0.7373},
+            {x: 1.0, y: 1.0}
+        ]
+    },
+    {
+        id: "negative",
+        key: "Negative",
         points: [
             { x: 0.0, y: 1.0 },
             { x: 1.0, y: 0.0 }
-        ]
-    },
-    {
-        id: "soft_contrast",
-        key: "SoftContrast",
-        points: [
-            { x: 0.0, y: 0.0 },
-            { x: 0.3, y: 0.25 },
-            { x: 0.7, y: 0.75 },
-            { x: 1.0, y: 1.0 }
-        ]
-    },
-    {
-        id: "gamma_22",
-        key: "Gamma2_2",
-        points: [
-            { x: 0.0, y: 0.0 },
-            { x: 0.25, y: 0.133 },
-            { x: 0.5, y: 0.378 },
-            { x: 0.75, y: 0.669 },
-            { x: 1.0, y: 1.0 }
-        ]
-    },
-    {
-        id: "gamma_045",
-        key: "Gamma0_45",
-        points: [
-            { x: 0.0, y: 0.0 },
-            { x: 0.25, y: 0.475 },
-            { x: 0.5, y: 0.707 },
-            { x: 0.75, y: 0.890 },
-            { x: 1.0, y: 1.0 }
-        ]
-    },
-    {
-        id: "shadows_lift",
-        key: "ShadowsLift",
-        points: [
-            { x: 0.0, y: 0.08 },
-            { x: 0.3, y: 0.35 },
-            { x: 1.0, y: 1.0 }
-        ]
-    },
-    {
-        id: "highlights_compress",
-        key: "HighlightsCompress",
-        points: [
-            { x: 0.0, y: 0.0 },
-            { x: 0.7, y: 0.78 },
-            { x: 1.0, y: 0.92 }
-        ]
-    },
-    {
-        id: "vintage",
-        key: "Vintage",
-        points: [
-            { x: 0.0, y: 0.05 },
-            { x: 0.4, y: 0.45 },
-            { x: 0.8, y: 0.82 },
-            { x: 1.0, y: 0.95 }
         ]
     }
 ];
@@ -306,17 +297,17 @@ const translate = (key, fallback) => {
         Presets: { en: "Presets", zh: "预设" },
         Hint: { en: "Click to add, drag to adjust, double-click to delete", zh: "单击添加,拖动调整,双击删除" },
         ApplyPreset: { en: "Apply", zh: "应用" },
-        Linear: { en: "Linear", zh: "线性" },
-        Contrast: { en: "Strong Contrast", zh: "对比增强" },
-        Brighten: { en: "Brighten", zh: "提亮" },
-        Darken: { en: "Darken", zh: "压暗" },
-        Invert: { en: "Invert", zh: "反相" },
-        SoftContrast: { en: "Soft Contrast", zh: "柔对比" },
-        Gamma2_2: { en: "Gamma 2.2", zh: "伽马2.2" },
-        Gamma0_45: { en: "Gamma 0.45", zh: "伽马0.45" },
-        ShadowsLift: { en: "Shadows Lift", zh: "阴影提升" },
-        HighlightsCompress: { en: "Highlights Compress", zh: "高光压缩" },
-        Vintage: { en: "Vintage", zh: "复古" }
+        AutoCurve: { en: "Auto", zh: "自动" },
+        Linear: { en: "Linear", zh: "默认值" },
+        ColorNegative: { en: "Color Negative (RGB)", zh: "彩色负片(RGB)" },
+        CrossProcess: { en: "Cross Process (RGB)", zh: "反冲 (RGB)" },
+        Darker: { en: "Darker (RGB)", zh: "较暗(RGB)" },
+        IncreaseContrast: { en: "Increase Contrast (RGB)", zh: "增加对比度(RGB)" },
+        Lighter: { en: "Lighter (RGB)", zh: "较亮(RGB)" },
+        LinearContrast: { en: "Linear Contrast (RGB)", zh: "线性对比度(RGB)" },
+        MediumContrast: { en: "Medium Contrast (RGB)", zh: "中对比度(RGB)" },
+        Negative: { en: "Negative (RGB)", zh: "负片(RGB)" },
+        StrongContrast: { en: "Strong Contrast (RGB)", zh: "强对比度(RGB)" }
     };
 
     const translations = table[key];
@@ -335,6 +326,9 @@ const sortPoints = (points) => {
     points.sort((a, b) => a.x - b.x);
     return points;
 };
+
+
+
 
 const normalizePoints = (points) => {
     if (!Array.isArray(points) || points.length < 2) {
@@ -751,6 +745,7 @@ app.registerExtension({
                     widget.callback(serialized, node, appInstance);
                 }
                 node?.graph?.setDirtyCanvas(true, true);
+
             };
 
             const updateChannelButtons = () => {
@@ -807,6 +802,7 @@ app.registerExtension({
                     ctx.lineTo(displayWidth - padding, y);
                     ctx.stroke();
                 }
+
 
                 // 绘制对角线
                 ctx.strokeStyle = "#3c3c3c";
@@ -1127,11 +1123,38 @@ app.registerExtension({
                 save();
             });
 
+
             applyPresetBtn.addEventListener("click", () => {
                 const preset = PRESETS.find(p => p.id === presetSelect.value);
                 if (!preset) return;
-                curves[activeChannel] = normalizePoints(preset.points);
-                selectedPerChannel[activeChannel] = Math.min(1, curves[activeChannel].length - 1);
+
+                // Handle multi-channel presets (for Color Negative and Cross Process)
+                if (preset.channels) {
+                    // Reset all channels to default first
+                    CHANNELS.forEach(ch => {
+                        curves[ch.id] = clonePoints(PRESETS[0].points); // Reset to default
+                        selectedPerChannel[ch.id] = 0;
+                    });
+
+                    // Apply curves to specific channels (R, G, B)
+                    Object.keys(preset.channels).forEach(channelId => {
+                        if (curves[channelId]) {
+                            curves[channelId] = normalizePoints(preset.channels[channelId]);
+                            selectedPerChannel[channelId] = Math.min(1, curves[channelId].length - 1);
+                        }
+                    });
+                } else {
+                    // Handle single-channel presets - reset ALL channels first, then apply to active
+                    CHANNELS.forEach(ch => {
+                        curves[ch.id] = clonePoints(PRESETS[0].points); // Reset to default
+                        selectedPerChannel[ch.id] = 0;
+                    });
+
+                    // Apply preset only to current active channel
+                    curves[activeChannel] = normalizePoints(preset.points);
+                    selectedPerChannel[activeChannel] = Math.min(1, curves[activeChannel].length - 1);
+                }
+
                 updateChannelButtons();
                 updateInfo();
                 draw();
@@ -1148,13 +1171,14 @@ app.registerExtension({
 
             const htmlWidget = node.addDOMWidget("curves_editor", "div", container);
             htmlWidget.computeSize = function (width) {
-                return [width, 420];
+                return [width, 500];
             };
 
             node.setSize([
                 Math.max(node.size[0], 360),
-                Math.max(node.size[1], 450)
+                Math.max(node.size[1], 530)
             ]);
+
 
             const onRemoved = node.onRemoved;
             node.onRemoved = function () {

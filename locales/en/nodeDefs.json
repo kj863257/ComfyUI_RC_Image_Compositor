@@ -310,7 +310,7 @@
       },
       "method": {
         "name": "Method",
-        "tooltip": "Blur algorithm:\\n- PIL: Fast, general purpose\\n- OpenCV: Precise, professional grade"
+        "tooltip": "Blur algorithm:\n- PIL: Fast, general purpose\n- OpenCV: Precise, professional grade"
       },
       "preserve_alpha": {
         "name": "Preserve Alpha",
@@ -330,7 +330,7 @@
       },
       "method": {
         "name": "Method",
-        "tooltip": "Sharpening method:\\n- unsharp_mask: Classic unsharp masking\\n- high_pass: High-pass filter sharpening\\n- edge_enhance: Edge enhancement sharpening"
+        "tooltip": "Sharpening method:\n- unsharp_mask: Classic unsharp masking\n- high_pass: High-pass filter sharpening\n- edge_enhance: Edge enhancement sharpening"
       },
       "radius": {
         "name": "Radius",
@@ -344,9 +344,23 @@
   },
   "RC_HueSaturation": {
     "display_name": "RC Hue/Saturation",
+    "presets": {
+      "Cyanotype": "Blue-tinted vintage photography effect",
+      "Old Style": "Warm vintage color grading",
+      "Red Boost": "Enhanced red channel saturation",
+      "Increase Saturation": "Moderate saturation boost",
+      "Increase Saturation More": "Strong saturation enhancement",
+      "Sepia": "Classic sepia tone effect",
+      "Desaturate": "Reduced color saturation",
+      "Vibrance": "Enhanced color vibrancy"
+    },
     "inputs": {
       "image": {
         "name": "Image"
+      },
+      "preset": {
+        "name": "Preset",
+        "tooltip": "Hue/Saturation presets"
       },
       "hue_shift": {
         "name": "Hue Shift",
@@ -374,7 +388,7 @@
       },
       "target_color": {
         "name": "Target Color",
-        "tooltip": "Target color range:\\n- master: All colors\\n- reds: Red range\\n- yellows: Yellow range\\n- greens: Green range\\n- cyans: Cyan range\\n- blues: Blue range\\n- magentas: Magenta range"
+        "tooltip": "Target color range:\n- master: All colors\n- reds: Red range\n- yellows: Yellow range\n- greens: Green range\n- cyans: Cyan range\n- blues: Blue range\n- magentas: Magenta range"
       }
     }
   },
@@ -402,7 +416,7 @@
       },
       "fill_mode": {
         "name": "Fill Mode",
-        "tooltip": "Fill mode:\\n- color: Fill with solid color\\n- edge: Extend edge pixels\\n- mirror: Mirror edge content\\n- transparent: Transparent fill (RGBA only)"
+        "tooltip": "Fill mode:\n- color: Fill with solid color\n- edge: Extend edge pixels\n- mirror: Mirror edge content\n- transparent: Transparent fill (RGBA only)"
       },
       "fill_color_r": {
         "name": "Fill Color R",
@@ -426,7 +440,7 @@
       },
       "scale_method": {
         "name": "Scale Method",
-        "tooltip": "Scale method:\\n- percentage: Scale by percentage\\n- dimensions: Exact dimensions\\n- fit_width: Fit to width (keep ratio)\\n- fit_height: Fit to height (keep ratio)\\n- fit_longest: Fit to longest side (keep ratio)\\n- fit_shortest: Fit to shortest side (keep ratio)"
+        "tooltip": "Scale method:\n- percentage: Scale by percentage\n- dimensions: Exact dimensions\n- fit_width: Fit to width (keep ratio)\n- fit_height: Fit to height (keep ratio)\n- fit_longest: Fit to longest side (keep ratio)\n- fit_shortest: Fit to shortest side (keep ratio)"
       },
       "scale_factor": {
         "name": "Scale Factor",
@@ -442,7 +456,7 @@
       },
       "resampling": {
         "name": "Resampling",
-        "tooltip": "Resampling algorithm:\\n- LANCZOS: Highest quality (slow)\\n- BICUBIC: High quality\\n- BILINEAR: Medium quality\\n- NEAREST: Fastest (low quality)"
+        "tooltip": "Resampling algorithm:\n- LANCZOS: Highest quality (slow)\n- BICUBIC: High quality\n- BILINEAR: Medium quality\n- NEAREST: Fastest (low quality)"
       },
       "keep_aspect_ratio": {
         "name": "Keep Aspect Ratio",
@@ -458,7 +472,7 @@
       },
       "crop_method": {
         "name": "Crop Method",
-        "tooltip": "Crop method:\\n- manual: Manual coordinates\\n- center: Center crop to size\\n- aspect_ratio: Crop by ratio (centered)"
+        "tooltip": "Crop method:\n- manual: Manual coordinates\n- center: Center crop to size\n- aspect_ratio: Crop by ratio (centered)"
       },
       "x": {
         "name": "X",
@@ -502,7 +516,7 @@
       },
       "anchor": {
         "name": "Anchor",
-        "tooltip": "Image anchor position in new canvas:\\n- center: Center\\n- top_left: Top-left corner\\n- top_center: Top center\\n- top_right: Top-right corner\\n- middle_left: Middle left\\n- middle_right: Middle right\\n- bottom_left: Bottom-left corner\\n- bottom_center: Bottom center\\n- bottom_right: Bottom-right corner"
+        "tooltip": "Image anchor position in new canvas:\n- center: Center\n- top_left: Top-left corner\n- top_center: Top center\n- top_right: Top-right corner\n- middle_left: Middle left\n- middle_right: Middle right\n- bottom_left: Bottom-left corner\n- bottom_center: Bottom center\n- bottom_right: Bottom-right corner"
       },
       "x_offset": {
         "name": "X Offset",
@@ -538,39 +552,7 @@
       },
       "ensure_alpha": {
         "name": "Ensure Alpha",
-        "tooltip": "Ensure alpha channel in output:\\n- True: Force RGBA output format\\n- False: Keep original format (RGB stays RGB)"
-      }
-    }
-  },
-  "RC_LevelsAdjust": {
-    "display_name": "RC Levels",
-    "inputs": {
-      "image": {
-        "name": "Image"
-      },
-      "input_black": {
-        "name": "Input Black",
-        "tooltip": "Input black point (0.0-0.9, raising darkens shadows)"
-      },
-      "input_white": {
-        "name": "Input White",
-        "tooltip": "Input white point (0.1-1.0, lowering brightens highlights)"
-      },
-      "gamma": {
-        "name": "Gamma",
-        "tooltip": "Gamma value (<1.0 brightens midtones, >1.0 darkens midtones)"
-      },
-      "output_black": {
-        "name": "Output Black",
-        "tooltip": "Output black point (lifts darkest areas)"
-      },
-      "output_white": {
-        "name": "Output White",
-        "tooltip": "Output white point (suppresses brightest areas)"
-      },
-      "channel": {
-        "name": "Channel",
-        "tooltip": "Adjustment channel:\\n- RGB: Adjust all channels together\\n- Red/Green/Blue: Adjust individual color channels"
+        "tooltip": "Ensure alpha channel in output:\n- True: Force RGBA output format\n- False: Keep original format (RGB stays RGB)"
       }
     }
   },
@@ -610,7 +592,7 @@
       },
       "method": {
         "name": "Method",
-        "tooltip": "Adjustment algorithm:\\n- PIL: Use PIL library algorithm\\n- OpenCV: Use OpenCV algorithm, more precise"
+        "tooltip": "Adjustment algorithm:\n- PIL: Use PIL library algorithm\n- OpenCV: Use OpenCV algorithm, more precise"
       }
     }
   },
@@ -634,11 +616,11 @@
       },
       "tone_range": {
         "name": "Tone Range",
-        "tooltip": "Tone range:\\n- midtones: Midtones (main adjustment area)\\n- shadows: Shadows (dark areas)\\n- highlights: Highlights (bright areas)"
+        "tooltip": "Tone range:\n- midtones: Midtones (main adjustment area)\n- shadows: Shadows (dark areas)\n- highlights: Highlights (bright areas)"
       },
       "preserve_luminosity": {
         "name": "Preserve Luminosity",
-        "tooltip": "Preserve luminosity:\\n- True: Keep image brightness unchanged\\n- False: Allow brightness changes"
+        "tooltip": "Preserve luminosity:\n- True: Keep image brightness unchanged\n- False: Allow brightness changes"
       }
     }
   },
@@ -647,6 +629,10 @@
     "inputs": {
       "image": {
         "name": "Image"
+      },
+      "preset": {
+        "name": "Preset",
+        "tooltip": "Channel mixer presets"
       },
       "red_from_red": {
         "name": "Red from Red",
@@ -686,7 +672,117 @@
       },
       "monochrome": {
         "name": "Monochrome",
-        "tooltip": "Monochrome mode:\\n- True: Output grayscale image (uses only red channel settings)\\n- False: Output color image"
+        "tooltip": "Monochrome mode:\n- True: Output grayscale image (uses only red channel settings)\n- False: Output color image"
+      }
+    },
+    "presets": {
+      "bw_red_filter": "B&W with Red Filter",
+      "bw_orange_filter": "B&W with Orange Filter",
+      "bw_yellow_filter": "B&W with Yellow Filter",
+      "bw_green_filter": "B&W with Green Filter",
+      "bw_blue_filter": "B&W with Blue Filter",
+      "bw_infrared": "B&W Infrared"
+    }
+  },
+  "RC_LevelsAdjust": {
+    "display_name": "RC Levels Adjust",
+    "inputs": {
+      "image": {
+        "name": "Image"
+      },
+      "preset": {
+        "name": "Preset",
+        "tooltip": "Levels adjustment presets"
+      },
+      "input_black": {
+        "name": "Input Black",
+        "tooltip": "Input black point (0.0-0.9, raising darkens shadows)"
+      },
+      "input_white": {
+        "name": "Input White",
+        "tooltip": "Input white point (0.1-1.0, lowering brightens highlights)"
+      },
+      "gamma": {
+        "name": "Gamma",
+        "tooltip": "Gamma value (<1.0 brightens midtones, >1.0 darkens midtones)"
+      },
+      "output_black": {
+        "name": "Output Black",
+        "tooltip": "Output black point (lifts darkest areas)"
+      },
+      "output_white": {
+        "name": "Output White",
+        "tooltip": "Output white point (suppresses brightest areas)"
+      },
+      "channel": {
+        "name": "Channel",
+        "tooltip": "Adjustment channel:\n- RGB: Adjust all channels together\n- Red/Green/Blue: Adjust individual color channels"
+      }
+    },
+    "presets": {
+      "increase_contrast": "Increase Contrast",
+      "lighten": "Lighten",
+      "darken": "Darken",
+      "high_contrast": "High Contrast"
+    }
+  },
+  "RC_AutoColor": {
+    "display_name": "RC Auto Color Correction",
+    "inputs": {
+      "image": {
+        "name": "Image"
+      },
+      "algorithm": {
+        "name": "Algorithm",
+        "tooltip": "Auto correction algorithm:\n- enhance_monochromatic: Clip channels identically (Auto Contrast)\n- enhance_per_channel: Clip channels independently (Auto Tone)\n- find_dark_light_colors: Find dark/light colors (Auto Color)\n- enhance_brightness_contrast: Content-aware enhancement"
+      },
+      "neutralize_midtones": {
+        "name": "Neutralize Midtones",
+        "tooltip": "Adjust midtones so neutral colors map to target neutral"
+      },
+      "shadow_clip": {
+        "name": "Shadow Clip",
+        "tooltip": "Amount of shadow data to discard (%)"
+      },
+      "highlight_clip": {
+        "name": "Highlight Clip",
+        "tooltip": "Amount of highlight data to discard (%)"
+      },
+      "target_shadow_r": {
+        "name": "Target Shadow R",
+        "tooltip": "Target shadow color red component"
+      },
+      "target_shadow_g": {
+        "name": "Target Shadow G",
+        "tooltip": "Target shadow color green component"
+      },
+      "target_shadow_b": {
+        "name": "Target Shadow B",
+        "tooltip": "Target shadow color blue component"
+      },
+      "target_midtone_r": {
+        "name": "Target Midtone R",
+        "tooltip": "Target midtone color red component"
+      },
+      "target_midtone_g": {
+        "name": "Target Midtone G",
+        "tooltip": "Target midtone color green component"
+      },
+      "target_midtone_b": {
+        "name": "Target Midtone B",
+        "tooltip": "Target midtone color blue component"
+      },
+      "target_highlight_r": {
+        "name": "Target Highlight R",
+        "tooltip": "Target highlight color red component"
+      },
+      "target_highlight_g": {
+        "name": "Target Highlight G",
+        "tooltip": "Target highlight color green component"
+      },
+      "target_highlight_b": {
+        "name": "Target Highlight B",
+        "tooltip": "Target highlight color blue component"
       }
     }
   }

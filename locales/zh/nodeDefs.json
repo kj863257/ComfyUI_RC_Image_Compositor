@@ -310,7 +310,7 @@
       },
       "method": {
         "name": "算法",
-        "tooltip": "模糊算法：\\n- PIL：快速、通用\\n- OpenCV：精确、专业级"
+        "tooltip": "模糊算法：\n- PIL：快速、通用\n- OpenCV：精确、专业级"
       },
       "preserve_alpha": {
         "name": "保留Alpha",
@@ -330,7 +330,7 @@
       },
       "method": {
         "name": "方法",
-        "tooltip": "锐化方式：\\n- unsharp_mask：传统反锐化蒙版\\n- high_pass：高通滤波锐化\\n- edge_enhance：边缘增强锐化"
+        "tooltip": "锐化方式：\n- unsharp_mask：传统反锐化蒙版\n- high_pass：高通滤波锐化\n- edge_enhance：边缘增强锐化"
       },
       "radius": {
         "name": "半径",
@@ -344,9 +344,23 @@
   },
   "RC_HueSaturation": {
     "display_name": "RC 色相/饱和度",
+    "presets": {
+      "Cyanotype": "氰版法（蓝调古典摄影效果）",
+      "Old Style": "老式风格（暖色调复古效果）",
+      "Red Boost": "红色增强（提升红色通道饱和度）",
+      "Increase Saturation": "饱和度增强（适度提升）",
+      "Increase Saturation More": "饱和度强化（大幅提升）",
+      "Sepia": "棕褐色调（经典复古色调）",
+      "Desaturate": "去饱和（降低色彩饱和度）",
+      "Vibrance": "鲜艳度（增强色彩活力）"
+    },
     "inputs": {
       "image": {
         "name": "图像"
+      },
+      "preset": {
+        "name": "预设",
+        "tooltip": "色相/饱和度预设"
       },
       "hue_shift": {
         "name": "色相偏移",
@@ -374,7 +388,7 @@
       },
       "target_color": {
         "name": "目标色域",
-        "tooltip": "目标色域：\\n- master：全局\\n- reds：红色范围\\n- yellows：黄色范围\\n- greens：绿色范围\\n- cyans：青色范围\\n- blues：蓝色范围\\n- magentas：洋红范围"
+        "tooltip": "目标色域：\n- master：全局\n- reds：红色范围\n- yellows：黄色范围\n- greens：绿色范围\n- cyans：青色范围\n- blues：蓝色范围\n- magentas：洋红范围"
       }
     }
   },
@@ -402,7 +416,7 @@
       },
       "fill_mode": {
         "name": "填充模式",
-        "tooltip": "填充模式：\\n- color：纯色填充\\n- edge：延伸边缘像素\\n- mirror：镜像边缘内容\\n- transparent：透明填充（仅 RGBA）"
+        "tooltip": "填充模式：\n- color：纯色填充\n- edge：延伸边缘像素\n- mirror：镜像边缘内容\n- transparent：透明填充（仅 RGBA）"
       },
       "fill_color_r": {
         "name": "填充红",
@@ -426,7 +440,7 @@
       },
       "scale_method": {
         "name": "缩放模式",
-        "tooltip": "缩放模式：\\n- percentage：按百分比缩放\\n- dimensions：指定尺寸\\n- fit_width：适配宽度（保持比例）\\n- fit_height：适配高度（保持比例）\\n- fit_longest：适配最长边（保持比例）\\n- fit_shortest：适配最短边（保持比例）"
+        "tooltip": "缩放模式：\n- percentage：按百分比缩放\n- dimensions：指定尺寸\n- fit_width：适配宽度（保持比例）\n- fit_height：适配高度（保持比例）\n- fit_longest：适配最长边（保持比例）\n- fit_shortest：适配最短边（保持比例）"
       },
       "scale_factor": {
         "name": "缩放系数",
@@ -442,7 +456,7 @@
       },
       "resampling": {
         "name": "重采样",
-        "tooltip": "重采样算法：\\n- LANCZOS：最高画质（较慢）\\n- BICUBIC：高画质\\n- BILINEAR：中等画质\\n- NEAREST：最快（画质较低）"
+        "tooltip": "重采样算法：\n- LANCZOS：最高画质（较慢）\n- BICUBIC：高画质\n- BILINEAR：中等画质\n- NEAREST：最快（画质较低）"
       },
       "keep_aspect_ratio": {
         "name": "保持比例",
@@ -458,7 +472,7 @@
       },
       "crop_method": {
         "name": "裁剪方式",
-        "tooltip": "裁剪方式：\\n- manual：手动坐标\\n- center：居中裁剪到指定尺寸\\n- aspect_ratio：按比例裁剪（居中）"
+        "tooltip": "裁剪方式：\n- manual：手动坐标\n- center：居中裁剪到指定尺寸\n- aspect_ratio：按比例裁剪（居中）"
       },
       "x": {
         "name": "起始X",
@@ -502,7 +516,7 @@
       },
       "anchor": {
         "name": "锚点",
-        "tooltip": "新画布中的图像锚点：\\n- center：居中\\n- top_left：左上角\\n- top_center：顶部居中\\n- top_right：右上角\\n- middle_left：左中\\n- middle_right：右中\\n- bottom_left：左下角\\n- bottom_center：底部居中\\n- bottom_right：右下角"
+        "tooltip": "新画布中的图像锚点：\n- center：居中\n- top_left：左上角\n- top_center：顶部居中\n- top_right：右上角\n- middle_left：左中\n- middle_right：右中\n- bottom_left：左下角\n- bottom_center：底部居中\n- bottom_right：右下角"
       },
       "x_offset": {
         "name": "水平偏移",
@@ -538,39 +552,7 @@
       },
       "ensure_alpha": {
         "name": "确保Alpha",
-        "tooltip": "输出是否确保带 Alpha 通道：\\n- True：强制输出 RGBA\\n- False：保持原始格式（RGB 保持 RGB）"
-      }
-    }
-  },
-  "RC_LevelsAdjust": {
-    "display_name": "RC 色阶调整",
-    "inputs": {
-      "image": {
-        "name": "图像"
-      },
-      "input_black": {
-        "name": "输入黑场",
-        "tooltip": "输入黑场（0.0-0.9，提高会压暗阴影）"
-      },
-      "input_white": {
-        "name": "输入白场",
-        "tooltip": "输入白场（0.1-1.0，降低会提亮高光）"
-      },
-      "gamma": {
-        "name": "伽马",
-        "tooltip": "伽马值（<1.0 提亮中间调，>1.0 压暗中间调）"
-      },
-      "output_black": {
-        "name": "输出黑场",
-        "tooltip": "输出黑场（抬升最暗区域）"
-      },
-      "output_white": {
-        "name": "输出白场",
-        "tooltip": "输出白场（压制最亮区域）"
-      },
-      "channel": {
-        "name": "通道",
-        "tooltip": "调整通道：\\n- RGB：同时调整全部通道\\n- Red/Green/Blue：分别调整单独颜色通道"
+        "tooltip": "输出是否确保带 Alpha 通道：\n- True：强制输出 RGBA\n- False：保持原始格式（RGB 保持 RGB）"
       }
     }
   },
@@ -610,7 +592,7 @@
       },
       "method": {
         "name": "算法",
-        "tooltip": "调整算法：\\n- PIL：使用 PIL 算法\\n- OpenCV：使用 OpenCV 算法，更精确"
+        "tooltip": "调整算法：\n- PIL：使用 PIL 算法\n- OpenCV：使用 OpenCV 算法，更精确"
       }
     }
   },
@@ -634,11 +616,11 @@
       },
       "tone_range": {
         "name": "调节范围",
-        "tooltip": "调节范围：\\n- midtones：中间调（主要调整区域）\\n- shadows：阴影（暗部）\\n- highlights：高光（亮部）"
+        "tooltip": "调节范围：\n- midtones：中间调（主要调整区域）\n- shadows：阴影（暗部）\n- highlights：高光（亮部）"
       },
       "preserve_luminosity": {
         "name": "保持亮度",
-        "tooltip": "是否保持亮度：\\n- True：保持整体亮度不变\\n- False：允许亮度变化"
+        "tooltip": "是否保持亮度：\n- True：保持整体亮度不变\n- False：允许亮度变化"
       }
     }
   },
@@ -647,6 +629,10 @@
     "inputs": {
       "image": {
         "name": "图像"
+      },
+      "preset": {
+        "name": "预设",
+        "tooltip": "通道混合器预设"
       },
       "red_from_red": {
         "name": "红<-红",
@@ -686,7 +672,117 @@
       },
       "monochrome": {
         "name": "单色模式",
-        "tooltip": "单色模式：\\n- True：输出灰度图（仅使用红通道设置）\\n- False：输出彩色图像"
+        "tooltip": "单色模式：\n- True：输出灰度图（仅使用红通道设置）\n- False：输出彩色图像"
+      }
+    },
+    "presets": {
+      "bw_red_filter": "黑白红色滤镜",
+      "bw_orange_filter": "黑白橙色滤镜",
+      "bw_yellow_filter": "黑白黄色滤镜",
+      "bw_green_filter": "黑白绿色滤镜",
+      "bw_blue_filter": "黑白蓝色滤镜",
+      "bw_infrared": "黑白红外效果"
+    }
+  },
+  "RC_LevelsAdjust": {
+    "display_name": "RC 色阶调整",
+    "inputs": {
+      "image": {
+        "name": "图像"
+      },
+      "preset": {
+        "name": "预设",
+        "tooltip": "色阶调整预设"
+      },
+      "input_black": {
+        "name": "输入黑场",
+        "tooltip": "输入黑场（0.0-0.9，提高会压暗阴影）"
+      },
+      "input_white": {
+        "name": "输入白场",
+        "tooltip": "输入白场（0.1-1.0，降低会提亮高光）"
+      },
+      "gamma": {
+        "name": "伽马",
+        "tooltip": "伽马值（<1.0 提亮中间调，>1.0 压暗中间调）"
+      },
+      "output_black": {
+        "name": "输出黑场",
+        "tooltip": "输出黑场（抬升最暗区域）"
+      },
+      "output_white": {
+        "name": "输出白场",
+        "tooltip": "输出白场（压制最亮区域）"
+      },
+      "channel": {
+        "name": "通道",
+        "tooltip": "调整通道：\n- RGB：同时调整全部通道\n- Red/Green/Blue：分别调整单独颜色通道"
+      }
+    },
+    "presets": {
+      "increase_contrast": "增加对比度",
+      "lighten": "提亮",
+      "darken": "变暗",
+      "high_contrast": "高对比度"
+    }
+  },
+  "RC_AutoColor": {
+    "display_name": "RC 自动色彩校正",
+    "inputs": {
+      "image": {
+        "name": "图像"
+      },
+      "algorithm": {
+        "name": "算法",
+        "tooltip": "自动校正算法：\n- enhance_monochromatic：统一裁剪通道（自动对比度）\n- enhance_per_channel：独立裁剪通道（自动色调）\n- find_dark_light_colors：查找暗/亮色彩（自动颜色）\n- enhance_brightness_contrast：内容感知增强"
+      },
+      "neutralize_midtones": {
+        "name": "中和中间调",
+        "tooltip": "调整中间调使中性色映射到目标中性色"
+      },
+      "shadow_clip": {
+        "name": "阴影裁剪",
+        "tooltip": "要丢弃的阴影数据百分比（%）"
+      },
+      "highlight_clip": {
+        "name": "高光裁剪",
+        "tooltip": "要丢弃的高光数据百分比（%）"
+      },
+      "target_shadow_r": {
+        "name": "目标阴影红",
+        "tooltip": "目标阴影颜色红色分量"
+      },
+      "target_shadow_g": {
+        "name": "目标阴影绿",
+        "tooltip": "目标阴影颜色绿色分量"
+      },
+      "target_shadow_b": {
+        "name": "目标阴影蓝",
+        "tooltip": "目标阴影颜色蓝色分量"
+      },
+      "target_midtone_r": {
+        "name": "目标中间调红",
+        "tooltip": "目标中间调颜色红色分量"
+      },
+      "target_midtone_g": {
+        "name": "目标中间调绿",
+        "tooltip": "目标中间调颜色绿色分量"
+      },
+      "target_midtone_b": {
+        "name": "目标中间调蓝",
+        "tooltip": "目标中间调颜色蓝色分量"
+      },
+      "target_highlight_r": {
+        "name": "目标高光红",
+        "tooltip": "目标高光颜色红色分量"
+      },
+      "target_highlight_g": {
+        "name": "目标高光绿",
+        "tooltip": "目标高光颜色绿色分量"
+      },
+      "target_highlight_b": {
+        "name": "目标高光蓝",
+        "tooltip": "目标高光颜色蓝色分量"
       }
     }
   }
