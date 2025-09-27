@@ -22,6 +22,7 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 ### 🔧 **Professional Filters & Adjustments**
 - **Gaussian Blur** - Professional-grade blur effect with PIL/OpenCV algorithm selection
 - **Unsharp Mask Sharpening** - Multiple sharpening algorithms
+- **High/Low Frequency Skin Smoothing** - Photoshop-style frequency separation technique with automatic skin tone detection and edge protection
 - **Hue/Saturation Adjustment** - Photoshop-like targeted color editing with **intelligent presets** (Cyanotype, Sepia, Vibrance, etc.)
 - **Opacity Control** - Precise transparency adjustment with alpha channel support
 - **Levels Adjustment** - Input/output levels with gamma correction and **quick-access presets** (Increase Contrast, Lighten, Darken, High Contrast)
@@ -71,6 +72,7 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 ### **RC/Filters** - Image Processing
 - `RC Gaussian Blur` - Professional-grade blur with algorithm selection
 - `RC Sharpen` - Multiple sharpening methods including unsharp mask
+- `RC High/Low Frequency Skin Smoothing` - Photoshop-style frequency separation skin smoothing with skin tone detection
 
 ### **RC/Adjustments** - Color & Tone
 - `RC Hue/Saturation` - Targeted color adjustment with tint mode

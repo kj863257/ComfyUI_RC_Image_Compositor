@@ -29,6 +29,9 @@ from .nodes.generators.gradient_generator import RC_GradientGenerator
 # Import auto color correction
 from .nodes.adjustments.auto_color import RC_AutoColor
 
+# Import skin smoothing
+from .nodes.generators.skin_smoothing import RC_HighLowFrequencySkinSmoothing
+
 # Node class mappings - used by ComfyUI to register nodes
 NODE_CLASS_MAPPINGS = {
     # Core compositor nodes
@@ -68,6 +71,9 @@ NODE_CLASS_MAPPINGS = {
 
     # Auto color correction
     "RC_AutoColor": RC_AutoColor,
+
+    # Skin smoothing
+    "RC_HighLowFrequencySkinSmoothing": RC_HighLowFrequencySkinSmoothing,
 }
 
 # Display name mappings - shown in ComfyUI interface
@@ -109,6 +115,9 @@ NODE_DISPLAY_NAME_MAPPINGS = {
 
     # Auto color correction
     "RC_AutoColor": "RC Auto Color Correction",
+
+    # Skin smoothing
+    "RC_HighLowFrequencySkinSmoothing": "RC High/Low Frequency Skin Smoothing",
 }
 
 WEB_DIRECTORY = "./js"

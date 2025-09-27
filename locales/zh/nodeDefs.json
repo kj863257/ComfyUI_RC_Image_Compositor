@@ -785,5 +785,41 @@
         "tooltip": "目标高光颜色蓝色分量"
       }
     }
+  },
+  "RC_HighLowFrequencySkinSmoothing": {
+    "display_name": "RC 高低频磨皮",
+    "inputs": {
+      "image": {
+        "name": "图像"
+      },
+      "low_frequency_radius": {
+        "name": "低频半径",
+        "tooltip": "低频分离半径 - 决定要平滑的皮肤纹理特征大小"
+      },
+      "high_frequency_strength": {
+        "name": "高频强度",
+        "tooltip": "高频细节强度（0=最大平滑，1=原始细节，>1=增强细节）"
+      },
+      "skin_tone_protection": {
+        "name": "肤色保护",
+        "tooltip": "肤色保护级别（0=影响所有区域，1=仅影响检测到的肤色）"
+      },
+      "preserve_fine_details": {
+        "name": "保留细节",
+        "tooltip": "保留精细细节如睫毛、眉毛和头发"
+      },
+      "edge_protection": {
+        "name": "边缘保护",
+        "tooltip": "边缘保护强度（0=无保护，1=最大边缘保护）"
+      },
+      "method": {
+        "name": "方法",
+        "tooltip": "平滑方法：\n- frequency_separation：经典PS频率分离\n- surface_blur：表面模糊纹理保护\n- selective_gaussian：选择性高斯模糊"
+      },
+      "mask": {
+        "name": "蒙版",
+        "tooltip": "可选蒙版限制平滑区域（1.0=平滑，0.0=保留）"
+      }
+    }
   }
 }

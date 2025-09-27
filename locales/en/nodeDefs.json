@@ -785,5 +785,41 @@
         "tooltip": "Target highlight color blue component"
       }
     }
+  },
+  "RC_HighLowFrequencySkinSmoothing": {
+    "display_name": "RC High/Low Frequency Skin Smoothing",
+    "inputs": {
+      "image": {
+        "name": "Image"
+      },
+      "low_frequency_radius": {
+        "name": "Low Frequency Radius",
+        "tooltip": "Low frequency separation radius - determines the size of skin texture features to smooth"
+      },
+      "high_frequency_strength": {
+        "name": "High Frequency Strength",
+        "tooltip": "High frequency detail strength (0=maximum smoothing, 1=original detail, >1=enhanced detail)"
+      },
+      "skin_tone_protection": {
+        "name": "Skin Tone Protection",
+        "tooltip": "Skin tone protection level (0=affect all areas, 1=only affect detected skin tones)"
+      },
+      "preserve_fine_details": {
+        "name": "Preserve Fine Details",
+        "tooltip": "Preserve fine details like eyelashes, eyebrows and hair"
+      },
+      "edge_protection": {
+        "name": "Edge Protection",
+        "tooltip": "Edge protection strength (0=no protection, 1=maximum edge preservation)"
+      },
+      "method": {
+        "name": "Method",
+        "tooltip": "Smoothing method:\n- frequency_separation: Classic PS frequency separation\n- surface_blur: Surface blur for texture preservation\n- selective_gaussian: Selective Gaussian blur"
+      },
+      "mask": {
+        "name": "Mask",
+        "tooltip": "Optional mask to limit smoothing to specific areas (1.0=smooth, 0.0=preserve)"
+      }
+    }
   }
 }
