@@ -25,6 +25,7 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 - **Hue/Saturation Adjustment** - Photoshop-like targeted color editing with efficient batch processing
 - **Opacity Control** - Precise transparency adjustment with alpha channel support
 - **Levels Adjustment** - Input/output levels with gamma correction
+- **Curves Adjustment** - Photoshop-style multi-channel curves with interactive editor, natural cubic spline interpolation, RGB/individual channel support, and preset library
 - **Brightness/Contrast** - Professional brightness and contrast control
 - **Color Balance** - CMY color balance with tonal range selection
 - **Channel Mixer** - Advanced RGB channel mixing with monochrome option
@@ -73,6 +74,7 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 - `RC Hue/Saturation` - Targeted color adjustment with tint mode
 - `RC Opacity Adjust` - Precise transparency control with alpha channel support
 - `RC Levels` - Professional levels adjustment with gamma correction
+- `RC Curves` - Multi-channel curves adjustment with interactive editor, natural cubic spline interpolation, RGB/individual channel support, and preset library
 - `RC Brightness/Contrast` - Dual-algorithm brightness and contrast control
 - `RC Color Balance` - CMY color balance with tonal range positioning
 - `RC Channel Mixer` - Advanced RGB channel mixing with monochrome mode
@@ -163,6 +165,7 @@ Layer effects automatically expand the canvas when effects exceed original bound
 - Luminance preservation in color balance adjustments
 - Channel-specific level adjustments (RGB, red, green, blue)
 - Monochrome conversion with custom channel mixing
+- **Advanced Curves Adjustment** - Photoshop-style multi-channel curves with interactive editor, natural cubic spline interpolation, and preset support
 
 ### **Advanced Masking & Channel Operations**
 - **Channel Extraction** - Extract specific channels (red, green, blue, alpha, or luminance) from images for matting

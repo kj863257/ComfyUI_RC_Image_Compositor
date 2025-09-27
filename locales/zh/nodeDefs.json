@@ -574,6 +574,26 @@
       }
     }
   },
+  "RC_CurvesAdjust": {
+    "display_name": "RC 曲线调整",
+    "inputs": {
+      "image": {
+        "name": "图像"
+      },
+      "curve_data": {
+        "name": "曲线数据",
+        "tooltip": "曲线配置（JSON 格式）。使用编辑器添加控制点、拖动调整或套用预设。"
+      },
+      "mix": {
+        "name": "混合",
+        "tooltip": "混合比例：0.0 保留原图，1.0 完全应用曲线调整。"
+      },
+      "apply_alpha": {
+        "name": "影响 Alpha",
+        "tooltip": "当存在 Alpha 通道时，同时对 Alpha 应用曲线调整。"
+      }
+    }
+  },
   "RC_BrightnessContrast": {
     "display_name": "RC 亮度/对比度",
     "inputs": {

@@ -574,6 +574,26 @@
       }
     }
   },
+  "RC_CurvesAdjust": {
+    "display_name": "RC Curves",
+    "inputs": {
+      "image": {
+        "name": "Image"
+      },
+      "curve_data": {
+        "name": "Curve Data",
+        "tooltip": "Serialized curve configuration (JSON). Use the editor widget to add points, drag handles, and apply presets."
+      },
+      "mix": {
+        "name": "Mix",
+        "tooltip": "Blend factor: 0.0 keeps the original image, 1.0 applies the full curve adjustment."
+      },
+      "apply_alpha": {
+        "name": "Affect Alpha",
+        "tooltip": "Apply the curves to the alpha channel when available."
+      }
+    }
+  },
   "RC_BrightnessContrast": {
     "display_name": "RC Brightness/Contrast",
     "inputs": {

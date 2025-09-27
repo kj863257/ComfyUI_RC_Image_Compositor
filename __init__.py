@@ -11,7 +11,14 @@ from .filters import RC_GaussianBlur, RC_Sharpen, RC_HueSaturation
 from .utilities import RC_CanvasPadding, RC_ImageScale, RC_ImageCrop, RC_CanvasResize
 
 # Import adjustment nodes
-from .adjustments import RC_OpacityAdjust, RC_LevelsAdjust, RC_BrightnessContrast, RC_ColorBalance, RC_ChannelMixer
+from .adjustments import (
+    RC_OpacityAdjust,
+    RC_LevelsAdjust,
+    RC_BrightnessContrast,
+    RC_ColorBalance,
+    RC_ChannelMixer,
+    RC_CurvesAdjust,
+)
 
 # Import channel operations
 from .channel_ops import RC_ChannelExtractor, RC_MaskApply
@@ -44,6 +51,7 @@ NODE_CLASS_MAPPINGS = {
     # Adjustment nodes
     "RC_OpacityAdjust": RC_OpacityAdjust,
     "RC_LevelsAdjust": RC_LevelsAdjust,
+    "RC_CurvesAdjust": RC_CurvesAdjust,
     "RC_BrightnessContrast": RC_BrightnessContrast,
     "RC_ColorBalance": RC_ColorBalance,
     "RC_ChannelMixer": RC_ChannelMixer,
@@ -81,6 +89,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     # Adjustment nodes
     "RC_OpacityAdjust": "RC Opacity Adjust",
     "RC_LevelsAdjust": "RC Levels",
+    "RC_CurvesAdjust": "RC Curves",
     "RC_BrightnessContrast": "RC Brightness/Contrast",
     "RC_ColorBalance": "RC Color Balance",
     "RC_ChannelMixer": "RC Channel Mixer",
@@ -104,7 +113,7 @@ __author__ = "RC Studio"
 print(f"\n🎨 RC Image Compositor v{__version__} loaded successfully!")
 print("   ✨ Complete 24 Photoshop Blend Modes + Layer Effects")
 print("   🔧 Utilities: Canvas Padding, Image Scale, Crop, Canvas Resize")
-print("   🎚️  Adjustments: Opacity, Levels, Brightness/Contrast, Color Balance, Channel Mixer")
+print("   🎚️  Adjustments: Opacity, Levels, Curves, Brightness/Contrast, Color Balance, Channel Mixer")
 print("   🌐 Full bilingual support")
 print("   📁 Modular architecture for professional workflows")
 print("   🎯 Professional Photoshop-grade effects\n")
