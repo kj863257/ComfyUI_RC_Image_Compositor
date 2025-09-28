@@ -978,3 +978,192 @@ class RC_CurvesAdjust:
 
         result_tensor = torch.from_numpy(result.astype(np.float32)).unsqueeze(0)
         return (result_tensor,)
+
+
+class RC_Threshold:
+    """Threshold Adjustment Node"""
+    RETURN_TYPES = ("IMAGE",)
+    FUNCTION = "adjust_threshold"
+    CATEGORY = "RC/Adjustments"
+    DESCRIPTION = "Convert image to high contrast black and white using threshold values."
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "image": ("IMAGE",),
+                "threshold": ("FLOAT", {
+                    "default": 0.5, "min": 0.0, "max": 1.0, "step": 0.01,
+                    "tooltip": "Threshold value (0.0-1.0, pixels below this become black, above become white)"
+                }),
+                "method": (["luminance", "average", "red", "green", "blue"], {
+                    "default": "luminance",
+                    "tooltip": (
+                        "Threshold calculation method:\n"
+                        "- luminance: Use perceptual luminance (0.299R + 0.587G + 0.114B)\n"
+                        "- average: Simple RGB average (R + G + B) / 3\n"
+                        "- red/green/blue: Use single color channel"
+                    )
+                }),
+                "invert": ("BOOLEAN", {
+                    "default": False,
+                    "tooltip": "Invert the threshold result (black becomes white, white becomes black)"
+                }),
+            }
+        }
+
+    def adjust_threshold(self, image, threshold, method, invert):
+        # Convert to numpy
+        img = image[0].cpu().numpy()
+        has_alpha = img.shape[2] == 4
+
+        if has_alpha:
+            rgb = img[:, :, :3]
+            alpha = img[:, :, 3]
+        else:
+            rgb = img
+
+        # Optimized grayscale conversion using pre-computed weights
+        if method == "luminance":
+            # Vectorized perceptual luminance (fastest matrix multiplication)
+            luminance_weights = np.array([0.299, 0.587, 0.114], dtype=np.float32)
+            gray = np.dot(rgb, luminance_weights)
+        elif method == "average":
+            # Optimized average using sum and division
+            gray = np.sum(rgb, axis=2) / 3.0
+        elif method == "red":
+            gray = rgb[:, :, 0]
+        elif method == "green":
+            gray = rgb[:, :, 1]
+        elif method == "blue":
+            gray = rgb[:, :, 2]
+
+        # Vectorized threshold comparison
+        mask = gray >= threshold
+        if invert:
+            mask = ~mask
+
+        # Efficient broadcast operation for RGB channels
+        mask_3d = np.expand_dims(mask, axis=2)
+        result_rgb = np.where(mask_3d, 1.0, 0.0)
+
+        # Reassemble image
+        if has_alpha:
+            result = np.dstack([result_rgb, alpha])
+        else:
+            result = result_rgb
+
+        # Convert back to tensor (already float32)
+        result_tensor = torch.from_numpy(result).unsqueeze(0)
+        return (result_tensor,)
+
+
+class RC_Vibrance:
+    """Vibrance Adjustment Node"""
+    RETURN_TYPES = ("IMAGE",)
+    FUNCTION = "adjust_vibrance"
+    CATEGORY = "RC/Adjustments"
+    DESCRIPTION = "Smart saturation enhancement that protects skin tones and avoids color clipping."
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "image": ("IMAGE",),
+                "vibrance": ("FLOAT", {
+                    "default": 0.0, "min": -100.0, "max": 100.0, "step": 1.0,
+                    "tooltip": "Vibrance adjustment (-100 to 100, negative=less vibrant, positive=more vibrant)"
+                }),
+                "saturation": ("FLOAT", {
+                    "default": 0.0, "min": -100.0, "max": 100.0, "step": 1.0,
+                    "tooltip": "Additional saturation adjustment (-100 to 100, applied uniformly to all colors)"
+                }),
+                "protect_skin_tones": ("BOOLEAN", {
+                    "default": True,
+                    "tooltip": (
+                        "Protect skin tones:\n"
+                        "- True: Reduce effect on orange/yellow skin tones\n"
+                        "- False: Apply vibrance uniformly to all colors"
+                    )
+                }),
+                "skin_protection_strength": ("FLOAT", {
+                    "default": 0.7, "min": 0.0, "max": 1.0, "step": 0.1,
+                    "tooltip": "Skin tone protection strength (0.0=no protection, 1.0=maximum protection)"
+                }),
+            }
+        }
+
+    def adjust_vibrance(self, image, vibrance, saturation, protect_skin_tones, skin_protection_strength):
+        # Early exit optimization
+        if vibrance == 0 and saturation == 0:
+            return (image,)
+
+        # Convert to numpy, stay in float32 for better performance
+        img = image[0].cpu().numpy()
+        has_alpha = img.shape[2] == 4
+
+        if has_alpha:
+            rgb = img[:, :, :3]
+            alpha = img[:, :, 3]
+        else:
+            rgb = img
+
+        # Convert factors once
+        vibrance_factor = vibrance / 100.0
+        saturation_factor = saturation / 100.0
+
+        # Optimized RGB to HSV conversion (avoid unnecessary uint8 conversion)
+        rgb_clamped = np.clip(rgb, 0, 1)
+        hsv = cv2.cvtColor(rgb_clamped, cv2.COLOR_RGB2HSV)
+        h, s, v = hsv[:, :, 0], hsv[:, :, 1], hsv[:, :, 2]
+
+        # Vibrance processing with enhanced skin protection
+        if vibrance_factor != 0:
+            # Vectorized saturation protection (avoid division)
+            saturation_protection = 1.0 - s
+
+            # Enhanced skin tone protection with adjustable strength
+            if protect_skin_tones:
+                # Optimized skin tone detection with expanded range and smoother falloff
+                # Skin tones: 5-35 degrees (OpenCV hue range 0-360)
+                skin_hue_center = 20.0  # Orange-yellow skin tone center
+                skin_hue_range = 15.0   # ±15 degrees range
+
+                # Smooth falloff function for skin protection
+                hue_distance = np.minimum(
+                    np.abs(h - skin_hue_center),
+                    360.0 - np.abs(h - skin_hue_center)  # Handle hue wrap-around
+                )
+                skin_mask = np.maximum(0.0, 1.0 - (hue_distance / skin_hue_range))
+
+                # Apply protection strength parameter
+                protection_amount = 1.0 - (skin_protection_strength * skin_mask)
+                skin_protection = protection_amount
+            else:
+                skin_protection = 1.0
+
+            # Vectorized vibrance application
+            vibrance_multiplier = 1.0 + (vibrance_factor * saturation_protection * skin_protection)
+            s = s * vibrance_multiplier
+
+        # Regular saturation adjustment (vectorized)
+        if saturation_factor != 0:
+            s = s * (1.0 + saturation_factor)
+
+        # Clamp and reconstruct (stay in float32)
+        s = np.clip(s, 0.0, 1.0)
+        hsv_adjusted = np.stack([h, s, v], axis=2)
+
+        # Convert back to RGB
+        rgb_adjusted = cv2.cvtColor(hsv_adjusted, cv2.COLOR_HSV2RGB)
+        rgb_adjusted = np.clip(rgb_adjusted, 0.0, 1.0)
+
+        # Reassemble image
+        if has_alpha:
+            result = np.dstack([rgb_adjusted, alpha])
+        else:
+            result = rgb_adjusted
+
+        # Convert back to tensor
+        result_tensor = torch.from_numpy(result).unsqueeze(0)
+        return (result_tensor,)

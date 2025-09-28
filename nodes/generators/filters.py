@@ -394,3 +394,166 @@ class RC_HueSaturation:
         # Convert back to tensor
         result_tensor = torch.from_numpy(result.astype(np.float32) / 255.0).unsqueeze(0)
         return (result_tensor,)
+
+
+class RC_AddNoise:
+    """Add Noise Filter Node"""
+    RETURN_TYPES = ("IMAGE",)
+    FUNCTION = "add_noise"
+    CATEGORY = "RC/Filters"
+    DESCRIPTION = "Add customizable noise to images for texture or artistic effects."
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "image": ("IMAGE",),
+                "noise_type": (["gaussian", "gaussian_blur", "uniform", "salt_pepper", "speckle"], {
+                    "default": "gaussian",
+                    "tooltip": (
+                        "Noise type:\n"
+                        "- gaussian: Sharp random noise with bell curve distribution\n"
+                        "- gaussian_blur: Smooth Gaussian distributed noise with blur\n"
+                        "- uniform: Evenly distributed random noise\n"
+                        "- salt_pepper: Black and white speckles\n"
+                        "- speckle: Multiplicative noise (like film grain)"
+                    )
+                }),
+                "amount": ("FLOAT", {
+                    "default": 10.0, "min": 0.0, "max": 100.0, "step": 0.1,
+                    "tooltip": "Noise intensity (0-100, higher values = more noise)"
+                }),
+                "monochromatic": ("BOOLEAN", {
+                    "default": False,
+                    "tooltip": (
+                        "Monochromatic noise:\n"
+                        "- True: Same noise pattern for all RGB channels (grayscale noise)\n"
+                        "- False: Independent noise for each color channel (color noise)"
+                    )
+                }),
+                "preserve_alpha": ("BOOLEAN", {
+                    "default": True,
+                    "tooltip": "Keep original alpha channel unchanged"
+                }),
+            }
+        }
+
+    def add_noise(self, image, noise_type, amount, monochromatic, preserve_alpha):
+        # Early exit for zero noise
+        if amount == 0:
+            return (image,)
+
+        # Convert to numpy
+        img = image[0].cpu().numpy()
+        has_alpha = img.shape[2] == 4
+
+        if has_alpha:
+            rgb = img[:, :, :3]
+            alpha = img[:, :, 3]
+        else:
+            rgb = img
+
+        h, w = rgb.shape[:2]
+        noise_factor = amount / 100.0
+
+        # Pre-compute noise shape for optimization
+        if monochromatic:
+            noise_shape = (h, w, 1)
+        else:
+            noise_shape = (h, w, 3)
+
+        # Generate noise based on type (optimized)
+        if noise_type == "gaussian":
+            # Vectorized sharp Gaussian noise generation
+            noise = np.random.normal(0, noise_factor * 0.3, noise_shape)
+            if monochromatic:
+                noise = np.broadcast_to(noise, (h, w, 3))
+            result_rgb = rgb + noise
+
+        elif noise_type == "gaussian_blur":
+            # Smooth Gaussian distributed noise with blur
+            noise = np.random.normal(0, noise_factor * 0.4, noise_shape)
+            if monochromatic:
+                noise = np.broadcast_to(noise, (h, w, 3))
+
+            # Apply Gaussian blur to noise for smoother appearance
+            blur_kernel_size = max(3, int(noise_factor * 10))
+            if blur_kernel_size % 2 == 0:
+                blur_kernel_size += 1  # Ensure odd kernel size
+
+            # Blur each channel
+            noise_blurred = np.zeros_like(noise)
+            for c in range(3):
+                noise_blurred[:, :, c] = cv2.GaussianBlur(
+                    noise[:, :, c],
+                    (blur_kernel_size, blur_kernel_size),
+                    noise_factor * 2.0
+                )
+
+            result_rgb = rgb + noise_blurred
+
+        elif noise_type == "uniform":
+            # Vectorized uniform noise generation
+            noise = np.random.uniform(-noise_factor * 0.5, noise_factor * 0.5, noise_shape)
+            if monochromatic:
+                noise = np.broadcast_to(noise, (h, w, 3))
+            result_rgb = rgb + noise
+
+        elif noise_type == "salt_pepper":
+            # Optimized salt and pepper noise
+            result_rgb = rgb.copy()
+
+            # Vectorized salt/pepper generation
+            if monochromatic:
+                # Single mask for all channels
+                noise_probability = noise_factor * 0.01
+                noise_mask = np.random.random((h, w)) < noise_probability
+                salt_mask = np.random.random((h, w)) < 0.5
+
+                # Vectorized assignment using broadcasting
+                salt_pixels = noise_mask & salt_mask
+                pepper_pixels = noise_mask & ~salt_mask
+
+                result_rgb[salt_pixels] = 1.0    # White (salt)
+                result_rgb[pepper_pixels] = 0.0  # Black (pepper)
+            else:
+                # Optimized per-channel processing
+                noise_probability = noise_factor * 0.01
+                for channel in range(3):
+                    channel_noise_mask = np.random.random((h, w)) < noise_probability
+                    channel_salt_mask = np.random.random((h, w)) < 0.5
+
+                    salt_pixels = channel_noise_mask & channel_salt_mask
+                    pepper_pixels = channel_noise_mask & ~channel_salt_mask
+
+                    result_rgb[salt_pixels, channel] = 1.0
+                    result_rgb[pepper_pixels, channel] = 0.0
+
+        elif noise_type == "speckle":
+            # Optimized speckle noise (multiplicative)
+            noise = np.random.normal(1.0, noise_factor * 0.2, noise_shape)
+            if monochromatic:
+                noise = np.broadcast_to(noise, (h, w, 3))
+            result_rgb = rgb * noise
+
+        # Single clamp operation
+        result_rgb = np.clip(result_rgb, 0.0, 1.0)
+
+        # Optimized image reassembly
+        if has_alpha:
+            if preserve_alpha:
+                result = np.dstack([result_rgb, alpha])
+            else:
+                # Optimized alpha noise application
+                if noise_type in ["gaussian", "uniform"]:
+                    alpha_noise = np.random.normal(0, noise_factor * 0.1, alpha.shape)
+                    result_alpha = np.clip(alpha + alpha_noise, 0.0, 1.0)
+                else:
+                    result_alpha = alpha  # Keep original for other noise types
+                result = np.dstack([result_rgb, result_alpha])
+        else:
+            result = result_rgb
+
+        # Convert back to tensor (already float32)
+        result_tensor = torch.from_numpy(result).unsqueeze(0)
+        return (result_tensor,)

@@ -4,6 +4,15 @@
     "RC/Layer Effects": "RC/Layer Effects",
     "RC/Filters": "RC/Filters",
     "RC/Adjustments": "RC/Adjustments",
-    "RC/Utilities": "RC/Utilities"
+    "RC/Utilities": "RC/Utilities",
+    "RC/Channel": "RC/Channel",
+    "RC/Generate": "RC/Generate",
+    "Image": "RC/Image",
+    "Layer Effects": "RC/Layer Effects",
+    "Filters": "RC/Filters",
+    "Adjustments": "RC/Adjustments",
+    "Utilities": "RC/Utilities",
+    "Channel": "RC/Channel",
+    "Generate": "RC/Generate"
   }
 }

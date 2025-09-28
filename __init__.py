@@ -5,7 +5,7 @@ from .nodes.core.compositor import RC_ImageCompositor, RC_LoadImageWithAlpha
 from .nodes.effects.layer_styles import RC_DropShadow, RC_Stroke, RC_OuterGlow
 
 # Import filters and adjustments
-from .nodes.generators.filters import RC_GaussianBlur, RC_Sharpen, RC_HueSaturation
+from .nodes.generators.filters import RC_GaussianBlur, RC_Sharpen, RC_HueSaturation, RC_AddNoise
 
 # Import utility nodes
 from .nodes.utilities.utilities import RC_CanvasPadding, RC_ImageScale, RC_ImageCrop, RC_CanvasResize
@@ -18,6 +18,8 @@ from .nodes.adjustments.adjustments import (
     RC_ColorBalance,
     RC_ChannelMixer,
     RC_CurvesAdjust,
+    RC_Threshold,
+    RC_Vibrance,
 )
 
 # Import channel operations
@@ -50,6 +52,7 @@ NODE_CLASS_MAPPINGS = {
     "RC_GaussianBlur": RC_GaussianBlur,
     "RC_Sharpen": RC_Sharpen,
     "RC_HueSaturation": RC_HueSaturation,
+    "RC_AddNoise": RC_AddNoise,
 
     # Utility nodes
     "RC_CanvasPadding": RC_CanvasPadding,
@@ -65,6 +68,8 @@ NODE_CLASS_MAPPINGS = {
     "RC_ColorBalance": RC_ColorBalance,
     "RC_ChannelMixer": RC_ChannelMixer,
     "RC_GradientMap": RC_GradientMap,
+    "RC_Threshold": RC_Threshold,
+    "RC_Vibrance": RC_Vibrance,
 
     # Channel operations
     "RC_ChannelExtractor": RC_ChannelExtractor,
@@ -95,6 +100,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "RC_GaussianBlur": "RC Gaussian Blur",
     "RC_Sharpen": "RC Sharpen",
     "RC_HueSaturation": "RC Hue/Saturation",
+    "RC_AddNoise": "RC Add Noise",
 
     # Utility nodes
     "RC_CanvasPadding": "RC Canvas Padding",
@@ -110,6 +116,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "RC_ColorBalance": "RC Color Balance",
     "RC_ChannelMixer": "RC Channel Mixer",
     "RC_GradientMap": "RC Gradient Map",
+    "RC_Threshold": "RC Threshold",
+    "RC_Vibrance": "RC Vibrance",
 
     # Channel operations
     "RC_ChannelExtractor": "RC Channel Extractor",

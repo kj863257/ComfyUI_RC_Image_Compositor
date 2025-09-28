@@ -851,6 +851,74 @@
       }
     }
   },
+  "RC_Threshold": {
+    "display_name": "RC 阈值调整",
+    "inputs": {
+      "image": {
+        "name": "图像"
+      },
+      "threshold": {
+        "name": "阈值",
+        "tooltip": "阈值（0.0-1.0，低于此值变黑，高于此值变白）"
+      },
+      "method": {
+        "name": "计算方法",
+        "tooltip": "阈值计算方法：\n- luminance: 感知亮度 (0.299R + 0.587G + 0.114B)\n- average: 简单RGB平均值\n- red/green/blue: 使用单个颜色通道"
+      },
+      "invert": {
+        "name": "反转",
+        "tooltip": "反转阈值结果（黑变白，白变黑）"
+      }
+    }
+  },
+  "RC_Vibrance": {
+    "display_name": "RC 自然饱和度",
+    "inputs": {
+      "image": {
+        "name": "图像"
+      },
+      "vibrance": {
+        "name": "自然饱和度",
+        "tooltip": "自然饱和度调整（-100到100，负值=降低，正值=增强）"
+      },
+      "saturation": {
+        "name": "饱和度",
+        "tooltip": "附加饱和度调整（-100到100，对所有颜色均匀应用）"
+      },
+      "protect_skin_tones": {
+        "name": "保护肤色",
+        "tooltip": "保护肤色：\n- True: 减少对橙黄色肤色的效果\n- False: 对所有颜色均匀应用自然饱和度"
+      },
+      "skin_protection_strength": {
+        "name": "肤色保护强度",
+        "tooltip": "肤色保护强度（0.0=无保护，1.0=最大保护）"
+      }
+    }
+  },
+  "RC_AddNoise": {
+    "display_name": "RC 添加杂色",
+    "inputs": {
+      "image": {
+        "name": "图像"
+      },
+      "noise_type": {
+        "name": "杂色类型",
+        "tooltip": "杂色类型：\n- gaussian: 锐利随机杂色（钟形分布）\n- gaussian_blur: 平滑高斯分布杂色（带模糊）\n- uniform: 均匀分布随机杂色\n- salt_pepper: 椒盐杂色（黑白斑点）\n- speckle: 斑点杂色（乘性杂色，类似胶片颗粒）"
+      },
+      "amount": {
+        "name": "数量",
+        "tooltip": "杂色强度（0-100，数值越高杂色越多）"
+      },
+      "monochromatic": {
+        "name": "单色杂色",
+        "tooltip": "单色杂色：\n- True: 所有RGB通道使用相同杂色图案（灰度杂色）\n- False: 每个颜色通道独立杂色（彩色杂色）"
+      },
+      "preserve_alpha": {
+        "name": "保留透明度",
+        "tooltip": "保持原始Alpha通道不变"
+      }
+    }
+  },
   "_categories": {
     "RC/Image": "RC/图像",
     "RC/Adjustments": "RC/调整",

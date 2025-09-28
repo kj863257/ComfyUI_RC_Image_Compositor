@@ -851,6 +851,74 @@
       }
     }
   },
+  "RC_Threshold": {
+    "display_name": "RC Threshold",
+    "inputs": {
+      "image": {
+        "name": "Image"
+      },
+      "threshold": {
+        "name": "Threshold",
+        "tooltip": "Threshold value (0.0-1.0, pixels below this become black, above become white)"
+      },
+      "method": {
+        "name": "Method",
+        "tooltip": "Threshold calculation method:\n- luminance: Use perceptual luminance (0.299R + 0.587G + 0.114B)\n- average: Simple RGB average (R + G + B) / 3\n- red/green/blue: Use single color channel"
+      },
+      "invert": {
+        "name": "Invert",
+        "tooltip": "Invert the threshold result (black becomes white, white becomes black)"
+      }
+    }
+  },
+  "RC_Vibrance": {
+    "display_name": "RC Vibrance",
+    "inputs": {
+      "image": {
+        "name": "Image"
+      },
+      "vibrance": {
+        "name": "Vibrance",
+        "tooltip": "Vibrance adjustment (-100 to 100, negative=less vibrant, positive=more vibrant)"
+      },
+      "saturation": {
+        "name": "Saturation",
+        "tooltip": "Additional saturation adjustment (-100 to 100, applied uniformly to all colors)"
+      },
+      "protect_skin_tones": {
+        "name": "Protect Skin Tones",
+        "tooltip": "Protect skin tones:\n- True: Reduce effect on orange/yellow skin tones\n- False: Apply vibrance uniformly to all colors"
+      },
+      "skin_protection_strength": {
+        "name": "Skin Protection Strength",
+        "tooltip": "Skin tone protection strength (0.0=no protection, 1.0=maximum protection)"
+      }
+    }
+  },
+  "RC_AddNoise": {
+    "display_name": "RC Add Noise",
+    "inputs": {
+      "image": {
+        "name": "Image"
+      },
+      "noise_type": {
+        "name": "Noise Type",
+        "tooltip": "Noise type:\n- gaussian: Sharp random noise with bell curve distribution\n- gaussian_blur: Smooth Gaussian distributed noise with blur\n- uniform: Evenly distributed random noise\n- salt_pepper: Black and white speckles\n- speckle: Multiplicative noise (like film grain)"
+      },
+      "amount": {
+        "name": "Amount",
+        "tooltip": "Noise intensity (0-100, higher values = more noise)"
+      },
+      "monochromatic": {
+        "name": "Monochromatic",
+        "tooltip": "Monochromatic noise:\n- True: Same noise pattern for all RGB channels (grayscale noise)\n- False: Independent noise for each color channel (color noise)"
+      },
+      "preserve_alpha": {
+        "name": "Preserve Alpha",
+        "tooltip": "Keep original alpha channel unchanged"
+      }
+    }
+  },
   "_categories": {
     "RC/Image": "RC/Image",
     "RC/Adjustments": "RC/Adjustments",

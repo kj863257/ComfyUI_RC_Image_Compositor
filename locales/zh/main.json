@@ -4,6 +4,15 @@
     "RC/Layer Effects": "RC/图层效果",
     "RC/Filters": "RC/滤镜",
     "RC/Adjustments": "RC/调整",
-    "RC/Utilities": "RC/实用工具"
+    "RC/Utilities": "RC/实用工具",
+    "RC/Channel": "RC/通道",
+    "RC/Generate": "RC/生成",
+    "Image": "图像",
+    "Layer Effects": "图层效果",
+    "Filters": "滤镜",
+    "Adjustments": "调整",
+    "Utilities": "实用工具",
+    "Channel": "通道",
+    "Generate": "生成"
   }
 }
