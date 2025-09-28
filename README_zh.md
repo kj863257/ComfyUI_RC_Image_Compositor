@@ -5,6 +5,42 @@
 
 ---
 
+## 🖼️ 功能展示
+
+### 专业图层混合
+![图层混合](doc/images/layer_blending.png)
+*RC 图像合成器支持全部 24 种专业 Photoshop 风格混合模式，包括 HSL 模式，提供精确的合成控制。*
+
+### 高级曲线调整
+![曲线调整](doc/images/curves_adjustment.png)
+*交互式曲线编辑器，采用自然立方样条插值，支持 RGB 和独立通道调整，实现专业色彩分级。*
+
+### 专业渐变映射
+![渐变映射](doc/images/gradient_mapping.png)
+*使用渐变映射变换图像 - 完美适用于色彩分级、色调映射和创意色彩效果，支持 16 种混合模式。*
+
+### 智能渐变生成器
+![渐变生成器](doc/images/gradient_generator.png)
+*创建自定义渐变，支持多色节点、透明度和各种渐变类型（线性、径向、角度、反射）。*
+
+### 自动色彩校正
+![自动色彩校正](doc/images/auto_color_correction.png)
+*Photoshop 风格的自动色彩校正，提供 4 种智能算法，实现即时图像增强。*
+
+### 专业色彩平衡
+![色彩平衡](doc/images/color_balance.png)
+*使用 CMY 控制和色调范围选择进行精细色彩平衡调整，实现精确色彩校正。*
+
+### 高低频磨皮
+![高低频磨皮](doc/images/high_low_frequency_skin_smoothing.png)
+*专业频率分离技术，自动肤色检测和边缘保护，实现自然人像磨皮效果。*
+
+### 完整图层效果工作流
+![外发光和图层混合打水印工作流](doc/images/outer_glow_blend_watermark_workflow.png)
+*综合工作流展示外发光效果、图层混合和水印创建 - 全部支持自动画布扩展。*
+
+---
+
 ## ✨ 核心特性
 
 ### 🎭 **专业图层样式**

@@ -292,87 +292,97 @@ class RC_ColorBalance:
         }
 
     def adjust_color_balance(self, image, cyan_red, magenta_green, yellow_blue, tone_range, preserve_luminosity):
-        # Convert to numpy
-        img = (image[0].cpu().numpy() * 255).astype(np.uint8)
+        # Convert to numpy, stay in float32 throughout processing
+        img = image[0].cpu().numpy()
         has_alpha = img.shape[2] == 4
 
         if has_alpha:
-            rgb = img[:, :, :3].astype(np.float32) / 255.0
+            rgb = img[:, :, :3]
             alpha = img[:, :, 3]
         else:
-            rgb = img.astype(np.float32) / 255.0
+            rgb = img
 
-        # Store original luminosity
-        if preserve_luminosity:
-            original_luminosity = np.dot(rgb, [0.299, 0.587, 0.114])
+        # Calculate luminosity once and reuse (avoid redundant calculations)
+        luminosity_weights = np.array([0.299, 0.587, 0.114], dtype=np.float32)
+        luminosity = np.dot(rgb, luminosity_weights)
 
-        # Create tone mask based on range
-        luminosity = np.dot(rgb, [0.299, 0.587, 0.114])
+        # Store original luminosity for restoration
+        original_luminosity = luminosity if preserve_luminosity else None
 
+        # Create tone mask based on range (optimized calculations)
         if tone_range == "shadows":
-            # More effect on darker areas
             mask = 1.0 - np.power(luminosity, 0.5)
         elif tone_range == "highlights":
-            # More effect on brighter areas
             mask = np.power(luminosity, 0.5)
         else:  # midtones
-            # Bell curve centered on 0.5
             mask = 1.0 - np.abs(luminosity - 0.5) * 2.0
             mask = np.power(mask, 0.5)
 
-        # Apply color balance adjustments
-        rgb_adjusted = rgb.copy()
+        # Expand mask for broadcasting to RGB channels
+        mask_3d = np.expand_dims(mask, axis=2)
 
         # Convert adjustments to factors
         cyan_red_factor = cyan_red / 100.0
         magenta_green_factor = magenta_green / 100.0
         yellow_blue_factor = yellow_blue / 100.0
 
-        # Apply color shifts
+        # Vectorized color adjustments (eliminate conditional branches and copies)
+        rgb_adjusted = rgb.copy()
+
+        # Cyan-Red adjustment (vectorized)
         if cyan_red_factor != 0:
-            if cyan_red_factor > 0:  # More red
-                rgb_adjusted[:, :, 0] += mask * cyan_red_factor * 0.3
-            else:  # More cyan
-                rgb_adjusted[:, :, 1] += mask * abs(cyan_red_factor) * 0.2
-                rgb_adjusted[:, :, 2] += mask * abs(cyan_red_factor) * 0.2
+            red_adjustment = np.where(cyan_red_factor > 0,
+                                    mask_3d * cyan_red_factor * 0.3, 0)
+            cyan_adjustment = np.where(cyan_red_factor < 0,
+                                     mask_3d * abs(cyan_red_factor) * 0.2, 0)
 
+            rgb_adjusted[:, :, 0] += red_adjustment.squeeze()
+            rgb_adjusted[:, :, 1] += cyan_adjustment.squeeze()
+            rgb_adjusted[:, :, 2] += cyan_adjustment.squeeze()
+
+        # Magenta-Green adjustment (vectorized)
         if magenta_green_factor != 0:
-            if magenta_green_factor > 0:  # More green
-                rgb_adjusted[:, :, 1] += mask * magenta_green_factor * 0.3
-            else:  # More magenta
-                rgb_adjusted[:, :, 0] += mask * abs(magenta_green_factor) * 0.2
-                rgb_adjusted[:, :, 2] += mask * abs(magenta_green_factor) * 0.2
+            green_adjustment = np.where(magenta_green_factor > 0,
+                                      mask_3d * magenta_green_factor * 0.3, 0)
+            magenta_adjustment = np.where(magenta_green_factor < 0,
+                                        mask_3d * abs(magenta_green_factor) * 0.2, 0)
 
+            rgb_adjusted[:, :, 1] += green_adjustment.squeeze()
+            rgb_adjusted[:, :, 0] += magenta_adjustment.squeeze()
+            rgb_adjusted[:, :, 2] += magenta_adjustment.squeeze()
+
+        # Yellow-Blue adjustment (vectorized)
         if yellow_blue_factor != 0:
-            if yellow_blue_factor > 0:  # More blue
-                rgb_adjusted[:, :, 2] += mask * yellow_blue_factor * 0.3
-            else:  # More yellow
-                rgb_adjusted[:, :, 0] += mask * abs(yellow_blue_factor) * 0.2
-                rgb_adjusted[:, :, 1] += mask * abs(yellow_blue_factor) * 0.2
+            blue_adjustment = np.where(yellow_blue_factor > 0,
+                                     mask_3d * yellow_blue_factor * 0.3, 0)
+            yellow_adjustment = np.where(yellow_blue_factor < 0,
+                                       mask_3d * abs(yellow_blue_factor) * 0.2, 0)
+
+            rgb_adjusted[:, :, 2] += blue_adjustment.squeeze()
+            rgb_adjusted[:, :, 0] += yellow_adjustment.squeeze()
+            rgb_adjusted[:, :, 1] += yellow_adjustment.squeeze()
 
         # Clamp values
         rgb_adjusted = np.clip(rgb_adjusted, 0.0, 1.0)
 
-        # Restore luminosity if requested
-        if preserve_luminosity:
-            new_luminosity = np.dot(rgb_adjusted, [0.299, 0.587, 0.114])
-            # Avoid division by zero
-            scale = np.where(new_luminosity > 0.001, original_luminosity / new_luminosity, 1.0)
-            scale = np.expand_dims(scale, axis=2)
-            rgb_adjusted = rgb_adjusted * scale
+        # Restore luminosity if requested (optimized)
+        if preserve_luminosity and original_luminosity is not None:
+            new_luminosity = np.dot(rgb_adjusted, luminosity_weights)
+            # Vectorized division with safe handling
+            scale = np.where(new_luminosity > 0.001,
+                           original_luminosity / new_luminosity, 1.0)
+            scale_3d = np.expand_dims(scale, axis=2)
+            rgb_adjusted *= scale_3d
             rgb_adjusted = np.clip(rgb_adjusted, 0.0, 1.0)
 
-        # Convert back to uint8
-        rgb_adjusted = (rgb_adjusted * 255).astype(np.uint8)
-
-        # Reassemble image
+        # Reassemble image (avoid unnecessary conversions)
         if has_alpha:
             result = np.dstack([rgb_adjusted, alpha])
         else:
             result = rgb_adjusted
 
         # Convert back to tensor
-        result_tensor = torch.from_numpy(result.astype(np.float32) / 255.0).unsqueeze(0)
+        result_tensor = torch.from_numpy(result).unsqueeze(0)
         return (result_tensor,)
 
 

@@ -6,6 +6,42 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 
 ---
 
+## 🖼️ Feature Showcase
+
+### Professional Layer Blending
+![Layer Blending](doc/images/layer_blending.png)
+*RC Image Compositor supports all 24 professional Photoshop-style blend modes including HSL modes for precise compositing control.*
+
+### Advanced Curves Adjustment
+![Curves Adjustment](doc/images/curves_adjustment.png)
+*Interactive curves editor with natural cubic spline interpolation, supporting RGB and individual channel adjustments for professional color grading.*
+
+### Professional Gradient Mapping
+![Gradient Mapping](doc/images/gradient_mapping.png)
+*Transform your images with gradient mapping - perfect for color grading, tone mapping, and creative color effects with 16 blend modes.*
+
+### Intelligent Gradient Generator
+![Gradient Generator](doc/images/gradient_generator.png)
+*Create custom gradients with multiple color stops, transparency support, and various gradient types (linear, radial, angular, reflected).*
+
+### Auto Color Correction
+![Auto Color Correction](doc/images/auto_color_correction.png)
+*Photoshop-style automatic color correction with 4 intelligent algorithms for instant image enhancement.*
+
+### Professional Color Balance
+![Color Balance](doc/images/color_balance.png)
+*Fine-tune color balance with CMY controls and tonal range selection for precise color correction.*
+
+### High/Low Frequency Skin Smoothing
+![Skin Smoothing](doc/images/high_low_frequency_skin_smoothing.png)
+*Professional frequency separation technique with automatic skin tone detection and edge protection for natural portrait retouching.*
+
+### Complete Layer Effects Workflow
+![Outer Glow Workflow](doc/images/outer_glow_blend_watermark_workflow.png)
+*Comprehensive workflow showcasing outer glow effects, layer blending, and watermark creation - all with automatic canvas expansion.*
+
+---
+
 ## ✨ Key Features
 
 ### 🎭 **Professional Layer Styles**

@@ -850,5 +850,14 @@
         "tooltip": "Preserve original image luminosity when mapping colors (maintains original brightness)"
       }
     }
+  },
+  "_categories": {
+    "RC/Image": "RC/Image",
+    "RC/Adjustments": "RC/Adjustments",
+    "RC/Filters": "RC/Filters",
+    "RC/Generate": "RC/Generate",
+    "RC/Layer Effects": "RC/Layer Effects",
+    "RC/Utilities": "RC/Utilities",
+    "RC/Channel": "RC/Channel"
   }
 }

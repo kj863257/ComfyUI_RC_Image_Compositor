@@ -850,5 +850,14 @@
         "tooltip": "映射颜色时保留原始图像亮度（保持原始明度）"
       }
     }
+  },
+  "_categories": {
+    "RC/Image": "RC/图像",
+    "RC/Adjustments": "RC/调整",
+    "RC/Filters": "RC/滤镜",
+    "RC/Generate": "RC/生成",
+    "RC/Layer Effects": "RC/图层效果",
+    "RC/Utilities": "RC/工具",
+    "RC/Channel": "RC/通道"
   }
 }
