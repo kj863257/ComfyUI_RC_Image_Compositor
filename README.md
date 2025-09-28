@@ -15,6 +15,7 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 
 ### 🎨 **Complete Blend Mode Suite**
 - **24 Professional Blend Modes** Including all HSL modes (Hue, Saturation, Color, Luminosity)
+- **Blend Color Band** - **NEW!** Photoshop-style Blend If functionality with channel-based masking for advanced compositing control
 - **Enhanced Positioning System** - Achieve precise positioning control with alignment options
 - **Detailed Tooltips** - Every blend mode comes with visual descriptions
 - **Optional Background Support** - Automatically creates transparent canvas when no background is specified
@@ -30,7 +31,8 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 - **Brightness/Contrast** - Professional brightness and contrast control
 - **Color Balance** - CMY color balance with tonal range selection
 - **Channel Mixer** - Advanced RGB channel mixing with **B&W filter presets** (Red, Orange, Yellow, Green, Blue, Infrared filters)
-- **Auto Color Correction** - **NEW!** Photoshop-style automatic color correction with 4 algorithms (Enhance Monochromatic, Per-Channel, Dark/Light Colors, Brightness/Contrast)
+- **Auto Color Correction** - Photoshop-style automatic color correction with 4 algorithms (Enhance Monochromatic, Per-Channel, Dark/Light Colors, Brightness/Contrast)
+- **Gradient Map** - **NEW!** Professional gradient mapping for color grading, tone mapping, and creative color effects with 16 blend modes and luminosity preservation
 
 ### 🛠️ **Utility Tools**
 - **Canvas Padding** - Multiple padding modes (solid color, edge, mirror, transparent)
@@ -42,9 +44,10 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 - **Channel Extractor** - Extract RGB channels or luminance as grayscale or mask, commonly used for matting workflows
 - **Mask Apply** - Use mask to control image transparency, achieving matting effects with smooth feathering
 
-### 🌈 **Gradient Generation**
+### 🌈 **Gradient Generation & Mapping**
 - **Gradient Generator** - Create gradient images with transparency support and multiple color stops, computed with high-efficiency lookup tables
-- **Enhanced Presets** - Professional gradient presets including Gold, Purple, Fire, and more for quick creative workflows
+- **Gradient Map** - **NEW!** Professional gradient mapping for color grading, tone mapping, and creative color effects with 16 blend modes and luminosity preservation
+- **Enhanced Presets** - Professional gradient presets including Sepia, Cool Blue, Fire Heat, Thermal, Film Noir, and more for quick creative workflows
 
 ---
 

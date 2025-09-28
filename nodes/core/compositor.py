@@ -201,6 +201,10 @@ class RC_ImageCompositor:
                     "default": False,
                     "tooltip": "Flip vertically"
                 }),
+                "blend_if_data": ("STRING", {
+                    "default": '{"channel": "gray", "this_layer": {"black": [0.0, 0.0], "white": [1.0, 1.0]}, "underlying_layer": {"black": [0.0, 0.0], "white": [1.0, 1.0]}}',
+                    "tooltip": "Blend color band settings (JSON format)"
+                }),
             },
             "optional": {
                 "background": ("IMAGE", {
@@ -215,7 +219,8 @@ class RC_ImageCompositor:
                   x_offset=50, y_offset=50,
                   scale_mode="relative_to_background_width", scale=0.3,
                   rotation=0.0, opacity=0.7,
-                  blend_mode="normal", flip_h=False, flip_v=False):
+                  blend_mode="normal", flip_h=False, flip_v=False,
+                  blend_if_data='{"channel": "gray", "this_layer": {"black": [0.0, 0.0], "white": [1.0, 1.0]}, "underlying_layer": {"black": [0.0, 0.0], "white": [1.0, 1.0]}}'):
         # Convert overlay to numpy first to get dimensions
         fg = (overlay[0].cpu().numpy() * 255).astype(np.uint8)
         fg_h_orig, fg_w_orig = fg.shape[:2]
@@ -397,6 +402,20 @@ class RC_ImageCompositor:
                 # Apply blend mode (only on RGB channels)
                 blended = self.apply_blend_mode(bg_rgb, rgb[:, :, :3] if rgb.shape[2] == 4 else rgb, blend_mode)
 
+                # Apply blend color band logic
+                try:
+                    import json
+                    blend_if_settings = json.loads(blend_if_data)
+                    blend_mask = self.calculate_blend_if_mask(
+                        bg_rgb, rgb[:, :, :3] if rgb.shape[2] == 4 else rgb,
+                        blend_if_settings
+                    )
+                    alpha = alpha * blend_mask
+                except (json.JSONDecodeError, KeyError, ValueError, TypeError) as e:
+                    # If JSON parsing or mask calculation fails, continue without blend if effect
+                    # This ensures graceful degradation rather than complete failure
+                    pass
+
                 # Clamp blend results to [0, 1]
                 blended = np.clip(blended, 0.0, 1.0)
 
@@ -524,6 +543,79 @@ class RC_ImageCompositor:
 
         # Convert back to RGB
         return hsl_to_rgb_batch(result_hsl)
+
+    def calculate_blend_if_mask(self, bg_rgb, fg_rgb, blend_if_settings):
+        """Calculate blend color band mask based on JSON settings"""
+
+        # ITU-R BT.601 luminance weights (Photoshop standard)
+        LUMA_WEIGHTS = np.array([0.299, 0.587, 0.114])
+
+        channel = blend_if_settings.get("channel", "gray")
+        this_layer = blend_if_settings.get("this_layer", {"black": [0.0, 0.0], "white": [1.0, 1.0]})
+        underlying_layer = blend_if_settings.get("underlying_layer", {"black": [0.0, 0.0], "white": [1.0, 1.0]})
+
+        # Get channel values based on selection (optimized)
+        if channel == "gray":
+            # Vectorized luminosity calculation
+            this_values = np.dot(fg_rgb, LUMA_WEIGHTS)
+            underlying_values = np.dot(bg_rgb, LUMA_WEIGHTS)
+        elif channel in ["red", "green", "blue"]:
+            channel_idx = {"red": 0, "green": 1, "blue": 2}[channel]
+            this_values = fg_rgb[:, :, channel_idx]
+            underlying_values = bg_rgb[:, :, channel_idx]
+        else:
+            # Default to gray (avoid code duplication)
+            this_values = np.dot(fg_rgb, LUMA_WEIGHTS)
+            underlying_values = np.dot(bg_rgb, LUMA_WEIGHTS)
+
+        # Helper function to calculate range mask (optimized)
+        def calculate_range_mask(values, black_range, white_range):
+            mask = np.ones_like(values)
+            black_start, black_end = min(black_range), max(black_range)
+            white_start, white_end = min(white_range), max(white_range)
+
+            # Combined black range processing
+            if black_start > 0 or black_end > black_start:
+                # Values below black_start are hidden
+                mask = np.where(values <= black_start, 0.0, mask)
+
+                # Smooth transition in black range
+                if black_end > black_start:
+                    transition_mask = (values > black_start) & (values < black_end)
+                    transition_alpha = (values - black_start) / (black_end - black_start)
+                    mask = np.where(transition_mask, transition_alpha, mask)
+
+            # Combined white range processing
+            if white_end < 1 or white_start < white_end:
+                # Values above white_end are hidden
+                mask = np.where(values >= white_end, 0.0, mask)
+
+                # Smooth transition in white range
+                if white_end > white_start:
+                    transition_mask = (values > white_start) & (values < white_end)
+                    transition_alpha = 1.0 - (values - white_start) / (white_end - white_start)
+                    mask = np.where(transition_mask, transition_alpha, mask)
+
+            return mask
+
+        # Calculate masks for both layers
+        this_mask = calculate_range_mask(
+            this_values,
+            this_layer.get("black", [0.0, 0.0]),
+            this_layer.get("white", [1.0, 1.0])
+        )
+
+        underlying_mask = calculate_range_mask(
+            underlying_values,
+            underlying_layer.get("black", [0.0, 0.0]),
+            underlying_layer.get("white", [1.0, 1.0])
+        )
+
+        # Combine masks: both conditions must be met for blending to occur
+        final_mask = this_mask * underlying_mask
+
+        # Add dimension for broadcasting with alpha
+        return np.expand_dims(final_mask, axis=2)
 
 
 class RC_LoadImageWithAlpha:

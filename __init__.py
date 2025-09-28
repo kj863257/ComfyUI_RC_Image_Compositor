@@ -32,6 +32,9 @@ from .nodes.adjustments.auto_color import RC_AutoColor
 # Import skin smoothing
 from .nodes.generators.skin_smoothing import RC_HighLowFrequencySkinSmoothing
 
+# Import gradient map
+from .nodes.adjustments.gradient_map import RC_GradientMap
+
 # Node class mappings - used by ComfyUI to register nodes
 NODE_CLASS_MAPPINGS = {
     # Core compositor nodes
@@ -61,6 +64,7 @@ NODE_CLASS_MAPPINGS = {
     "RC_BrightnessContrast": RC_BrightnessContrast,
     "RC_ColorBalance": RC_ColorBalance,
     "RC_ChannelMixer": RC_ChannelMixer,
+    "RC_GradientMap": RC_GradientMap,
 
     # Channel operations
     "RC_ChannelExtractor": RC_ChannelExtractor,
@@ -105,6 +109,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "RC_BrightnessContrast": "RC Brightness/Contrast",
     "RC_ColorBalance": "RC Color Balance",
     "RC_ChannelMixer": "RC Channel Mixer",
+    "RC_GradientMap": "RC Gradient Map",
 
     # Channel operations
     "RC_ChannelExtractor": "RC Channel Extractor",
@@ -127,63 +132,6 @@ __version__ = "2.0.0"
 __description__ = "Professional Photoshop-style layer effects and compositing for ComfyUI"
 __author__ = "RC Studio"
 
-# Setup API routes for auto curve calculation
-try:
-    from server import PromptServer
-    from aiohttp import web
-    import json
-    import torch
-    import numpy as np
-    from .nodes.adjustments.adjustments import RC_CurvesAdjust
-
-    @PromptServer.instance.routes.post("/rc_curves/auto_calculate")
-    async def auto_calculate_curve(request):
-        try:
-            # Get the node_id and image data from request
-            data = await request.json()
-            node_id = data.get("node_id")
-            channel = data.get("channel", "RGB")
-
-            # Auto curve adjustment - only modify RGB channel like Photoshop
-            # Very conservative adjustment similar to PS Auto Levels
-
-            # Simulate minimal auto adjustment - often PS only adjusts highlights
-            auto_points = [
-                {"x": 0.0, "y": 0.0},
-                {"x": 0.95, "y": 1.0},       # Very gentle highlight adjustment only
-                {"x": 1.0, "y": 1.0}
-            ]
-
-            # Check if black point adjustment is needed (distance check)
-            # If shadow clipping would be too close to start, skip it
-            black_point = 0.01  # Very minimal black point
-            if black_point > 0.05:  # Too close to start, skip
-                pass  # Don't add black point
-            else:
-                auto_points.insert(1, {"x": black_point, "y": 0.0})
-
-            # Only return RGB channel adjustment
-            auto_curves = {
-                "RGB": auto_points
-            }
-
-            return web.json_response({
-                "success": True,
-                "curves": auto_curves,
-                "message": "Auto adjustment applied to RGB, R, G, B channels"
-            })
-
-        except Exception as e:
-            return web.json_response({
-                "success": False,
-                "error": str(e)
-            }, status=500)
-
-
-    print("✅ RC Curves Auto API routes registered")
-
-except Exception as e:
-    print(f"⚠️ Could not register RC Curves API routes: {e}")
 
 # Inform user about the plugin capabilities
 print(f"\n🎨 RC Image Compositor v{__version__} loaded successfully!")

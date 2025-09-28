@@ -59,6 +59,10 @@
       "flip_v": {
         "name": "垂直翻转",
         "tooltip": "垂直翻转贴图"
+      },
+      "blend_if_data": {
+        "name": "混合颜色带",
+        "tooltip": "Photoshop风格的混合颜色带设置。根据颜色值控制像素混合：\n- 通道：选择灰色/红/绿/蓝通道进行分析\n- 本图层：通过颜色范围控制前景图层可见性\n- 下一图层：通过颜色范围控制背景图层混合\n- 范围滑块：黑色（阴影）和白色（高光）范围\n- 分离范围：Alt+拖拽滑块创建平滑过渡"
       }
     }
   },
@@ -819,6 +823,31 @@
       "mask": {
         "name": "蒙版",
         "tooltip": "可选蒙版限制平滑区域（1.0=平滑，0.0=保留）"
+      }
+    }
+  },
+  "RC_GradientMap": {
+    "display_name": "RC 渐变映射",
+    "inputs": {
+      "image": {
+        "name": "图像",
+        "tooltip": "输入图像以应用渐变映射"
+      },
+      "gradient_data": {
+        "name": "渐变",
+        "tooltip": "渐变映射数据。将图像亮度映射到渐变颜色：\n- 位置：亮度范围中的位置（0=黑色，1=白色）\n- 颜色：该亮度级别的RGB颜色和透明度\n- 使用渐变编辑器创建平滑颜色过渡"
+      },
+      "blend_mode": {
+        "name": "混合模式",
+        "tooltip": "渐变映射的混合模式：\n- normal：直接替换\n- multiply：变暗效果\n- screen：变亮效果\n- overlay：对比度增强\n- soft_light：柔和照明\n- hard_light：强烈照明\n- color_dodge：明亮高光\n- color_burn：深度阴影\n- darken/lighten：选择性亮度\n- difference/exclusion：创意效果\n- hue/saturation/color/luminosity：基于HSL的混合"
+      },
+      "opacity": {
+        "name": "不透明度",
+        "tooltip": "渐变映射效果的不透明度（0.0=无效果，1.0=完全效果）"
+      },
+      "preserve_luminosity": {
+        "name": "保留亮度",
+        "tooltip": "映射颜色时保留原始图像亮度（保持原始明度）"
       }
     }
   }

@@ -59,6 +59,10 @@
       "flip_v": {
         "name": "Flip Vertical",
         "tooltip": "Flip vertically"
+      },
+      "blend_if_data": {
+        "name": "Blend Color Band",
+        "tooltip": "Photoshop-style Blend Color Band settings. Controls which pixels blend based on color values:\n- Channel: Gray/Red/Green/Blue channel to analyze\n- This Layer: Controls foreground layer visibility by color range\n- Underlying Layer: Controls background layer blending by color range\n- Range sliders: Black (shadows) and White (highlights) ranges\n- Split ranges: Alt+drag sliders for smooth transitions"
       }
     }
   },
@@ -819,6 +823,31 @@
       "mask": {
         "name": "Mask",
         "tooltip": "Optional mask to limit smoothing to specific areas (1.0=smooth, 0.0=preserve)"
+      }
+    }
+  },
+  "RC_GradientMap": {
+    "display_name": "RC Gradient Map",
+    "inputs": {
+      "image": {
+        "name": "Image",
+        "tooltip": "Input image to apply gradient mapping"
+      },
+      "gradient_data": {
+        "name": "Gradient",
+        "tooltip": "Gradient mapping data. Maps image luminosity to gradient colors:\n- Position: Where in the luminosity range (0=black, 1=white)\n- Color: RGB color and alpha for that luminosity level\n- Use gradient editor to create smooth color transitions"
+      },
+      "blend_mode": {
+        "name": "Blend Mode",
+        "tooltip": "Blending mode for gradient mapping:\n- normal: Direct replacement\n- multiply: Darken effect\n- screen: Lighten effect\n- overlay: Contrast enhancement\n- soft_light: Gentle lighting\n- hard_light: Strong lighting\n- color_dodge: Bright highlights\n- color_burn: Deep shadows\n- darken/lighten: Selective brightness\n- difference/exclusion: Creative effects\n- hue/saturation/color/luminosity: HSL-based blending"
+      },
+      "opacity": {
+        "name": "Opacity",
+        "tooltip": "Opacity of the gradient mapping effect (0.0=no effect, 1.0=full effect)"
+      },
+      "preserve_luminosity": {
+        "name": "Preserve Luminosity",
+        "tooltip": "Preserve original image luminosity when mapping colors (maintains original brightness)"
       }
     }
   }

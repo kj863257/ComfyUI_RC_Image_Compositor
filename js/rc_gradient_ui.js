@@ -225,6 +225,38 @@ const PRESETS = [
             { position: 0.5, color: [255, 140, 0, 255] },
             { position: 1.0, color: [255, 255, 0, 255] }
         ]
+    },
+    {
+        name: "Forest",
+        stops: [
+            { position: 0.0, color: [20, 40, 10, 255] },
+            { position: 0.5, color: [60, 120, 30, 255] },
+            { position: 1.0, color: [150, 255, 100, 255] }
+        ]
+    },
+    {
+        name: "Sky",
+        stops: [
+            { position: 0.0, color: [135, 206, 235, 255] },
+            { position: 0.6, color: [70, 130, 180, 255] },
+            { position: 1.0, color: [25, 25, 112, 255] }
+        ]
+    },
+    {
+        name: "Copper",
+        stops: [
+            { position: 0.0, color: [101, 67, 33, 255] },
+            { position: 0.5, color: [184, 115, 51, 255] },
+            { position: 1.0, color: [255, 198, 140, 255] }
+        ]
+    },
+    {
+        name: "Cherry",
+        stops: [
+            { position: 0.0, color: [139, 0, 139, 255] },
+            { position: 0.4, color: [220, 20, 60, 255] },
+            { position: 1.0, color: [255, 182, 193, 255] }
+        ]
     }
 ];
 
