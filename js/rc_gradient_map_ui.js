@@ -53,6 +53,7 @@ app.registerExtension({
                         widget.callback(widget.value, this, app);
                     }
                     this.graph?.setDirtyCanvas(true, true);
+                    lastWidgetValue = widget.value;
                 };
 
                 // Listen for external widget value changes (e.g., loading saved workflows)
@@ -72,7 +73,7 @@ app.registerExtension({
                 };
 
                 // Check for widget value changes periodically
-                setInterval(checkWidgetValueChange, 100);
+                const valuePoller = setInterval(checkWidgetValueChange, 200);
 
                 // Add the editor to the node
                 const htmlWidget = this.addDOMWidget("gradient_map_editor", "div", container);
@@ -85,6 +86,12 @@ app.registerExtension({
                     Math.max(this.size[0], 320),
                     Math.max(this.size[1], this.size[1] + 280)
                 ]);
+
+                const onRemoved = this.onRemoved;
+                this.onRemoved = function () {
+                    clearInterval(valuePoller);
+                    return onRemoved ? onRemoved.apply(this, arguments) : undefined;
+                };
 
                 return ret;
             };

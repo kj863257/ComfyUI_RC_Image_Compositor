@@ -73,6 +73,7 @@ const styles = `
     cursor: pointer;
     user-select: none;
     z-index: 2;
+    filter: drop-shadow(0 0 0 1px rgba(0, 0, 0, 0.5)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.35));
 }
 
 .rc-blend-if-triangle.black {
@@ -81,7 +82,7 @@ const styles = `
     border-bottom: 10px solid #606060;
     transform: translate(-50%, 0%);
     top: 100%;
-    filter: drop-shadow(0 0 0 1px rgba(255, 255, 255, 0.3)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.3));
+    filter: drop-shadow(0 0 0 1px rgba(255, 255, 255, 0.6)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.35));
     transition: border-bottom-color 0.15s ease, filter 0.15s ease;
 }
 
@@ -91,7 +92,7 @@ const styles = `
     border-bottom: 10px solid #c0c0c0;
     transform: translate(-50%, 0%);
     top: 100%;
-    filter: drop-shadow(0 0 0 1px rgba(0, 0, 0, 0.4)) drop-shadow(0 1px 2px rgba(0, 0, 0, 0.2));
+    filter: drop-shadow(0 0 0 1px rgba(0, 0, 0, 0.65)) drop-shadow(0 1px 3px rgba(0, 0, 0, 0.35));
     transition: border-bottom-color 0.15s ease, filter 0.15s ease;
 }
 
@@ -137,6 +138,24 @@ const styles = `
 .rc-blend-if-triangle.split-left:hover,
 .rc-blend-if-triangle.split-right:hover {
     filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.4));
+}
+
+.rc-blend-if-split-indicator {
+    position: absolute;
+    top: calc(100% + 0.5px);
+    width: 1px;
+    height: 9.5px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 0.8), rgba(255, 255, 255, 0.25));
+    border-radius: 0.5px;
+    transform: translateX(-50%);
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.15s ease;
+    z-index: 3;
+}
+
+.rc-blend-if-split-indicator.visible {
+    opacity: 1;
 }
 
 .rc-blend-if-values {
@@ -377,6 +396,7 @@ app.registerExtension({
                     widget.callback(widget.value, node, app);
                 }
                 node?.graph?.setDirtyCanvas(true, true);
+                lastWidgetValue = widget.value;
             };
 
             // Initialize values from settings
@@ -560,7 +580,7 @@ app.registerExtension({
             };
 
             // Check for widget value changes periodically
-            setInterval(checkWidgetValueChange, 100);
+            const valuePoller = setInterval(checkWidgetValueChange, 200);
 
             // Initial update
             updateSliderBackground();
@@ -579,6 +599,14 @@ app.registerExtension({
                 Math.max(node.size[0], 350),
                 Math.max(node.size[1], node.size[1] + 340)
             ]);
+
+            const onRemoved = node.onRemoved;
+            node.onRemoved = function () {
+                thisLayerSlider?.teardown?.();
+                underLayerSlider?.teardown?.();
+                clearInterval(valuePoller);
+                return onRemoved ? onRemoved.apply(this, arguments) : undefined;
+            };
 
             return result;
         };
@@ -618,6 +646,18 @@ app.registerExtension({
             slider.triangles.whiteStart = createTriangle("white", 1);
             slider.triangles.whiteEnd = createTriangle("white", 1);
 
+            const createSplitIndicator = () => {
+                const indicator = document.createElement("div");
+                indicator.className = "rc-blend-if-split-indicator";
+                container.appendChild(indicator);
+                return indicator;
+            };
+
+            slider.splitIndicators = {
+                black: createSplitIndicator(),
+                white: createSplitIndicator()
+            };
+
             slider.updateTriangles = () => {
                 // Update visual styles for split triangles
                 const blackSplit = Math.abs(slider.blackStart - slider.blackEnd) > 0.001;
@@ -632,6 +672,7 @@ app.registerExtension({
                     slider.triangles.blackEnd.className = `rc-blend-if-triangle black split-right`;
                     slider.triangles.blackStart.style.display = 'block';
                     slider.triangles.blackEnd.style.display = 'block';
+                    slider.splitIndicators.black.classList.remove("visible");
                 } else {
                     // When not split, position both at the same location but only show one
                     const pos = (slider.blackStart * 100) + "%";
@@ -641,6 +682,9 @@ app.registerExtension({
                     slider.triangles.blackEnd.className = `rc-blend-if-triangle black`;
                     slider.triangles.blackStart.style.display = 'block';
                     slider.triangles.blackEnd.style.display = 'none';
+                    const indicator = slider.splitIndicators.black;
+                    indicator.style.left = pos;
+                    indicator.classList.add("visible");
                 }
 
                 // Update positions and styles for white triangles
@@ -652,6 +696,7 @@ app.registerExtension({
                     slider.triangles.whiteEnd.className = `rc-blend-if-triangle white split-right`;
                     slider.triangles.whiteStart.style.display = 'block';
                     slider.triangles.whiteEnd.style.display = 'block';
+                    slider.splitIndicators.white.classList.remove("visible");
                 } else {
                     // When not split, position both at the same location but only show one
                     const pos = (slider.whiteStart * 100) + "%";
@@ -661,6 +706,9 @@ app.registerExtension({
                     slider.triangles.whiteEnd.className = `rc-blend-if-triangle white`;
                     slider.triangles.whiteStart.style.display = 'block';
                     slider.triangles.whiteEnd.style.display = 'none';
+                    const indicator = slider.splitIndicators.white;
+                    indicator.style.left = pos;
+                    indicator.classList.add("visible");
                 }
             };
 
@@ -815,6 +863,14 @@ app.registerExtension({
             container.addEventListener("mousedown", handleMouseDown);
             document.addEventListener("mousemove", handleMouseMove);
             document.addEventListener("mouseup", handleMouseUp);
+
+            slider.teardown = () => {
+                container.removeEventListener("mousedown", handleMouseDown);
+                document.removeEventListener("mousemove", handleMouseMove);
+                document.removeEventListener("mouseup", handleMouseUp);
+                slider.splitIndicators?.black?.remove();
+                slider.splitIndicators?.white?.remove();
+            };
 
             return slider;
         };

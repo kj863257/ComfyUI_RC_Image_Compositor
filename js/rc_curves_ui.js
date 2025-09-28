@@ -561,24 +561,29 @@ app.registerExtension({
             widget.type = "converted-widget";
             widget.serializeValue = () => widget.value;
 
-            let payload;
-            try {
-                payload = JSON.parse(widget.value);
-            } catch (_) {
-                payload = {};
-            }
-
             const curves = {};
-            CHANNELS.forEach(ch => {
-                const channelPoints = payload?.channels?.[ch.id] || payload?.[ch.id];
-                curves[ch.id] = normalizePoints(channelPoints);
-            });
-
-            let activeChannel = CHANNELS.find(ch => ch.id === payload?.active_channel)?.id || "RGB";
             const selectedPerChannel = {};
-            CHANNELS.forEach(ch => {
-                selectedPerChannel[ch.id] = clamp(payload?.selection?.[ch.id] ?? 0, 0, curves[ch.id].length - 1);
-            });
+            let activeChannel = "RGB";
+
+            const applyPayload = (value) => {
+                let payload;
+                try {
+                    payload = JSON.parse(value);
+                } catch (_) {
+                    payload = {};
+                }
+
+                CHANNELS.forEach(ch => {
+                    const channelPoints = payload?.channels?.[ch.id] || payload?.[ch.id];
+                    curves[ch.id] = normalizePoints(channelPoints);
+                    const points = curves[ch.id];
+                    selectedPerChannel[ch.id] = clamp(payload?.selection?.[ch.id] ?? 0, 0, points.length - 1);
+                });
+
+                activeChannel = CHANNELS.find(ch => ch.id === payload?.active_channel)?.id || "RGB";
+            };
+
+            applyPayload(widget.value);
 
             const container = document.createElement("div");
             container.className = "rc-curves-editor";
@@ -614,20 +619,63 @@ app.registerExtension({
             const ctx = canvas.getContext("2d");
             const padding = 16;
 
-            // 自适应canvas尺寸的函数 - 修复ComfyUI缩放问题
-            const updateCanvasSize = () => {
+            let lastLogicalWidth = 0;
+            let lastLogicalHeight = 0;
+
+            // 同步 canvas 尺寸，确保缩放后仍然清晰
+            const syncCanvasSize = () => {
                 const rect = canvasWrapper.getBoundingClientRect();
-                // 不使用devicePixelRatio，避免ComfyUI缩放时的问题
-                canvas.width = rect.width;
-                canvas.height = rect.height;
-                draw();
+                const measuredWidth = rect?.width ?? 0;
+                const measuredHeight = rect?.height ?? 0;
+                const logicalWidth = measuredWidth > 0 ? measuredWidth : (lastLogicalWidth || canvas.width || 1);
+                const logicalHeight = measuredHeight > 0 ? measuredHeight : (lastLogicalHeight || canvas.height || 1);
+                const width = Math.max(1, Math.round(logicalWidth));
+                const height = Math.max(1, Math.round(logicalHeight));
+                let resized = false;
+                if (canvas.width !== width) {
+                    canvas.width = width;
+                    resized = true;
+                }
+                if (canvas.height !== height) {
+                    canvas.height = height;
+                    resized = true;
+                }
+                lastLogicalWidth = logicalWidth;
+                lastLogicalHeight = logicalHeight;
+                return { logicalWidth, logicalHeight, width, height, resized };
+            };
+
+            let scheduledFrame = null;
+            const requestRender = () => {
+                if (scheduledFrame !== null) return;
+                scheduledFrame = requestAnimationFrame(() => {
+                    scheduledFrame = null;
+                    draw();
+                });
             };
 
             // 使用ResizeObserver监听容器大小变化
             const resizeObserver = new ResizeObserver(() => {
-                updateCanvasSize();
+                requestRender();
             });
             resizeObserver.observe(canvasWrapper);
+
+            const pollIntervalMs = 150;
+            const checkSizeWithTimer = () => {
+                const rect = canvasWrapper.getBoundingClientRect();
+                const width = rect?.width ?? 0;
+                const height = rect?.height ?? 0;
+                if (width <= 0 && height <= 0) return;
+                if (Math.abs(width - lastLogicalWidth) > 0.5 || Math.abs(height - lastLogicalHeight) > 0.5) {
+                    lastLogicalWidth = width;
+                    lastLogicalHeight = height;
+                    requestRender();
+                }
+            };
+            const sizePoller = setInterval(checkSizeWithTimer, pollIntervalMs);
+            checkSizeWithTimer();
+
+            window.addEventListener("resize", requestRender);
 
             const infoRow = document.createElement("div");
             infoRow.className = "rc-curves-info-row";
@@ -741,6 +789,7 @@ app.registerExtension({
 
                 const serialized = JSON.stringify(payloadToSave);
                 widget.value = serialized;
+                lastWidgetValue = serialized;
                 if (widget.callback) {
                     widget.callback(serialized, node, appInstance);
                 }
@@ -769,10 +818,16 @@ app.registerExtension({
                 });
             };
 
-            const draw = () => {
-                const rect = canvasWrapper.getBoundingClientRect();
-                const displayWidth = canvas.width;
-                const displayHeight = canvas.height;
+            function draw() {
+                const metrics = syncCanvasSize();
+                const displayWidth = metrics.width;
+                const displayHeight = metrics.height;
+                const logicalWidth = metrics.logicalWidth;
+                const logicalHeight = metrics.logicalHeight;
+                const widthSpan = Math.max(1, logicalWidth - padding * 2);
+                const heightSpan = Math.max(1, logicalHeight - padding * 2);
+                const scaleX = logicalWidth ? displayWidth / logicalWidth : 1;
+                const scaleY = logicalHeight ? displayHeight / logicalHeight : 1;
 
                 ctx.clearRect(0, 0, displayWidth, displayHeight);
 
@@ -782,24 +837,26 @@ app.registerExtension({
                 ctx.strokeStyle = "#2c2c2c";
                 ctx.lineWidth = 1;
 
-                const widthSpan = displayWidth - padding * 2;
-                const heightSpan = displayHeight - padding * 2;
+                const top = padding * scaleY;
+                const bottom = (logicalHeight - padding) * scaleY;
+                const left = padding * scaleX;
+                const right = (logicalWidth - padding) * scaleX;
 
                 // 绘制网格
                 const steps = 4;
                 for (let i = 1; i < steps; i++) {
                     const t = i / steps;
-                    const x = padding + t * widthSpan;
-                    const y = padding + t * heightSpan;
+                    const x = (padding + t * widthSpan) * scaleX;
+                    const y = (padding + t * heightSpan) * scaleY;
 
                     ctx.beginPath();
-                    ctx.moveTo(x, padding);
-                    ctx.lineTo(x, displayHeight - padding);
+                    ctx.moveTo(x, top);
+                    ctx.lineTo(x, bottom);
                     ctx.stroke();
 
                     ctx.beginPath();
-                    ctx.moveTo(padding, y);
-                    ctx.lineTo(displayWidth - padding, y);
+                    ctx.moveTo(left, y);
+                    ctx.lineTo(right, y);
                     ctx.stroke();
                 }
 
@@ -807,8 +864,8 @@ app.registerExtension({
                 // 绘制对角线
                 ctx.strokeStyle = "#3c3c3c";
                 ctx.beginPath();
-                ctx.moveTo(padding, displayHeight - padding);
-                ctx.lineTo(displayWidth - padding, padding);
+                ctx.moveTo(left, bottom);
+                ctx.lineTo(right, top);
                 ctx.stroke();
 
                 // 绘制其他被修改通道的曲线（虚线）
@@ -825,8 +882,8 @@ app.registerExtension({
                     ctx.lineWidth = 1.5;
                     ctx.beginPath();
                     otherSamples.forEach((pt, idx) => {
-                        const x = padding + pt.x * widthSpan;
-                        const y = padding + (1 - pt.y) * heightSpan;
+                        const x = (padding + pt.x * widthSpan) * scaleX;
+                        const y = (padding + (1 - pt.y) * heightSpan) * scaleY;
                         if (idx === 0) {
                             ctx.moveTo(x, y);
                         } else {
@@ -846,8 +903,8 @@ app.registerExtension({
                     ctx.strokeStyle = "rgba(255,255,255,0.25)";
                     ctx.lineWidth = 1.5;
                     referenceSamples.forEach((pt, idx) => {
-                        const x = padding + pt.x * widthSpan;
-                        const y = padding + (1 - pt.y) * heightSpan;
+                        const x = (padding + pt.x * widthSpan) * scaleX;
+                        const y = (padding + (1 - pt.y) * heightSpan) * scaleY;
                         if (idx === 0) {
                             ctx.moveTo(x, y);
                         } else {
@@ -864,8 +921,8 @@ app.registerExtension({
                 ctx.strokeStyle = strokeColor;
                 ctx.lineWidth = 2.5;
                 samples.forEach((pt, idx) => {
-                    const x = padding + pt.x * widthSpan;
-                    const y = padding + (1 - pt.y) * heightSpan;
+                    const x = (padding + pt.x * widthSpan) * scaleX;
+                    const y = (padding + (1 - pt.y) * heightSpan) * scaleY;
                     if (idx === 0) {
                         ctx.moveTo(x, y);
                     } else {
@@ -878,8 +935,8 @@ app.registerExtension({
                 const selectedIdx = getSelectedIndex();
                 ctx.lineWidth = 1;
                 points.forEach((pt, idx) => {
-                    const x = padding + pt.x * widthSpan;
-                    const y = padding + (1 - pt.y) * heightSpan;
+                    const x = (padding + pt.x * widthSpan) * scaleX;
+                    const y = (padding + (1 - pt.y) * heightSpan) * scaleY;
                     ctx.beginPath();
                     ctx.fillStyle = idx === selectedIdx ? "#ffffff" : "#f0a124";
                     ctx.strokeStyle = "#111";
@@ -887,7 +944,7 @@ app.registerExtension({
                     ctx.fill();
                     ctx.stroke();
                 });
-            };
+            }
 
             const updateInfo = () => {
                 const points = getPoints();
@@ -1054,6 +1111,12 @@ app.registerExtension({
                 canvas.removeEventListener("dblclick", handleDoubleClick);
                 window.removeEventListener("mousemove", handleMouseMove);
                 window.removeEventListener("mouseup", handleMouseUp);
+                window.removeEventListener("resize", requestRender);
+                if (scheduledFrame !== null) {
+                    cancelAnimationFrame(scheduledFrame);
+                    scheduledFrame = null;
+                }
+                clearInterval(sizePoller);
                 resizeObserver.disconnect();
             };
 
@@ -1163,12 +1226,6 @@ app.registerExtension({
 
             updateChannelButtons();
             
-            // 初始化canvas尺寸
-            setTimeout(() => {
-                updateCanvasSize();
-                updateInfo();
-            }, 0);
-
             const htmlWidget = node.addDOMWidget("curves_editor", "div", container);
             htmlWidget.computeSize = function (width) {
                 return [width, 500];
@@ -1179,10 +1236,27 @@ app.registerExtension({
                 Math.max(node.size[1], 530)
             ]);
 
+            requestAnimationFrame(() => {
+                draw();
+                updateInfo();
+            });
+
+            let lastWidgetValue = widget.value;
+            const checkWidgetValueChange = () => {
+                if (widget.value === lastWidgetValue) return;
+                lastWidgetValue = widget.value;
+                applyPayload(widget.value);
+                updateChannelButtons();
+                updateInfo();
+                draw();
+            };
+            const valuePoller = setInterval(checkWidgetValueChange, 200);
+
 
             const onRemoved = node.onRemoved;
             node.onRemoved = function () {
                 cleanup();
+                clearInterval(valuePoller);
                 return onRemoved ? onRemoved.apply(this, arguments) : undefined;
             };
 

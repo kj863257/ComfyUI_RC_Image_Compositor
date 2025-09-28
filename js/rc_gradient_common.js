@@ -320,6 +320,7 @@ export class GradientEditor {
         ];
         this.selectedStopIndex = 0;
         this.onUpdate = null;
+        this.draggingStop = null;
 
         this.init();
     }
@@ -492,6 +493,53 @@ export class GradientEditor {
         });
     }
 
+    handleStopDragStart(index, event) {
+        if (event.type === 'mousedown' && event.button !== 0) return;
+        event.preventDefault();
+        event.stopPropagation();
+
+        const clientX = event.touches ? event.touches[0]?.clientX : event.clientX;
+        if (typeof clientX !== 'number') return;
+
+        this.selectedStopIndex = index;
+        this.draggingStop = this.stops[index];
+        this.updateControls();
+        this.updateGradient();
+
+        const handleMove = (moveEvent) => {
+            const moveClientX = moveEvent.touches ? moveEvent.touches[0]?.clientX : moveEvent.clientX;
+            if (typeof moveClientX !== 'number') return;
+            const rect = this.barContainer.getBoundingClientRect();
+            const position = gradientUtils.clamp((moveClientX - rect.left) / rect.width, 0, 1);
+            if (!this.draggingStop) return;
+
+            this.draggingStop.position = position;
+            const currentStop = this.draggingStop;
+            this.stops.sort((a, b) => a.position - b.position);
+            this.selectedStopIndex = this.stops.indexOf(currentStop);
+
+            this.updateGradient();
+            this.updateControls();
+            this.triggerUpdate();
+            moveEvent.preventDefault?.();
+        };
+
+        const handleUp = () => {
+            document.removeEventListener('mousemove', handleMove);
+            document.removeEventListener('mouseup', handleUp);
+            document.removeEventListener('touchmove', handleMove, { passive: false });
+            document.removeEventListener('touchend', handleUp);
+            document.removeEventListener('touchcancel', handleUp);
+            this.draggingStop = null;
+        };
+
+        document.addEventListener('mousemove', handleMove);
+        document.addEventListener('mouseup', handleUp);
+        document.addEventListener('touchmove', handleMove, { passive: false });
+        document.addEventListener('touchend', handleUp);
+        document.addEventListener('touchcancel', handleUp);
+    }
+
     addStopAtPosition(e) {
         const rect = this.barContainer.getBoundingClientRect();
         const position = (e.clientX - rect.left) / rect.width;
@@ -519,8 +567,13 @@ export class GradientEditor {
     }
 
     updateGradient() {
-        // 排序色标
+        // 排序色标，同时保持当前选中的色标引用
+        const currentSelected = this.stops[this.selectedStopIndex] || null;
         this.stops.sort((a, b) => a.position - b.position);
+        if (currentSelected) {
+            const newIndex = this.stops.indexOf(currentSelected);
+            this.selectedStopIndex = newIndex >= 0 ? newIndex : 0;
+        }
 
         // 更新渐变显示
         this.gradientBar.style.background = gradientUtils.genGradientCSS(this.stops);
@@ -538,13 +591,9 @@ export class GradientEditor {
             }
             stopEl.style.left = (stop.position * 100) + '%';
             stopEl.style.backgroundColor = gradientUtils.colorToHex(stop.color);
-
-            stopEl.addEventListener('click', (e) => {
-                e.stopPropagation();
-                this.selectedStopIndex = index;
-                this.updateGradient();
-                this.updateControls();
-            });
+            stopEl.style.touchAction = 'none';
+            stopEl.addEventListener('mousedown', (e) => this.handleStopDragStart(index, e));
+            stopEl.addEventListener('touchstart', (e) => this.handleStopDragStart(index, e), { passive: false });
 
             this.barContainer.appendChild(stopEl);
         });

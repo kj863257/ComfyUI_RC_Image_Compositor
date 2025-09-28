@@ -1,6 +1,6 @@
 # RC Image Compositor 🎨
 
-A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style layer effects** and **advanced compositing capabilities** to your workflows. Now with modular architecture, complete 24 blend modes, and enhanced positioning system!
+A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style layer effects** and **advanced compositing capabilities** to your workflows. Recent updates add a clearer Blend-If interface, high-precision curves display under ComfyUI zoom, and draggable gradient stops for faster toning workflows.
 
 [中文版 README](README_zh.md)
 
