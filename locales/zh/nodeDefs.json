@@ -544,6 +544,35 @@
       }
     }
   },
+  "RC_SaveImageNoMetadata": {
+    "display_name": "RC 无元数据保存",
+    "inputs": {
+      "images": {
+        "name": "图像",
+        "tooltip": "输入要保存的图像批次，保存时不会写入任何提示词或 PNG 元数据。"
+      },
+      "filename_prefix": {
+        "name": "文件名前缀",
+        "tooltip": "保存文件使用的前缀，支持与标准保存节点相同的格式化占位符。"
+      }
+    }
+  },
+  "RC_PreviewImageNoMetadata": {
+    "display_name": "RC 无元数据预览",
+    "description": "生成临时预览图像，去除提示词和PNG元数据，同时输出图像供后续处理",
+    "inputs": {
+      "images": {
+        "name": "图像",
+        "tooltip": "输入要预览并传递给下一个节点的图像"
+      }
+    },
+    "outputs": {
+      "IMAGE": {
+        "name": "图像",
+        "tooltip": "输出图像供工作流进一步处理"
+      }
+    }
+  },
   "RC_OpacityAdjust": {
     "display_name": "RC 不透明度调整",
     "inputs": {

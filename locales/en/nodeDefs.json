@@ -544,6 +544,35 @@
       }
     }
   },
+  "RC_SaveImageNoMetadata": {
+    "display_name": "RC Save Image (No Metadata)",
+    "inputs": {
+      "images": {
+        "name": "Images",
+        "tooltip": "Image batch to save without embedding any prompt or PNG metadata."
+      },
+      "filename_prefix": {
+        "name": "Filename Prefix",
+        "tooltip": "Prefix used when naming the saved files. Supports the same formatting tokens as the standard Save Image node."
+      }
+    }
+  },
+  "RC_PreviewImageNoMetadata": {
+    "display_name": "RC Preview Image (No Metadata)",
+    "description": "Generate temporary preview images that strip prompt and PNG metadata before saving, and output the images for further processing",
+    "inputs": {
+      "images": {
+        "name": "Images",
+        "tooltip": "Input images to preview and pass through to next nodes"
+      }
+    },
+    "outputs": {
+      "IMAGE": {
+        "name": "Images",
+        "tooltip": "Output images for further processing in the workflow"
+      }
+    }
+  },
   "RC_OpacityAdjust": {
     "display_name": "RC Opacity Adjust",
     "inputs": {

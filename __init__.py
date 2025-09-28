@@ -8,7 +8,14 @@ from .nodes.effects.layer_styles import RC_DropShadow, RC_Stroke, RC_OuterGlow
 from .nodes.generators.filters import RC_GaussianBlur, RC_Sharpen, RC_HueSaturation, RC_AddNoise
 
 # Import utility nodes
-from .nodes.utilities.utilities import RC_CanvasPadding, RC_ImageScale, RC_ImageCrop, RC_CanvasResize
+from .nodes.utilities.utilities import (
+    RC_CanvasPadding,
+    RC_ImageScale,
+    RC_ImageCrop,
+    RC_CanvasResize,
+    RC_SaveImageNoMetadata,
+    RC_PreviewImageNoMetadata,
+)
 
 # Import adjustment nodes
 from .nodes.adjustments.adjustments import (
@@ -59,6 +66,8 @@ NODE_CLASS_MAPPINGS = {
     "RC_ImageScale": RC_ImageScale,
     "RC_ImageCrop": RC_ImageCrop,
     "RC_CanvasResize": RC_CanvasResize,
+    "RC_SaveImageNoMetadata": RC_SaveImageNoMetadata,
+    "RC_PreviewImageNoMetadata": RC_PreviewImageNoMetadata,
 
     # Adjustment nodes
     "RC_OpacityAdjust": RC_OpacityAdjust,
@@ -107,6 +116,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "RC_ImageScale": "RC Image Scale",
     "RC_ImageCrop": "RC Image Crop",
     "RC_CanvasResize": "RC Canvas Resize",
+    "RC_SaveImageNoMetadata": "RC Save Image (No Metadata)",
+    "RC_PreviewImageNoMetadata": "RC Preview Image (No Metadata)",
 
     # Adjustment nodes
     "RC_OpacityAdjust": "RC Opacity Adjust",

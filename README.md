@@ -78,6 +78,7 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 - **Image Scale** - 6 scaling methods with high-quality resampling
 - **Image Crop** - Flexible cropping with manual, center, and aspect ratio modes
 - **Canvas Resize** - 9 anchor positions with background color control
+- **Save/Preview (No Metadata)** - Output and preview savers that strip prompts and PNG metadata before writing files
 
 ### 🎞️ **Channel Operations**
 - **Channel Extractor** - Extract RGB channels or luminance as grayscale or mask, commonly used for matting workflows

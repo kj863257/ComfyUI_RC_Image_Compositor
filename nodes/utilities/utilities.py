@@ -1,7 +1,19 @@
-import torch
-import numpy as np
-from PIL import Image, ImageOps
+import os
+import random
 from typing import Tuple
+import io
+from collections import defaultdict
+from concurrent.futures import ThreadPoolExecutor
+import multiprocessing
+
+import numpy as np
+import torch
+from PIL import Image, ImageOps
+from sklearn.cluster import MiniBatchKMeans
+import cv2
+
+import folder_paths
+from nodes import SaveImage as BaseSaveImage
 
 
 class RC_CanvasPadding:
@@ -496,3 +508,83 @@ class RC_CanvasResize:
         # Convert back to tensor
         result_tensor = torch.from_numpy(canvas.astype(np.float32) / 255.0).unsqueeze(0)
         return (result_tensor,)
+
+
+class RC_SaveImageNoMetadata(BaseSaveImage):
+    """Save images without embedding prompt or PNG metadata."""
+
+    CATEGORY = "RC/Utilities"
+    DESCRIPTION = "Save images to disk with metadata stripped so that prompts and node details are not written into the PNG file."
+
+    def __init__(self):
+        super().__init__()
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return BaseSaveImage.INPUT_TYPES()
+
+    def save_images(self, images, filename_prefix="ComfyUI", prompt=None, extra_pnginfo=None):
+        filename_prefix += self.prefix_append
+        full_output_folder, filename, counter, subfolder, filename_prefix = folder_paths.get_save_image_path(
+            filename_prefix,
+            self.output_dir,
+            images[0].shape[1],
+            images[0].shape[0]
+        )
+
+        results = []
+        for batch_number, image in enumerate(images):
+            # Fixed: Use same approach as standard ComfyUI to avoid data corruption
+            # Create a copy to prevent in-place modifications affecting original tensor
+            i = 255.0 * image.cpu().numpy()
+            img = Image.fromarray(np.clip(i, 0, 255).astype(np.uint8))
+
+            filename_with_batch_num = filename.replace("%batch_num%", str(batch_number))
+            file = f"{filename_with_batch_num}_{counter:05}_.png"
+            img.save(os.path.join(full_output_folder, file), pnginfo=None, compress_level=self.compress_level)
+
+            results.append({
+                "filename": file,
+                "subfolder": subfolder,
+                "type": self.type
+            })
+            counter += 1
+
+        return {"ui": {"images": results}}
+
+
+class RC_PreviewImageNoMetadata(RC_SaveImageNoMetadata):
+    """Save preview images without embedding metadata and output for further processing."""
+
+    RETURN_TYPES = ("IMAGE",)
+    CATEGORY = "RC/Utilities"
+    DESCRIPTION = "Generate temporary preview images that strip prompt and PNG metadata before saving, and output the images for further processing."
+
+    def __init__(self):
+        super().__init__()
+        self.output_dir = folder_paths.get_temp_directory()
+        self.type = "temp"
+        self.prefix_append = "_temp_" + ''.join(random.choice("abcdefghijklmnopqrstuvwxyz") for _ in range(5))
+        self.compress_level = 1
+
+    @classmethod
+    def INPUT_TYPES(cls):
+        return {
+            "required": {
+                "images": ("IMAGE",),
+            },
+            "hidden": {
+                "prompt": "PROMPT",
+                "extra_pnginfo": "EXTRA_PNGINFO",
+            },
+        }
+
+    FUNCTION = "save_preview"
+
+    def save_preview(self, images, prompt=None, extra_pnginfo=None):
+        # 保存预览图像
+        preview_result = super().save_images(images, filename_prefix="ComfyUI", prompt=prompt, extra_pnginfo=extra_pnginfo)
+
+        # 同时返回图像张量供后续节点使用
+        return {"ui": preview_result["ui"], "result": (images,)}
+
