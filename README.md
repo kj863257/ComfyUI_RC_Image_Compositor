@@ -51,7 +51,7 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 
 ### 🎨 **Complete Blend Mode Suite**
 - **24 Professional Blend Modes** Including all HSL modes (Hue, Saturation, Color, Luminosity)
-- **Blend Color Band** - **NEW!** Photoshop-style Blend If functionality with channel-based masking for advanced compositing control
+- **Blend Color Band** - Photoshop-style Blend If functionality with channel-based masking for advanced compositing control
 - **Enhanced Positioning System** - Achieve precise positioning control with alignment options
 - **Detailed Tooltips** - Every blend mode comes with visual descriptions
 - **Optional Background Support** - Automatically creates transparent canvas when no background is specified
@@ -68,7 +68,10 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 - **Color Balance** - CMY color balance with tonal range selection
 - **Channel Mixer** - Advanced RGB channel mixing with **B&W filter presets** (Red, Orange, Yellow, Green, Blue, Infrared filters)
 - **Auto Color Correction** - Photoshop-style automatic color correction with 4 algorithms (Enhance Monochromatic, Per-Channel, Dark/Light Colors, Brightness/Contrast)
-- **Gradient Map** - **NEW!** Professional gradient mapping for color grading, tone mapping, and creative color effects with 16 blend modes and luminosity preservation
+- **Gradient Map** - Professional gradient mapping for color grading, tone mapping, and creative color effects with 16 blend modes and luminosity preservation
+- **Threshold** - High-contrast black and white conversion with multiple calculation methods and inversion support
+- **Vibrance** - Smart saturation enhancement with adjustable skin tone protection and advanced HSV processing
+- **Add Noise** - Customizable noise effects with 5 types (Gaussian, Gaussian Blur, Uniform, Salt & Pepper, Speckle) for texture and artistic effects
 
 ### 🛠️ **Utility Tools**
 - **Canvas Padding** - Multiple padding modes (solid color, edge, mirror, transparent)
@@ -82,7 +85,7 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 
 ### 🌈 **Gradient Generation & Mapping**
 - **Gradient Generator** - Create gradient images with transparency support and multiple color stops, computed with high-efficiency lookup tables
-- **Gradient Map** - **NEW!** Professional gradient mapping for color grading, tone mapping, and creative color effects with 16 blend modes and luminosity preservation
+- **Gradient Map** - Professional gradient mapping for color grading, tone mapping, and creative color effects with 16 blend modes and luminosity preservation
 - **Enhanced Presets** - Professional gradient presets including Sepia, Cool Blue, Fire Heat, Thermal, Film Noir, and more for quick creative workflows
 
 ---
