@@ -242,6 +242,12 @@ pip install -r requirements.txt
 
 ---
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=kj863257/ComfyUI_RC_Image_Compositor&type=Date)](https://www.star-history.com/#kj863257/ComfyUI_RC_Image_Compositor&Date)
+
+---
+
 *为 ComfyUI 社区精心打造 ❤️*
 
 > **"在 ComfyUI 中实现完整的 Photoshop 功能 - 专业节点，24 种混合模式"**

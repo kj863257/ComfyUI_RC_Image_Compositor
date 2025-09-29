@@ -239,6 +239,12 @@ This project is licensed under the MIT License.
 
 ---
 
+## Star History
+
+[![Star History Chart](https://api.star-history.com/svg?repos=kj863257/ComfyUI_RC_Image_Compositor&type=Date)](https://www.star-history.com/#kj863257/ComfyUI_RC_Image_Compositor&Date)
+
+---
+
 *Crafted with ❤️ for the ComfyUI community*
 
 > **"Complete Photoshop power in ComfyUI - Professional nodes with 24 blend modes, zero negative offset headaches."**
