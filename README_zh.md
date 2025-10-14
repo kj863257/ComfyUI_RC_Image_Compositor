@@ -7,6 +7,8 @@
 
 > ✅ 最近更新：Blend If 滑块加入更清晰的视觉指示、曲线编辑器支持 ComfyUI 缩放下的高清重绘，并且渐变色标现在可以直接拖动位置。
 
+目前插件合集共提供 **29 个专业节点**，覆盖图层合成、图层样式、色彩调整、实用工具和生成类功能，并新增高性能的图案平铺节点，支持平铺前裁剪、缩放、旋转、间距和透明度等高级控制。
+
 ---
 
 ## 🖼️ 功能展示
@@ -118,6 +120,7 @@
 ### **RC/Filters** - 图像处理 (Image Processing)
 - `RC 高斯模糊 | RC Gaussian Blur` - 支持算法选择的专业级模糊
 - `RC 锐化滤镜 | RC Sharpen` - 包括反锐化蒙版在内的多种锐化方法
+- `RC 添加噪点 | RC Add Noise` - 提供高斯、模糊高斯、均匀、椒盐、斑点等 5 种噪点模型，可自定义混合方式
 - `RC 高低频磨皮 | RC High/Low Frequency Skin Smoothing` - Photoshop风格频率分离磨皮技术，支持肤色自动检测和边缘保护
 
 ### **RC/Adjustments** - 色彩和色调 (Color & Tone)
@@ -128,12 +131,18 @@
 - `RC 亮度/对比度 | RC Brightness/Contrast` - 双算法亮度和对比度控制
 - `RC 色彩平衡 | RC Color Balance` - 支持色调范围定位的 CMY 色彩平衡
 - `RC 通道混合器 | RC Channel Mixer` - 支持单色模式的高级 RGB 通道混合
+- `RC 渐变映射 | RC Gradient Map` - 通过 16 种混合模式进行 LUT 级别的渐变重映射，兼顾亮度保护
+- `RC 阈值 | RC Threshold` - 多算法高对比度转换，可选反转模式
+- `RC 活力 | RC Vibrance` - 智能饱和度提升，提供肤色保护调节
+- `RC 自动色彩校正 | RC Auto Color Correction` - 四种自动校正策略（单通道、分通道、阴影/高光、动态对比）
 
 ### **RC/Utilities** - 画布和变换 (Canvas & Transform)
 - `RC 画布填充 | RC Canvas Padding` - 支持多种填充模式的画布扩展
 - `RC 图像缩放 | RC Image Scale` - 支持 6 种不同方法的专业缩放
 - `RC 图像裁剪 | RC Image Crop` - 支持手动、中心和比例模式的灵活裁剪
 - `RC 画布调整 | RC Canvas Resize` - 支持 9 个锚点的画布调整
+- `RC 无元数据保存 | RC Save Image (No Metadata)` - 输出时剔除提示词与 PNG 元数据
+- `RC 无元数据预览 | RC Preview Image (No Metadata)` - 快速预览并传递图像，同时移除元数据
 
 ### **RC/Channel** - 通道和蒙版操作 (Channel & Mask Operations)
 - `RC 通道提取器 | RC Channel Extractor` - 提取 RGB 通道或亮度作为灰度图或蒙版，常用于抠图工作流
@@ -141,6 +150,7 @@
 
 ### **RC/Generate** - 生成操作 (Generate Operations)
 - `RC 渐变生成器 | RC Gradient Generator` - 创建支持透明度和多色的渐变图像，查找表加速覆盖线性、径向、角度和反射渐变
+- `RC 图案平铺 | RC Pattern Tiling` - 高性能图案平铺节点，支持平铺前裁剪、缩放、旋转、间距、偏移和透明度控制
 
 ---
 

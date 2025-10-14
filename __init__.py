@@ -32,8 +32,9 @@ from .nodes.adjustments.adjustments import (
 # Import channel operations
 from .nodes.utilities.channel_ops import RC_ChannelExtractor, RC_MaskApply
 
-# Import gradient generator
+# Import gradient generator and pattern tiling
 from .nodes.generators.gradient_generator import RC_GradientGenerator
+from .nodes.generators.pattern_tiling import RC_PatternTiling
 
 # Import auto color correction
 from .nodes.adjustments.auto_color import RC_AutoColor
@@ -84,8 +85,9 @@ NODE_CLASS_MAPPINGS = {
     "RC_ChannelExtractor": RC_ChannelExtractor,
     "RC_MaskApply": RC_MaskApply,
     
-    # Gradient operations
+    # Gradient and pattern operations
     "RC_GradientGenerator": RC_GradientGenerator,
+    "RC_PatternTiling": RC_PatternTiling,
 
     # Auto color correction
     "RC_AutoColor": RC_AutoColor,
@@ -134,8 +136,9 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "RC_ChannelExtractor": "RC Channel Extractor",
     "RC_MaskApply": "RC Mask Apply",
     
-    # Gradient operations
+    # Gradient and pattern operations
     "RC_GradientGenerator": "RC Gradient Generator",
+    "RC_PatternTiling": "RC Pattern Tiling",
 
     # Auto color correction
     "RC_AutoColor": "RC Auto Color Correction",

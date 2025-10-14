@@ -302,6 +302,75 @@
       }
     }
   },
+  "RC_PatternTiling": {
+    "display_name": "RC Pattern Tiling",
+    "inputs": {
+      "pattern_image": {
+        "name": "Pattern Image",
+        "tooltip": "Source pattern image (RGBA recommended)"
+      },
+      "size_mode": {
+        "name": "Size Mode",
+        "tooltip": "Output size mode:\n- from_image: Use reference image dimensions\n- custom: Specify custom width and height"
+      },
+      "width": {
+        "name": "Width",
+        "tooltip": "Output width in pixels (used when size_mode is custom)"
+      },
+      "height": {
+        "name": "Height",
+        "tooltip": "Output height in pixels (used when size_mode is custom)"
+      },
+      "pattern_scale": {
+        "name": "Pattern Scale",
+        "tooltip": "Scale factor applied to the pattern tile before tiling"
+      },
+      "rotation": {
+        "name": "Rotation",
+        "tooltip": "Rotation angle applied to the pattern tile (degrees)"
+      },
+      "spacing_x": {
+        "name": "Spacing X",
+        "tooltip": "Horizontal spacing between tiles in pixels (negative values create overlapping tiles with alpha compositing)"
+      },
+      "spacing_y": {
+        "name": "Spacing Y",
+        "tooltip": "Vertical spacing between tiles in pixels (negative values create overlapping tiles with alpha compositing)"
+      },
+      "offset_x": {
+        "name": "Offset X",
+        "tooltip": "Horizontal offset applied before tiling (positive shifts pattern right)"
+      },
+      "offset_y": {
+        "name": "Offset Y",
+        "tooltip": "Vertical offset applied before tiling (positive shifts pattern down)"
+      },
+      "opacity": {
+        "name": "Opacity",
+        "tooltip": "Global opacity multiplier applied to the tile alpha channel"
+      },
+      "crop_top": {
+        "name": "Crop Top",
+        "tooltip": "Pixels to trim from the top edge of the pattern before tiling"
+      },
+      "crop_right": {
+        "name": "Crop Right",
+        "tooltip": "Pixels to trim from the right edge of the pattern before tiling"
+      },
+      "crop_bottom": {
+        "name": "Crop Bottom",
+        "tooltip": "Pixels to trim from the bottom edge of the pattern before tiling"
+      },
+      "crop_left": {
+        "name": "Crop Left",
+        "tooltip": "Pixels to trim from the left edge of the pattern before tiling"
+      },
+      "reference_image": {
+        "name": "Reference Image",
+        "tooltip": "Reference image used for sizing when size_mode is from_image"
+      }
+    }
+  },
   "RC_GaussianBlur": {
     "display_name": "RC Gaussian Blur",
     "inputs": {

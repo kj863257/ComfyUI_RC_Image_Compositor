@@ -302,6 +302,75 @@
       }
     }
   },
+  "RC_PatternTiling": {
+    "display_name": "RC 图案平铺",
+    "inputs": {
+      "pattern_image": {
+        "name": "图案图像",
+        "tooltip": "输入图案源图（建议使用RGBA）"
+      },
+      "size_mode": {
+        "name": "尺寸模式",
+        "tooltip": "输出尺寸模式：\n- from_image：跟随参考图片尺寸\n- custom：使用自定义宽度与高度"
+      },
+      "width": {
+        "name": "宽度",
+        "tooltip": "输出宽度（像素，自定义模式下可用）"
+      },
+      "height": {
+        "name": "高度",
+        "tooltip": "输出高度（像素，自定义模式下可用）"
+      },
+      "pattern_scale": {
+        "name": "图案缩放",
+        "tooltip": "平铺前应用于图案的缩放系数"
+      },
+      "rotation": {
+        "name": "旋转",
+        "tooltip": "图案平铺前的旋转角度（度）"
+      },
+      "spacing_x": {
+        "name": "水平间距",
+        "tooltip": "水平平铺间距（像素，可填负值实现重叠并进行Alpha叠加）"
+      },
+      "spacing_y": {
+        "name": "垂直间距",
+        "tooltip": "垂直平铺间距（像素，可填负值实现重叠并进行Alpha叠加）"
+      },
+      "offset_x": {
+        "name": "水平偏移",
+        "tooltip": "平铺前的水平偏移（正值向右移动）"
+      },
+      "offset_y": {
+        "name": "垂直偏移",
+        "tooltip": "平铺前的垂直偏移（正值向下移动）"
+      },
+      "opacity": {
+        "name": "透明度",
+        "tooltip": "应用到图案Alpha的全局透明度倍数"
+      },
+      "crop_top": {
+        "name": "上裁剪",
+        "tooltip": "平铺前对图案顶部剪裁的像素数量"
+      },
+      "crop_right": {
+        "name": "右裁剪",
+        "tooltip": "平铺前对图案右侧剪裁的像素数量"
+      },
+      "crop_bottom": {
+        "name": "下裁剪",
+        "tooltip": "平铺前对图案底部剪裁的像素数量"
+      },
+      "crop_left": {
+        "name": "左裁剪",
+        "tooltip": "平铺前对图案左侧剪裁的像素数量"
+      },
+      "reference_image": {
+        "name": "参考图片",
+        "tooltip": "当尺寸模式为from_image时用于获取尺寸的参考图像"
+      }
+    }
+  },
   "RC_GaussianBlur": {
     "display_name": "RC 高斯模糊",
     "inputs": {

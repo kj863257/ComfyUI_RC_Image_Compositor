@@ -1,7 +1,6 @@
 import torch
 import numpy as np
 import json
-from scipy import ndimage
 
 
 class RC_GradientGenerator:
@@ -54,7 +53,7 @@ class RC_GradientGenerator:
             }
         }
 
-    RETURN_TYPES = ("IMAGE", "MASK")
+    RETURN_TYPES = ("IMAGE",)
     FUNCTION = "generate_gradient"
     CATEGORY = "RC/Generate"
 
@@ -157,11 +156,10 @@ class RC_GradientGenerator:
         # Create RGBA image
         rgba = np.concatenate([rgb, alpha[:, :, np.newaxis]], axis=2)
         
-        # Convert to tensors
+        # Convert to tensor
         image_out = torch.from_numpy(rgba).unsqueeze(0)  # [1, H, W, 4]
-        mask_out = torch.from_numpy(alpha).unsqueeze(0)  # [1, H, W]
-        
-        return (image_out, mask_out)
+
+        return (image_out,)
 
 
 NODE_CLASS_MAPPINGS = {
