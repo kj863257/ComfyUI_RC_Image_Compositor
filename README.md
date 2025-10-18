@@ -1,6 +1,6 @@
 # RC Image Compositor 🎨
 
-A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style layer effects** and **advanced compositing capabilities** to your workflows. The collection now ships with **31 production-ready nodes** spanning compositing, adjustments, generation, utilities, and channel tools. Recent updates add a clearer Blend-If interface, high-precision curves display under ComfyUI zoom, draggable gradient stops for faster toning workflows, a high-performance pattern tiling generator with pre-tiling crop controls, and workflow metadata transfer nodes for seamless metadata management.
+A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style layer effects** and **advanced compositing capabilities** to your workflows. The collection now ships with **32 production-ready nodes** spanning compositing, adjustments, generation, utilities, and channel tools. Recent updates add a clearer Blend-If interface, high-precision curves display under ComfyUI zoom, draggable gradient stops for faster toning workflows, a high-performance pattern tiling generator with pre-tiling crop controls, workflow metadata transfer nodes for seamless metadata management, and a brand-new interactive canvas for real-time foreground placement.
 
 [中文版 README](README_zh.md)
 
@@ -137,6 +137,7 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 - `RC Image Scale` - Professional scaling with 6 different methods
 - `RC Image Crop` - Flexible cropping with manual, center, and ratio modes
 - `RC Canvas Resize` - Canvas resizing with 9 anchor positions
+- `RC Interactive Canvas` - Live Photoshop-style canvas that supports move/scale/rotate, edge handles, smoothing brush eraser with mask export, reset controls, and pass-forward integration with downstream nodes
 - `RC Save Image (No Metadata)` - Export images without embedding prompt/PNG metadata
 - `RC Preview Image (No Metadata)` - Quick preview pass-through that strips metadata while keeping the workflow alive
 - `RC Save Image (Transfer Metadata)` - Extract and transfer workflow metadata from source image to processed image, then save with full ComfyUI workflow info

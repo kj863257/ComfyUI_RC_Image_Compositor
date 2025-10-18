@@ -51,6 +51,9 @@ from .nodes.generators.skin_smoothing import RC_HighLowFrequencySkinSmoothing
 # Import gradient map
 from .nodes.adjustments.gradient_map import RC_GradientMap
 
+# Import interactive compositor
+from .nodes.utilities.rc_compositor import RC_InteractiveCompositor
+
 # Node class mappings - used by ComfyUI to register nodes
 NODE_CLASS_MAPPINGS = {
     # Core compositor nodes
@@ -102,6 +105,9 @@ NODE_CLASS_MAPPINGS = {
 
     # Skin smoothing
     "RC_HighLowFrequencySkinSmoothing": RC_HighLowFrequencySkinSmoothing,
+
+    # Interactive compositor
+    "RC_InteractiveCompositor": RC_InteractiveCompositor,
 }
 
 # Display name mappings - shown in ComfyUI interface
@@ -155,6 +161,9 @@ NODE_DISPLAY_NAME_MAPPINGS = {
 
     # Skin smoothing
     "RC_HighLowFrequencySkinSmoothing": "RC High/Low Frequency Skin Smoothing",
+
+    # Interactive compositor
+    "RC_InteractiveCompositor": "RC Interactive Canvas",
 }
 
 WEB_DIRECTORY = "./js"
@@ -170,6 +179,7 @@ print(f"\n🎨 RC Image Compositor v{__version__} loaded successfully!")
 print("   ✨ Complete 24 Photoshop Blend Modes + Layer Effects")
 print("   🔧 Utilities: Canvas Padding, Image Scale, Crop, Canvas Resize")
 print("   🎚️  Adjustments: Opacity, Levels, Curves, Brightness/Contrast, Color Balance, Channel Mixer")
+print("   🖼️  Interactive Canvas: Photoshop-like compositor with rotation & masking")
 print("   🌐 Full bilingual support")
 print("   📁 Modular architecture for professional workflows")
 print("   🎯 Professional Photoshop-grade effects\n")

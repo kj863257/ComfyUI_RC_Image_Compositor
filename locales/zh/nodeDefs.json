@@ -1057,5 +1057,55 @@
     "RC/Layer Effects": "RC/图层效果",
     "RC/Utilities": "RC/工具",
     "RC/Channel": "RC/通道"
+  },
+  "RC_InteractiveCompositor": {
+    "display_name": "RC 交互画布",
+    "inputs": {
+      "background": {
+        "name": "背景",
+        "tooltip": "背景图层（静态，填充画布）"
+      },
+      "foreground": {
+        "name": "前景",
+        "tooltip": "前景图层（可移动、缩放、旋转，并可使用橡皮擦工具擦除）"
+      },
+      "canvas_width": {
+        "name": "画布宽度",
+        "tooltip": "输出合成画布的宽度（像素）"
+      },
+      "canvas_height": {
+        "name": "画布高度",
+        "tooltip": "输出合成画布的高度（像素）"
+      },
+      "composition_data": {
+        "name": "合成数据",
+        "tooltip": "JSON变换数据（自动生成，请勿手动编辑）"
+      },
+      "pass_forward": {
+        "name": "向后传递",
+        "tooltip": "启用后将保存的合成结果传递给后续节点"
+      },
+      "output_filename": {
+        "name": "输出文件名",
+        "tooltip": "保存的合成图像文件名"
+      },
+      "auto_continue": {
+        "name": "自动继续",
+        "tooltip": "保存合成后自动继续工作流"
+      }
+    },
+    "outputs": {
+      "image": {
+        "name": "图像",
+        "tooltip": "最终合成的图像（背景 + 前景）"
+      },
+      "foreground_mask": {
+        "name": "前景蒙版",
+        "tooltip": "使用橡皮擦工具编辑后的前景蒙版"
+      }
+    }
+  },
+  "_messages": {
+    "enable_pass_forward": "请调整好位置后打开向后传递以继续"
   }
 }

@@ -1057,5 +1057,55 @@
     "RC/Layer Effects": "RC/Layer Effects",
     "RC/Utilities": "RC/Utilities",
     "RC/Channel": "RC/Channel"
+  },
+  "RC_InteractiveCompositor": {
+    "display_name": "RC Interactive Canvas",
+    "inputs": {
+      "background": {
+        "name": "Background",
+        "tooltip": "Background image layer (static, fills canvas)"
+      },
+      "foreground": {
+        "name": "Foreground",
+        "tooltip": "Foreground image layer (can be moved, scaled, rotated, and erased with eraser tool)"
+      },
+      "canvas_width": {
+        "name": "Canvas Width",
+        "tooltip": "Output composition canvas width in pixels"
+      },
+      "canvas_height": {
+        "name": "Canvas Height",
+        "tooltip": "Output composition canvas height in pixels"
+      },
+      "composition_data": {
+        "name": "Composition Data",
+        "tooltip": "JSON transform data (auto-generated, do not edit manually)"
+      },
+      "pass_forward": {
+        "name": "Pass Forward",
+        "tooltip": "Emit the saved composition to downstream nodes when enabled"
+      },
+      "output_filename": {
+        "name": "Output Filename",
+        "tooltip": "Filename for saved composition image"
+      },
+      "auto_continue": {
+        "name": "Auto Continue",
+        "tooltip": "Automatically continue workflow after saving composition"
+      }
+    },
+    "outputs": {
+      "image": {
+        "name": "Image",
+        "tooltip": "Final composited image (background + foreground)"
+      },
+      "foreground_mask": {
+        "name": "Foreground Mask",
+        "tooltip": "Edited foreground mask after eraser tool usage"
+      }
+    }
+  },
+  "_messages": {
+    "enable_pass_forward": "Please adjust the composition, then enable Pass Forward to continue."
   }
 }
