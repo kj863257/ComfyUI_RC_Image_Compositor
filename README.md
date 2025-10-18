@@ -1,6 +1,6 @@
 # RC Image Compositor 🎨
 
-A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style layer effects** and **advanced compositing capabilities** to your workflows. The collection now ships with **29 production-ready nodes** spanning compositing, adjustments, generation, utilities, and channel tools. Recent updates add a clearer Blend-If interface, high-precision curves display under ComfyUI zoom, draggable gradient stops for faster toning workflows, and a high-performance pattern tiling generator with pre-tiling crop controls.
+A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style layer effects** and **advanced compositing capabilities** to your workflows. The collection now ships with **31 production-ready nodes** spanning compositing, adjustments, generation, utilities, and channel tools. Recent updates add a clearer Blend-If interface, high-precision curves display under ComfyUI zoom, draggable gradient stops for faster toning workflows, a high-performance pattern tiling generator with pre-tiling crop controls, and workflow metadata transfer nodes for seamless metadata management.
 
 [中文版 README](README_zh.md)
 
@@ -79,6 +79,7 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 - **Image Crop** - Flexible cropping with manual, center, and aspect ratio modes
 - **Canvas Resize** - 9 anchor positions with background color control
 - **Save/Preview (No Metadata)** - Output and preview savers that strip prompts and PNG metadata before writing files
+- **Save/Preview (Transfer Metadata)** - Extract workflow metadata from source images and transfer to processed images, preserving ComfyUI workflow information
 
 ### 🎞️ **Channel Operations**
 - **Channel Extractor** - Extract RGB channels or luminance as grayscale or mask, commonly used for matting workflows
@@ -138,6 +139,8 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 - `RC Canvas Resize` - Canvas resizing with 9 anchor positions
 - `RC Save Image (No Metadata)` - Export images without embedding prompt/PNG metadata
 - `RC Preview Image (No Metadata)` - Quick preview pass-through that strips metadata while keeping the workflow alive
+- `RC Save Image (Transfer Metadata)` - Extract and transfer workflow metadata from source image to processed image, then save with full ComfyUI workflow info
+- `RC Preview Image (Transfer Metadata)` - Extract and transfer workflow metadata from source image to processed image for preview with dual image display
 
 ### **RC/Channel** - Channel & Mask Operations
 - `RC Channel Extractor` - Extract RGB channels or luminance as grayscale or mask, commonly used for matting workflows

@@ -17,6 +17,12 @@ from .nodes.utilities.utilities import (
     RC_PreviewImageNoMetadata,
 )
 
+# Import metadata transfer nodes
+from .nodes.utilities.metadata_transfer import (
+    RC_PreviewImageWithMetadata,
+    RC_SaveImageWithMetadata,
+)
+
 # Import adjustment nodes
 from .nodes.adjustments.adjustments import (
     RC_OpacityAdjust,
@@ -69,6 +75,8 @@ NODE_CLASS_MAPPINGS = {
     "RC_CanvasResize": RC_CanvasResize,
     "RC_SaveImageNoMetadata": RC_SaveImageNoMetadata,
     "RC_PreviewImageNoMetadata": RC_PreviewImageNoMetadata,
+    "RC_PreviewImageWithMetadata": RC_PreviewImageWithMetadata,
+    "RC_SaveImageWithMetadata": RC_SaveImageWithMetadata,
 
     # Adjustment nodes
     "RC_OpacityAdjust": RC_OpacityAdjust,
@@ -120,6 +128,8 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "RC_CanvasResize": "RC Canvas Resize",
     "RC_SaveImageNoMetadata": "RC Save Image (No Metadata)",
     "RC_PreviewImageNoMetadata": "RC Preview Image (No Metadata)",
+    "RC_PreviewImageWithMetadata": "RC Preview Image (Transfer Metadata)",
+    "RC_SaveImageWithMetadata": "RC Save Image (Transfer Metadata)",
 
     # Adjustment nodes
     "RC_OpacityAdjust": "RC Opacity Adjust",

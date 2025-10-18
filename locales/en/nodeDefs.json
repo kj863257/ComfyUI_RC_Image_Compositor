@@ -642,6 +642,38 @@
       }
     }
   },
+  "RC_PreviewImageWithMetadata": {
+    "display_name": "RC Preview Image (Transfer Metadata)",
+    "description": "Transfer workflow metadata from source image file to target image and generate preview",
+    "inputs": {
+      "target_image": {
+        "name": "Target Image",
+        "tooltip": "Target image that will receive the transferred metadata and be previewed"
+      },
+      "source_image_file": {
+        "name": "Source Image File",
+        "tooltip": "Source image file (from input folder) containing workflow metadata to extract and transfer"
+      }
+    }
+  },
+  "RC_SaveImageWithMetadata": {
+    "display_name": "RC Save Image (Transfer Metadata)",
+    "description": "Transfer workflow metadata from source image file to target image and save to disk with full ComfyUI workflow information",
+    "inputs": {
+      "target_image": {
+        "name": "Target Image",
+        "tooltip": "Target image to save with transferred workflow metadata"
+      },
+      "source_image_file": {
+        "name": "Source Image File",
+        "tooltip": "Source image file (from input folder) containing workflow metadata to extract and transfer"
+      },
+      "filename_prefix": {
+        "name": "Filename Prefix",
+        "tooltip": "Prefix for saved image files (supports same formatting tokens as standard Save Image node)"
+      }
+    }
+  },
   "RC_OpacityAdjust": {
     "display_name": "RC Opacity Adjust",
     "inputs": {

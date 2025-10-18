@@ -642,6 +642,38 @@
       }
     }
   },
+  "RC_PreviewImageWithMetadata": {
+    "display_name": "RC 移植元数据预览",
+    "description": "从源图像文件提取工作流元数据并转移到目标图像，生成预览",
+    "inputs": {
+      "target_image": {
+        "name": "目标图像",
+        "tooltip": "接收转移元数据并进行预览的目标图像"
+      },
+      "source_image_file": {
+        "name": "源图像文件",
+        "tooltip": "源图像文件（来自输入文件夹），包含要提取并转移的工作流元数据"
+      }
+    }
+  },
+  "RC_SaveImageWithMetadata": {
+    "display_name": "RC 移植元数据保存",
+    "description": "从源图像文件提取工作流元数据并转移到目标图像，保存到磁盘时包含完整的ComfyUI工作流信息",
+    "inputs": {
+      "target_image": {
+        "name": "目标图像",
+        "tooltip": "要保存并接收转移元数据的目标图像"
+      },
+      "source_image_file": {
+        "name": "源图像文件",
+        "tooltip": "源图像文件（来自输入文件夹），包含要提取并转移的工作流元数据"
+      },
+      "filename_prefix": {
+        "name": "文件名前缀",
+        "tooltip": "保存图像文件的前缀（支持与标准保存节点相同的格式化占位符）"
+      }
+    }
+  },
   "RC_OpacityAdjust": {
     "display_name": "RC 不透明度调整",
     "inputs": {
