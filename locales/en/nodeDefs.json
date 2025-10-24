@@ -956,6 +956,54 @@
       }
     }
   },
+  "RC_ShineRemoval": {
+    "display_name": "RC Shine/Oil Removal",
+    "inputs": {
+      "image": {
+        "name": "Image"
+      },
+      "shine_detection_threshold": {
+        "name": "Shine Detection Threshold",
+        "tooltip": "Brightness threshold for detecting shine areas (lower = more sensitive, try 0.5-0.6 for portraits)"
+      },
+      "shine_removal_strength": {
+        "name": "Shine Removal Strength",
+        "tooltip": "Overall strength of shine removal effect (0=no effect, 1=maximum removal)"
+      },
+      "high_frequency_reduction": {
+        "name": "High Frequency Reduction",
+        "tooltip": "Reduce high frequency detail in shine areas (removes texture glare)"
+      },
+      "low_frequency_smoothing": {
+        "name": "Low Frequency Smoothing",
+        "tooltip": "Smooth low frequency layer in shine areas (color/tone correction)"
+      },
+      "saturation_boost": {
+        "name": "Saturation Boost",
+        "tooltip": "Restore color saturation lost in shiny areas (1.0=no boost, try 1.5-2.0)"
+      },
+      "smoothing_radius": {
+        "name": "Smoothing Radius",
+        "tooltip": "Frequency separation blur radius (larger = smoother transition)"
+      },
+      "feather_edges": {
+        "name": "Feather Edges",
+        "tooltip": "Feather the shine mask edges for natural blending (in pixels)"
+      },
+      "skin_tone_detection": {
+        "name": "Skin Tone Detection",
+        "tooltip": "Only process detected skin tone areas (turn OFF if no effect, ON for portraits only)"
+      },
+      "invert_mask": {
+        "name": "Invert Mask",
+        "tooltip": "Invert protection mask (enabled by default: mask bright=protect, mask dark=process)"
+      },
+      "protection_mask": {
+        "name": "Protection Mask",
+        "tooltip": "Protection mask: bright areas (1.0) will be protected from processing, dark areas (0.0) will be processed"
+      }
+    }
+  },
   "RC_GradientMap": {
     "display_name": "RC Gradient Map",
     "inputs": {

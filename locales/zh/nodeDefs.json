@@ -956,6 +956,54 @@
       }
     }
   },
+  "RC_ShineRemoval": {
+    "display_name": "RC 去油光",
+    "inputs": {
+      "image": {
+        "name": "图像"
+      },
+      "shine_detection_threshold": {
+        "name": "油光检测阈值",
+        "tooltip": "检测油光区域的亮度阈值（越低=越敏感，人像推荐0.5-0.6）"
+      },
+      "shine_removal_strength": {
+        "name": "去除强度",
+        "tooltip": "油光去除效果的整体强度（0=无效果，1=最大去除）"
+      },
+      "high_frequency_reduction": {
+        "name": "高频细节减弱",
+        "tooltip": "降低油光区域的高频细节（去除纹理反光）"
+      },
+      "low_frequency_smoothing": {
+        "name": "低频平滑",
+        "tooltip": "平滑油光区域的低频层（颜色/色调校正）"
+      },
+      "saturation_boost": {
+        "name": "饱和度提升",
+        "tooltip": "恢复油光区域丢失的色彩饱和度（1.0=不提升，推荐1.5-2.0）"
+      },
+      "smoothing_radius": {
+        "name": "平滑半径",
+        "tooltip": "频率分离模糊半径（越大=过渡越平滑）"
+      },
+      "feather_edges": {
+        "name": "羽化边缘",
+        "tooltip": "羽化油光蒙版边缘以实现自然混合（单位：像素）"
+      },
+      "skin_tone_detection": {
+        "name": "肤色检测",
+        "tooltip": "仅处理检测到的肤色区域（如果无效果请关闭，仅人像时开启）"
+      },
+      "invert_mask": {
+        "name": "反转蒙版",
+        "tooltip": "反转保护蒙版（默认开启：蒙版亮=保护，蒙版暗=处理）"
+      },
+      "protection_mask": {
+        "name": "保护区域蒙版",
+        "tooltip": "保护区域蒙版：亮区（1.0）将被保护不处理，暗区（0.0）将被处理"
+      }
+    }
+  },
   "RC_GradientMap": {
     "display_name": "RC 渐变映射",
     "inputs": {

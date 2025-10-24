@@ -45,8 +45,9 @@ from .nodes.generators.pattern_tiling import RC_PatternTiling
 # Import auto color correction
 from .nodes.adjustments.auto_color import RC_AutoColor
 
-# Import skin smoothing
+# Import skin smoothing and shine removal
 from .nodes.generators.skin_smoothing import RC_HighLowFrequencySkinSmoothing
+from .nodes.generators.shine_removal import RC_ShineRemoval
 
 # Import gradient map
 from .nodes.adjustments.gradient_map import RC_GradientMap
@@ -103,8 +104,9 @@ NODE_CLASS_MAPPINGS = {
     # Auto color correction
     "RC_AutoColor": RC_AutoColor,
 
-    # Skin smoothing
+    # Skin smoothing and shine removal
     "RC_HighLowFrequencySkinSmoothing": RC_HighLowFrequencySkinSmoothing,
+    "RC_ShineRemoval": RC_ShineRemoval,
 
     # Interactive compositor
     "RC_InteractiveCompositor": RC_InteractiveCompositor,
@@ -159,8 +161,9 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     # Auto color correction
     "RC_AutoColor": "RC Auto Color Correction",
 
-    # Skin smoothing
+    # Skin smoothing and shine removal
     "RC_HighLowFrequencySkinSmoothing": "RC High/Low Frequency Skin Smoothing",
+    "RC_ShineRemoval": "RC Shine/Oil Removal",
 
     # Interactive compositor
     "RC_InteractiveCompositor": "RC Interactive Canvas",

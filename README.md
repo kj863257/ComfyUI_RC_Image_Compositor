@@ -60,6 +60,7 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 - **Gaussian Blur** - Professional-grade blur effect with PIL/OpenCV algorithm selection
 - **Unsharp Mask Sharpening** - Multiple sharpening algorithms
 - **High/Low Frequency Skin Smoothing** - Photoshop-style frequency separation technique with automatic skin tone detection and edge protection
+- **Shine/Oil Removal** - Professional oil shine removal with intelligent detection, multiple processing methods, and saturation compensation for natural portrait retouching
 - **Hue/Saturation Adjustment** - Photoshop-like targeted color editing with **intelligent presets** (Cyanotype, Sepia, Vibrance, etc.)
 - **Opacity Control** - Precise transparency adjustment with alpha channel support
 - **Levels Adjustment** - Input/output levels with gamma correction and **quick-access presets** (Increase Contrast, Lighten, Darken, High Contrast)
