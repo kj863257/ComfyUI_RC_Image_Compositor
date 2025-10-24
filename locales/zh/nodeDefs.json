@@ -982,13 +982,17 @@
         "name": "饱和度提升",
         "tooltip": "恢复油光区域丢失的色彩饱和度（1.0=不提升，推荐1.5-2.0）"
       },
+      "brightness_reduction": {
+        "name": "明度降低",
+        "tooltip": "降低处理区域明度以减弱高光（0=不降低，1=最大降低）"
+      },
       "smoothing_radius": {
         "name": "平滑半径",
         "tooltip": "频率分离模糊半径（越大=过渡越平滑）"
       },
       "feather_edges": {
         "name": "羽化边缘",
-        "tooltip": "羽化油光蒙版边缘以实现自然混合（单位：像素）"
+        "tooltip": "羽化油光蒙版边缘以实现自然混合（单位：像素，0=不羽化）"
       },
       "skin_tone_detection": {
         "name": "肤色检测",
@@ -997,6 +1001,10 @@
       "invert_mask": {
         "name": "反转蒙版",
         "tooltip": "反转保护蒙版（默认开启：蒙版亮=保护，蒙版暗=处理）"
+      },
+      "protection_strength": {
+        "name": "保护强度",
+        "tooltip": "控制保护区域蒙版的保护强度（0=不保护，1=完全保护）"
       },
       "protection_mask": {
         "name": "保护区域蒙版",

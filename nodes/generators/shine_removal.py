@@ -36,13 +36,17 @@ class RC_ShineRemoval:
                     "default": 1.5, "min": 1.0, "max": 3.0, "step": 0.1,
                     "tooltip": "Restore color saturation lost in shiny areas (1.0=no boost, try 1.5-2.0)"
                 }),
+                "brightness_reduction": ("FLOAT", {
+                    "default": 0.1, "min": 0.0, "max": 0.5, "step": 0.02,
+                    "tooltip": "Reduce brightness in processed areas to diminish highlights (0=no reduction, 0.5=maximum reduction)"
+                }),
                 "smoothing_radius": ("FLOAT", {
                     "default": 12.0, "min": 1.0, "max": 50.0, "step": 0.5,
                     "tooltip": "Frequency separation blur radius (larger = smoother transition)"
                 }),
                 "feather_edges": ("FLOAT", {
-                    "default": 15.0, "min": 1.0, "max": 50.0, "step": 1.0,
-                    "tooltip": "Feather the shine mask edges for natural blending (in pixels)"
+                    "default": 15.0, "min": 0.0, "max": 50.0, "step": 1.0,
+                    "tooltip": "Feather the shine mask edges for natural blending (in pixels, 0=no feather)"
                 }),
                 "skin_tone_detection": ("BOOLEAN", {
                     "default": False,
@@ -51,6 +55,10 @@ class RC_ShineRemoval:
                 "invert_mask": ("BOOLEAN", {
                     "default": True,
                     "tooltip": "Invert protection mask (enabled by default: mask bright=protect, mask dark=process)"
+                }),
+                "protection_strength": ("FLOAT", {
+                    "default": 1.0, "min": 0.0, "max": 1.0, "step": 0.05,
+                    "tooltip": "Control the protection strength of protection mask (0=no protection, 1=full protection)"
                 }),
             },
             "optional": {
@@ -132,6 +140,27 @@ class RC_ShineRemoval:
 
         return skin_mask
 
+    def reduce_brightness(self, processed_img, shine_mask, reduction_strength):
+        """Simply reduce brightness in processed areas"""
+        if reduction_strength <= 0:
+            return processed_img
+
+        # Convert to LAB for luminosity control
+        processed_float = processed_img.astype(np.float32) / 255.0
+        lab_processed = cv2.cvtColor(processed_float, cv2.COLOR_RGB2LAB)
+
+        # Reduce L channel (brightness) in shine areas
+        # Reduction amount: up to 20 LAB units based on strength
+        reduction_amount = 20 * reduction_strength
+        lab_processed[:, :, 0] = lab_processed[:, :, 0] - (reduction_amount * shine_mask)
+        lab_processed[:, :, 0] = np.clip(lab_processed[:, :, 0], 0, 100)
+
+        # Convert back to RGB
+        result = cv2.cvtColor(lab_processed, cv2.COLOR_LAB2RGB)
+        result = np.clip(result * 255, 0, 255)
+
+        return result.astype(np.float32)
+
     def frequency_based_removal(self, rgb_img, shine_mask, smoothing_radius,
                                high_freq_reduction, low_freq_smoothing, sat_boost):
         """High/Low frequency separation method with saturation restoration"""
@@ -170,8 +199,8 @@ class RC_ShineRemoval:
 
     def remove_shine(self, image, shine_detection_threshold, shine_removal_strength,
                     high_frequency_reduction, low_frequency_smoothing, saturation_boost,
-                    smoothing_radius, feather_edges, skin_tone_detection, invert_mask,
-                    protection_mask=None):
+                    brightness_reduction, smoothing_radius, feather_edges,
+                    skin_tone_detection, invert_mask, protection_strength, protection_mask=None):
 
         # Convert to numpy
         img = (image[0].cpu().numpy() * 255).astype(np.uint8)
@@ -193,6 +222,9 @@ class RC_ShineRemoval:
                 user_mask = cv2.resize(user_mask, (rgb.shape[1], rgb.shape[0]),
                                       interpolation=cv2.INTER_LINEAR)
 
+            # Apply protection strength to the mask
+            user_mask = user_mask * protection_strength
+
             # Apply invert option
             if invert_mask:
                 # mask=1 means PROTECT (don't process), so multiply by (1-mask)
@@ -213,6 +245,11 @@ class RC_ShineRemoval:
         )
 
         processed = np.clip(processed, 0, 255).astype(np.uint8)
+
+        # Apply brightness reduction to reduce highlights
+        if brightness_reduction > 0:
+            processed = self.reduce_brightness(processed, shine_mask, brightness_reduction)
+            processed = np.clip(processed, 0, 255).astype(np.uint8)
 
         # Blend original and processed based on overall strength
         shine_mask_3d = np.expand_dims(shine_mask * shine_removal_strength, axis=2)

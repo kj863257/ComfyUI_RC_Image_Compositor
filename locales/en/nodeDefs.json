@@ -982,13 +982,17 @@
         "name": "Saturation Boost",
         "tooltip": "Restore color saturation lost in shiny areas (1.0=no boost, try 1.5-2.0)"
       },
+      "brightness_reduction": {
+        "name": "Brightness Reduction",
+        "tooltip": "Reduce brightness in processed areas to diminish highlights (0=no reduction, 1=maximum reduction)"
+      },
       "smoothing_radius": {
         "name": "Smoothing Radius",
         "tooltip": "Frequency separation blur radius (larger = smoother transition)"
       },
       "feather_edges": {
         "name": "Feather Edges",
-        "tooltip": "Feather the shine mask edges for natural blending (in pixels)"
+        "tooltip": "Feather the shine mask edges for natural blending (in pixels, 0=no feather)"
       },
       "skin_tone_detection": {
         "name": "Skin Tone Detection",
@@ -997,6 +1001,10 @@
       "invert_mask": {
         "name": "Invert Mask",
         "tooltip": "Invert protection mask (enabled by default: mask bright=protect, mask dark=process)"
+      },
+      "protection_strength": {
+        "name": "Protection Strength",
+        "tooltip": "Control the protection strength of protection mask (0=no protection, 1=full protection)"
       },
       "protection_mask": {
         "name": "Protection Mask",
