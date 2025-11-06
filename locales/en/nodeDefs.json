@@ -1105,6 +1105,64 @@
       }
     }
   },
+  "RC_FilmGrain": {
+    "display_name": "RC Film Grain",
+    "inputs": {
+      "image": {
+        "name": "Image"
+      },
+      "intensity": {
+        "name": "Intensity",
+        "tooltip": "Overall grain intensity (0=no grain, 1.0=heavy grain)"
+      },
+      "grain_size": {
+        "name": "Grain Size",
+        "tooltip": "Grain particle size (smaller = finer grain, larger = coarser grain)"
+      },
+      "luminance_response": {
+        "name": "Luminance Response",
+        "tooltip": "Luminance-based grain variation:\n- 0.0: Uniform grain across all tones\n- 1.0: Dramatic film (DARK areas get 2x grain, BRIGHT areas get 0x grain)\n- 2.0: Extreme film grain (DARK areas get 3x grain, BRIGHT areas get 0x grain)"
+      },
+      "grain_midtone": {
+        "name": "Grain Midtone",
+        "tooltip": "Grain distribution midtone (similar to Levels midtone slider):\n- 0.5: Standard distribution\n- <0.5: Pull midtones darker (MORE areas get grain)\n- >0.5: Pull midtones brighter (FEWER areas get grain, protect highlights)"
+      },
+      "highlight_protection": {
+        "name": "Highlight Protection",
+        "tooltip": "Additional highlight protection (applies after midtone adjustment):\n- 0.0: No additional protection\n- 0.5: Moderate black compression (stronger highlight protection)\n- 1.0: Maximum black compression (only deepest shadows get grain)"
+      },
+      "grain_opacity": {
+        "name": "Grain Opacity",
+        "tooltip": "Grain layer opacity (final blend strength):\n- 0.0: No grain visible\n- 0.5: 50% grain blend\n- 1.0: Full grain effect"
+      },
+      "grain_blur": {
+        "name": "Grain Blur",
+        "tooltip": "Blur applied to grain layer (soften grain):\n- 0.0: No blur (sharp grain)\n- 1.0: Slight softening\n- 3.0+: Very soft, subtle grain"
+      },
+      "monochrome": {
+        "name": "Monochrome",
+        "tooltip": "Monochrome grain (true for B&W film look, false for color film with chromatic grain)"
+      },
+      "blend_mode": {
+        "name": "Blend Mode",
+        "tooltip": "Grain blending mode:\n- add: Direct addition (strong, visible)\n- screen: Film-like brightening (soft, subtle)\n- overlay: Photoshop overlay (natural contrast)\n- soft_light: Photoshop soft light (gentle, smooth)\n- linear_dodge: Linear brightening (bright, glowy)"
+      },
+      "seed": {
+        "name": "Seed",
+        "tooltip": "Random seed for reproducible grain patterns"
+      }
+    },
+    "outputs": {
+      "image": {
+        "name": "Image",
+        "tooltip": "Image with applied film grain effect"
+      },
+      "grain_map": {
+        "name": "Grain Map",
+        "tooltip": "Visualization of grain intensity distribution (bright = more grain, dark = less grain)"
+      }
+    }
+  },
   "_categories": {
     "RC/Image": "RC/Image",
     "RC/Adjustments": "RC/Adjustments",

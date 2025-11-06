@@ -1105,6 +1105,64 @@
       }
     }
   },
+  "RC_FilmGrain": {
+    "display_name": "RC 胶片颗粒",
+    "inputs": {
+      "image": {
+        "name": "图像"
+      },
+      "intensity": {
+        "name": "强度",
+        "tooltip": "整体颗粒强度（0=无颗粒，1.0=重颗粒）"
+      },
+      "grain_size": {
+        "name": "颗粒大小",
+        "tooltip": "颗粒颗粒大小（越小=越细的颗粒，越大=越粗的颗粒）"
+      },
+      "luminance_response": {
+        "name": "亮度响应",
+        "tooltip": "基于亮度的颗粒变化：\n- 0.0: 所有区域均匀颗粒\n- 1.0: 戏剧胶片（暗部2倍颗粒，亮部0倍颗粒）\n- 2.0: 极端胶片颗粒（暗部3倍颗粒，亮部0倍颗粒）"
+      },
+      "grain_midtone": {
+        "name": "颗粒中间调",
+        "tooltip": "颗粒分布中间调（类似色阶中间调滑块）：\n- 0.5: 标准分布\n- <0.5: 将中间调往暗处拉（更多区域有颗粒）\n- >0.5: 将中间调往亮处拉（更少区域有颗粒，保护高光）"
+      },
+      "highlight_protection": {
+        "name": "高光保护",
+        "tooltip": "额外的高光保护（在中间调调整后应用）：\n- 0.0: 无额外保护\n- 0.5: 中等黑场压缩（更强的高光保护）\n- 1.0: 最大黑场压缩（仅最深阴影有颗粒）"
+      },
+      "grain_opacity": {
+        "name": "颗粒不透明度",
+        "tooltip": "颗粒图层不透明度（最终混合强度）：\n- 0.0: 无颗粒可见\n- 0.5: 50% 颗粒混合\n- 1.0: 完整颗粒效果"
+      },
+      "grain_blur": {
+        "name": "颗粒模糊",
+        "tooltip": "应用于颗粒图层的模糊（软化颗粒）：\n- 0.0: 无模糊（锐利颗粒）\n- 1.0: 轻微软化\n- 3.0+: 非常柔和、细微的颗粒"
+      },
+      "monochrome": {
+        "name": "单色",
+        "tooltip": "单色颗粒（黑白胶片效果用true，彩色胶片的色彩颗粒用false）"
+      },
+      "blend_mode": {
+        "name": "混合模式",
+        "tooltip": "颗粒混合模式：\n- add: 直接相加（强烈、明显）\n- screen: 胶片式变亮（柔和、微妙）\n- overlay: Photoshop叠加（自然对比）\n- soft_light: Photoshop柔光（温和、平滑）\n- linear_dodge: 线性变亮（明亮、发光）"
+      },
+      "seed": {
+        "name": "种子",
+        "tooltip": "随机种子用于可重现的颗粒图案"
+      }
+    },
+    "outputs": {
+      "image": {
+        "name": "图像",
+        "tooltip": "应用胶片颗粒效果后的图像"
+      },
+      "grain_map": {
+        "name": "颗粒图",
+        "tooltip": "颗粒强度分布可视化（亮=颗粒多，暗=颗粒少）"
+      }
+    }
+  },
   "_categories": {
     "RC/Image": "RC/图像",
     "RC/Adjustments": "RC/调整",

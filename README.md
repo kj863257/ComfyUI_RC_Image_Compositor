@@ -1,6 +1,6 @@
 # RC Image Compositor 🎨
 
-A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style layer effects** and **advanced compositing capabilities** to your workflows. The collection now ships with **33 production-ready nodes** spanning compositing, adjustments, generation, utilities, and channel tools. Recent updates add a clearer Blend-If interface, high-precision curves display under ComfyUI zoom, draggable gradient stops for faster toning workflows, a high-performance pattern tiling generator with pre-tiling crop controls, workflow metadata transfer nodes for seamless metadata management, and a brand-new interactive canvas for real-time foreground placement.
+A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style layer effects** and **advanced compositing capabilities** to your workflows. The collection now ships with **34 production-ready nodes** spanning compositing, adjustments, generation, utilities, and channel tools. Recent updates add a clearer Blend-If interface, high-precision curves display under ComfyUI zoom, draggable gradient stops for faster toning workflows, a high-performance pattern tiling generator with pre-tiling crop controls, workflow metadata transfer nodes for seamless metadata management, and a brand-new interactive canvas for real-time foreground placement.
 
 [中文版 README](README_zh.md)
 
@@ -61,6 +61,7 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 - **Unsharp Mask Sharpening** - Multiple sharpening algorithms
 - **High/Low Frequency Skin Smoothing** - Photoshop-style frequency separation technique with automatic skin tone detection and edge protection
 - **Shine/Oil Removal** - Professional oil shine removal with intelligent detection, multiple processing methods, and saturation compensation for natural portrait retouching
+- **Film Grain** - Realistic film grain effect with luminance-based intensity modulation (more grain in shadows, less in highlights), grain size control, midtone/highlight protection curves, grain opacity and blur adjustment, multiple blend modes (add/screen/overlay/soft_light/linear_dodge), and monochrome support for authentic analog film aesthetics
 - **Hue/Saturation Adjustment** - Photoshop-like targeted color editing with **intelligent presets** (Cyanotype, Sepia, Vibrance, etc.)
 - **Opacity Control** - Precise transparency adjustment with alpha channel support
 - **Levels Adjustment** - Input/output levels with gamma correction and **quick-access presets** (Increase Contrast, Lighten, Darken, High Contrast)
@@ -118,6 +119,7 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 - `RC Gaussian Blur` - Professional-grade blur with algorithm selection
 - `RC Sharpen` - Multiple sharpening methods including unsharp mask
 - `RC Add Noise` - Five procedural noise models with blend controls for texture and film grain
+- `RC Film Grain` - Realistic film grain with luminance-based intensity modulation, grain size control, midtone/highlight protection curves, grain opacity and blur, blend mode support, and monochrome mode
 - `RC High/Low Frequency Skin Smoothing` - Photoshop-style frequency separation skin smoothing with skin tone detection
 
 ### **RC/Adjustments** - Color & Tone
