@@ -29,20 +29,20 @@ class RC_CanvasPadding:
             "required": {
                 "image": ("IMAGE",),
                 "top": ("INT", {
-                    "default": 50, "min": 0, "max": 2048, "step": 1,
-                    "tooltip": "Top padding in pixels"
+                    "default": 50, "min": -8192, "max": 8192, "step": 1,
+                    "tooltip": "Top padding in pixels (negative values crop from top)"
                 }),
                 "bottom": ("INT", {
-                    "default": 50, "min": 0, "max": 2048, "step": 1,
-                    "tooltip": "Bottom padding in pixels"
+                    "default": 50, "min": -8192, "max": 8192, "step": 1,
+                    "tooltip": "Bottom padding in pixels (negative values crop from bottom)"
                 }),
                 "left": ("INT", {
-                    "default": 50, "min": 0, "max": 2048, "step": 1,
-                    "tooltip": "Left padding in pixels"
+                    "default": 50, "min": -8192, "max": 8192, "step": 1,
+                    "tooltip": "Left padding in pixels (negative values crop from left)"
                 }),
                 "right": ("INT", {
-                    "default": 50, "min": 0, "max": 2048, "step": 1,
-                    "tooltip": "Right padding in pixels"
+                    "default": 50, "min": -8192, "max": 8192, "step": 1,
+                    "tooltip": "Right padding in pixels (negative values crop from right)"
                 }),
                 "fill_mode": (["color", "edge", "mirror", "transparent"], {
                     "default": "color",
@@ -54,99 +54,129 @@ class RC_CanvasPadding:
                         "- transparent: Transparent fill (RGBA only)"
                     )
                 }),
-                "fill_color_r": ("FLOAT", {
-                    "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "Fill color red component"
+                "fill_color_r": ("INT", {
+                    "default": 0, "min": 0, "max": 255, "step": 1,
+                    "tooltip": "Fill color red component (0-255)"
                 }),
-                "fill_color_g": ("FLOAT", {
-                    "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "Fill color green component"
+                "fill_color_g": ("INT", {
+                    "default": 0, "min": 0, "max": 255, "step": 1,
+                    "tooltip": "Fill color green component (0-255)"
                 }),
-                "fill_color_b": ("FLOAT", {
-                    "default": 0.0, "min": 0.0, "max": 1.0, "step": 0.01,
-                    "tooltip": "Fill color blue component"
+                "fill_color_b": ("INT", {
+                    "default": 0, "min": 0, "max": 255, "step": 1,
+                    "tooltip": "Fill color blue component (0-255)"
+                }),
+                "background_alpha": ("FLOAT", {
+                    "default": 1.0, "min": 0.0, "max": 1.0, "step": 0.01,
+                    "tooltip": "Background alpha/opacity (0.0=fully transparent, 1.0=fully opaque). Values <1.0 will output RGBA format."
                 }),
             }
         }
 
     def apply_padding(self, image, top, bottom, left, right, fill_mode,
-                     fill_color_r, fill_color_g, fill_color_b):
+                     fill_color_r, fill_color_g, fill_color_b, background_alpha):
         # Convert to numpy
         img = (image[0].cpu().numpy() * 255).astype(np.uint8)
         h, w = img.shape[:2]
         has_alpha = img.shape[2] == 4
 
+        # Force RGBA output if background is not fully opaque
+        output_rgba = background_alpha < 1.0 or fill_mode == "transparent"
+
+        # Handle cropping (negative values)
+        crop_top = max(0, -top)
+        crop_bottom = max(0, -bottom)
+        crop_left = max(0, -left)
+        crop_right = max(0, -right)
+
+        # Apply cropping first if needed
+        if crop_top > 0 or crop_bottom > 0 or crop_left > 0 or crop_right > 0:
+            crop_h_end = h - crop_bottom if crop_bottom > 0 else h
+            crop_w_end = w - crop_right if crop_right > 0 else w
+            img = img[crop_top:crop_h_end, crop_left:crop_w_end]
+            h, w = img.shape[:2]
+
+        # Convert to RGBA if needed
+        if output_rgba and not has_alpha:
+            img_rgba = np.zeros((h, w, 4), dtype=np.uint8)
+            img_rgba[:, :, :3] = img
+            img_rgba[:, :, 3] = 255
+            img = img_rgba
+            has_alpha = True
+
+        # Calculate padding (only positive values)
+        pad_top = max(0, top)
+        pad_bottom = max(0, bottom)
+        pad_left = max(0, left)
+        pad_right = max(0, right)
+
+        # If no padding needed, return cropped image
+        if pad_top == 0 and pad_bottom == 0 and pad_left == 0 and pad_right == 0:
+            result_tensor = torch.from_numpy(img.astype(np.float32) / 255.0).unsqueeze(0)
+            return (result_tensor,)
+
         # Calculate new dimensions
-        new_h = h + top + bottom
-        new_w = w + left + right
+        new_h = h + pad_top + pad_bottom
+        new_w = w + pad_left + pad_right
+
+        # Calculate background alpha as integer (0-255)
+        bg_alpha = int(background_alpha * 255)
 
         if fill_mode == "color":
-            # Fill with solid color
-            if has_alpha:
-                fill_color = [fill_color_r * 255, fill_color_g * 255, fill_color_b * 255, 255]
+            # Fill with solid color (RGB values are already 0-255)
+            if output_rgba:
+                fill_color = [fill_color_r, fill_color_g, fill_color_b, bg_alpha]
                 padded = np.full((new_h, new_w, 4), fill_color, dtype=np.uint8)
             else:
-                fill_color = [fill_color_r * 255, fill_color_g * 255, fill_color_b * 255]
+                fill_color = [fill_color_r, fill_color_g, fill_color_b]
                 padded = np.full((new_h, new_w, 3), fill_color, dtype=np.uint8)
 
             # Place original image
-            padded[top:top+h, left:left+w] = img
+            padded[pad_top:pad_top+h, pad_left:pad_left+w] = img
 
         elif fill_mode == "transparent":
-            # Transparent fill (only for RGBA)
-            if has_alpha:
-                padded = np.zeros((new_h, new_w, 4), dtype=np.uint8)
-                padded[top:top+h, left:left+w] = img
-            else:
-                # Convert to RGBA and add transparent padding
-                padded = np.zeros((new_h, new_w, 4), dtype=np.uint8)
-                padded[top:top+h, left:left+w, :3] = img
-                padded[top:top+h, left:left+w, 3] = 255  # Original area opaque
+            # Transparent fill (always RGBA)
+            padded = np.zeros((new_h, new_w, 4), dtype=np.uint8)
+            # Background is transparent (alpha=0), ignore background_alpha parameter for transparent mode
+            padded[pad_top:pad_top+h, pad_left:pad_left+w] = img
 
-        else:
-            # Use PIL for edge and mirror modes
-            if has_alpha:
-                pil_img = Image.fromarray(img, 'RGBA')
-            else:
-                pil_img = Image.fromarray(img, 'RGB')
+        elif fill_mode == "edge":
+            # Edge extension using cv2.copyMakeBorder
+            padded = cv2.copyMakeBorder(img, pad_top, pad_bottom, pad_left, pad_right,
+                                      cv2.BORDER_REPLICATE)
 
-            if fill_mode == "edge":
-                # Extend edge pixels
-                padded_pil = ImageOps.expand(pil_img, (left, top, right, bottom),
-                                           fill=None)  # PIL will extend edges
-            else:  # mirror
-                # Create mirrored padding manually
-                if has_alpha:
-                    padded = np.zeros((new_h, new_w, 4), dtype=np.uint8)
-                else:
-                    padded = np.zeros((new_h, new_w, 3), dtype=np.uint8)
+            # Apply background alpha to padding area if needed
+            if output_rgba and background_alpha < 1.0:
+                # Ensure RGBA format
+                if padded.shape[2] == 3:
+                    padded_rgba = np.zeros((new_h, new_w, 4), dtype=np.uint8)
+                    padded_rgba[:, :, :3] = padded
+                    padded_rgba[:, :, 3] = 255
+                    padded = padded_rgba
+                # Create mask for padding area
+                mask = np.ones((new_h, new_w), dtype=bool)
+                mask[pad_top:pad_top+h, pad_left:pad_left+w] = False
+                # Set alpha channel in padding area
+                padded[mask, 3] = bg_alpha
 
-                # Place original image
-                padded[top:top+h, left:left+w] = img
+        else:  # mirror
+            # Mirror padding using cv2.copyMakeBorder
+            padded = cv2.copyMakeBorder(img, pad_top, pad_bottom, pad_left, pad_right,
+                                      cv2.BORDER_REFLECT_101)
 
-                # Mirror padding
-                if top > 0:
-                    mirror_h = min(top, h)
-                    padded[top-mirror_h:top, left:left+w] = np.flip(img[:mirror_h], axis=0)
-
-                if bottom > 0:
-                    mirror_h = min(bottom, h)
-                    padded[top+h:top+h+mirror_h, left:left+w] = np.flip(img[-mirror_h:], axis=0)
-
-                if left > 0:
-                    mirror_w = min(left, w)
-                    padded[top:top+h, left-mirror_w:left] = np.flip(padded[top:top+h, left:left+mirror_w], axis=1)
-
-                if right > 0:
-                    mirror_w = min(right, w)
-                    padded[top:top+h, left+w:left+w+mirror_w] = np.flip(padded[top:top+h, left+w-mirror_w:left+w], axis=1)
-
-                # Convert to result tensor
-                result_tensor = torch.from_numpy(padded.astype(np.float32) / 255.0).unsqueeze(0)
-                return (result_tensor,)
-
-            if fill_mode == "edge":
-                padded = np.array(padded_pil)
+            # Apply background alpha to padding area if needed
+            if output_rgba and background_alpha < 1.0:
+                # Ensure RGBA format
+                if padded.shape[2] == 3:
+                    padded_rgba = np.zeros((new_h, new_w, 4), dtype=np.uint8)
+                    padded_rgba[:, :, :3] = padded
+                    padded_rgba[:, :, 3] = 255
+                    padded = padded_rgba
+                # Create mask for padding area
+                mask = np.ones((new_h, new_w), dtype=bool)
+                mask[pad_top:pad_top+h, pad_left:pad_left+w] = False
+                # Set alpha channel in padding area
+                padded[mask, 3] = bg_alpha
 
         # Convert back to tensor
         result_tensor = torch.from_numpy(padded.astype(np.float32) / 255.0).unsqueeze(0)

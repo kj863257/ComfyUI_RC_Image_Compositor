@@ -473,19 +473,19 @@
       },
       "top": {
         "name": "Top Padding",
-        "tooltip": "Top padding in pixels"
+        "tooltip": "Top padding in pixels (negative values crop from top)"
       },
       "bottom": {
         "name": "Bottom Padding",
-        "tooltip": "Bottom padding in pixels"
+        "tooltip": "Bottom padding in pixels (negative values crop from bottom)"
       },
       "left": {
         "name": "Left Padding",
-        "tooltip": "Left padding in pixels"
+        "tooltip": "Left padding in pixels (negative values crop from left)"
       },
       "right": {
         "name": "Right Padding",
-        "tooltip": "Right padding in pixels"
+        "tooltip": "Right padding in pixels (negative values crop from right)"
       },
       "fill_mode": {
         "name": "Fill Mode",
@@ -493,15 +493,19 @@
       },
       "fill_color_r": {
         "name": "Fill Color R",
-        "tooltip": "Fill color red component"
+        "tooltip": "Fill color red component (0-255)"
       },
       "fill_color_g": {
         "name": "Fill Color G",
-        "tooltip": "Fill color green component"
+        "tooltip": "Fill color green component (0-255)"
       },
       "fill_color_b": {
         "name": "Fill Color B",
-        "tooltip": "Fill color blue component"
+        "tooltip": "Fill color blue component (0-255)"
+      },
+      "background_alpha": {
+        "name": "Background Alpha",
+        "tooltip": "Background alpha/opacity (0.0=fully transparent, 1.0=fully opaque). Values <1.0 will output RGBA format."
       }
     }
   },

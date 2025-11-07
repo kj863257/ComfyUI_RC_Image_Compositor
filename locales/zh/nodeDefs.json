@@ -473,19 +473,19 @@
       },
       "top": {
         "name": "上边距",
-        "tooltip": "上侧留白像素"
+        "tooltip": "上侧留白像素（负值从上侧裁切）"
       },
       "bottom": {
         "name": "下边距",
-        "tooltip": "下侧留白像素"
+        "tooltip": "下侧留白像素（负值从下侧裁切）"
       },
       "left": {
         "name": "左边距",
-        "tooltip": "左侧留白像素"
+        "tooltip": "左侧留白像素（负值从左侧裁切）"
       },
       "right": {
         "name": "右边距",
-        "tooltip": "右侧留白像素"
+        "tooltip": "右侧留白像素（负值从右侧裁切）"
       },
       "fill_mode": {
         "name": "填充模式",
@@ -493,15 +493,19 @@
       },
       "fill_color_r": {
         "name": "填充红",
-        "tooltip": "填充颜色红色分量"
+        "tooltip": "填充颜色红色分量 (0-255)"
       },
       "fill_color_g": {
         "name": "填充绿",
-        "tooltip": "填充颜色绿色分量"
+        "tooltip": "填充颜色绿色分量 (0-255)"
       },
       "fill_color_b": {
         "name": "填充蓝",
-        "tooltip": "填充颜色蓝色分量"
+        "tooltip": "填充颜色蓝色分量 (0-255)"
+      },
+      "background_alpha": {
+        "name": "背景不透明度",
+        "tooltip": "背景透明度/不透明度（0.0=完全透明，1.0=完全不透明）。值<1.0时将输出RGBA格式。"
       }
     }
   },
