@@ -1176,6 +1176,34 @@
     "RC/Utilities": "RC/Utilities",
     "RC/Channel": "RC/Channel"
   },
+  "RC_LRPreset": {
+    "display_name": "RC LR/ACR Preset",
+    "inputs": {
+      "image": {
+        "name": "Image"
+      },
+      "preset_directory": {
+        "name": "Preset Directory",
+        "tooltip": "Folder to scan (including subdirectories) for Lightroom (.lrtemplate) or Camera Raw (.xmp) presets."
+      },
+      "strength": {
+        "name": "Strength",
+        "tooltip": "Preset influence (0=no effect, 100=full preset). Interactive previews use the same slider."
+      },
+      "pass_forward": {
+        "name": "Pass Forward",
+        "tooltip": "Run once with Pass Forward off to pick a preset, then enable it to resume the workflow."
+      },
+      "selected_preset": {
+        "name": "Selected Preset",
+        "tooltip": "Managed by the preset browser UI. No manual editing required."
+      },
+      "browser_state": {
+        "name": "Browser State",
+        "tooltip": "Internal preset browser state (auto-managed)."
+      }
+    }
+  },
   "RC_InteractiveCompositor": {
     "display_name": "RC Interactive Canvas",
     "inputs": {

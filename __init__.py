@@ -53,6 +53,9 @@ from .nodes.generators.film_grain import RC_FilmGrain
 # Import gradient map
 from .nodes.adjustments.gradient_map import RC_GradientMap
 
+# Import LR preset loader
+from .nodes.adjustments.lr_preset import RC_LRPreset
+
 # Import interactive compositor
 from .nodes.utilities.rc_compositor import RC_InteractiveCompositor
 
@@ -93,6 +96,7 @@ NODE_CLASS_MAPPINGS = {
     "RC_GradientMap": RC_GradientMap,
     "RC_Threshold": RC_Threshold,
     "RC_Vibrance": RC_Vibrance,
+    "RC_LRPreset": RC_LRPreset,
 
     # Channel operations
     "RC_ChannelExtractor": RC_ChannelExtractor,
@@ -151,6 +155,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "RC_GradientMap": "RC Gradient Map",
     "RC_Threshold": "RC Threshold",
     "RC_Vibrance": "RC Vibrance",
+    "RC_LRPreset": "RC LR/ACR Preset",
 
     # Channel operations
     "RC_ChannelExtractor": "RC Channel Extractor",

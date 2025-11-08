@@ -1176,6 +1176,34 @@
     "RC/Utilities": "RC/工具",
     "RC/Channel": "RC/通道"
   },
+  "RC_LRPreset": {
+    "display_name": "RC LR/ACR 预设",
+    "inputs": {
+      "image": {
+        "name": "图像"
+      },
+      "preset_directory": {
+        "name": "预设目录",
+        "tooltip": "扫描该目录及其子目录中的 Lightroom (.lrtemplate) 或 Camera Raw (.xmp) 预设文件。"
+      },
+      "strength": {
+        "name": "强度",
+        "tooltip": "预设强度（0=无效果，100=完整应用），节点内预览使用同一滑块。"
+      },
+      "pass_forward": {
+        "name": "Pass Forward",
+        "tooltip": "先在 Pass Forward 关闭时运行以挑选预设，再开启让工作流继续。"
+      },
+      "selected_preset": {
+        "name": "选中预设",
+        "tooltip": "由预设浏览器自动维护，请勿手动修改。"
+      },
+      "browser_state": {
+        "name": "浏览状态",
+        "tooltip": "预设浏览器的内部状态（自动管理）。"
+      }
+    }
+  },
   "RC_InteractiveCompositor": {
     "display_name": "RC 交互画布",
     "inputs": {
