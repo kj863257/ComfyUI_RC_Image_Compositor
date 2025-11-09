@@ -1159,13 +1159,13 @@ app.registerExtension({
                 }
 
                 // Set minimum node size and prevent collapsing
-                this.size = [600, 900];
+                this.size = [620, 960];
 
                 // Override setSize to enforce minimum dimensions
                 const originalSetSize = this.setSize.bind(this);
                 this.setSize = function(size) {
-                    const minWidth = 500;
-                    const minHeight = 900; // Increased to show more canvas
+                    const minWidth = 520;
+                    const minHeight = 960;
                     const newSize = [
                         Math.max(minWidth, size[0]),
                         Math.max(minHeight, size[1])

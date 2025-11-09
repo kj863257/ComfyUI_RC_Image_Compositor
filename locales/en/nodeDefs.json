@@ -855,6 +855,10 @@
       "channel": {
         "name": "Channel",
         "tooltip": "Adjustment channel:\n- RGB: Adjust all channels together\n- Red/Green/Blue: Adjust individual color channels"
+      },
+      "levels_state": {
+        "name": "Levels State",
+        "tooltip": "Interactive UI JSON data (auto-managed, no manual editing required)."
       }
     },
     "presets": {

@@ -71,44 +71,56 @@ class RC_LevelsAdjust:
     CATEGORY = "RC/Adjustments"
     DESCRIPTION = "Photoshop-style levels adjustment with input/output range control."
 
+    @staticmethod
+    def _default_levels_state():
+        return json.dumps({
+            "channel": "RGB",
+            "values": {
+                "input_black": 0.0,
+                "input_white": 1.0,
+                "gamma": 1.0,
+                "output_black": 0.0,
+                "output_white": 1.0
+            }
+        })
+
     @classmethod
     def INPUT_TYPES(cls):
         return {
             "required": {
                 "image": ("IMAGE",),
-                "input_black": ("FLOAT", {
-                    "default": 0.0, "min": 0.0, "max": 0.9, "step": 0.01,
-                    "tooltip": "Input black point (0.0-0.9, raising darkens shadows)"
+                "levels_state": ("STRING", {
+                    "default": cls._default_levels_state(),
+                    "multiline": False,
+                    "tooltip": "Interactive levels UI state (managed by UI, contains channel and adjustment values)"
                 }),
-                "input_white": ("FLOAT", {
-                    "default": 1.0, "min": 0.1, "max": 1.0, "step": 0.01,
-                    "tooltip": "Input white point (0.1-1.0, lowering brightens highlights)"
-                }),
-                "gamma": ("FLOAT", {
-                    "default": 1.0, "min": 0.1, "max": 3.0, "step": 0.01,
-                    "tooltip": "Gamma value (<1.0 brightens midtones, >1.0 darkens midtones)"
-                }),
-                "output_black": ("FLOAT", {
-                    "default": 0.0, "min": 0.0, "max": 0.9, "step": 0.01,
-                    "tooltip": "Output black point (lifts darkest areas)"
-                }),
-                "output_white": ("FLOAT", {
-                    "default": 1.0, "min": 0.1, "max": 1.0, "step": 0.01,
-                    "tooltip": "Output white point (suppresses brightest areas)"
-                }),
-                "channel": (["RGB", "Red", "Green", "Blue"], {
-                    "default": "RGB",
-                    "tooltip": (
-                        "Adjustment channel:\n"
-                        "- RGB: Adjust all channels together\n"
-                        "- Red/Green/Blue: Adjust individual color channels"
-                    )
-                }),
+            },
+            "hidden": {
+                "node_id": "UNIQUE_ID",
             }
         }
 
 
-    def adjust_levels(self, image, input_black, input_white, gamma, output_black, output_white, channel):
+    def adjust_levels(self, image, levels_state, node_id=None):
+        # Parse levels state from JSON
+        try:
+            state = json.loads(levels_state)
+            channel = state.get("channel", "RGB")
+            values = state.get("values", {})
+            input_black = values.get("input_black", 0.0)
+            input_white = values.get("input_white", 1.0)
+            gamma = values.get("gamma", 1.0)
+            output_black = values.get("output_black", 0.0)
+            output_white = values.get("output_white", 1.0)
+        except:
+            # Fallback to defaults if parsing fails
+            channel = "RGB"
+            input_black = 0.0
+            input_white = 1.0
+            gamma = 1.0
+            output_black = 0.0
+            output_white = 1.0
+
         # Convert to numpy
         img = (image[0].cpu().numpy() * 255).astype(np.uint8)
         has_alpha = img.shape[2] == 4

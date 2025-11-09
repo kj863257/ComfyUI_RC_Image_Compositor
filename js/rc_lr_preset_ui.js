@@ -51,7 +51,10 @@ const hideWidget = (node, widget) => {
 };
 
 const markDirty = (node) => {
+    if (!node) return;
+    node.widgets_changed = true;
     node?.graph?.setDirtyCanvas(true, true);
+    app?.graph?.setDirtyCanvas(true, true);
 };
 
 const ensureState = (node) => {
@@ -506,7 +509,6 @@ app.registerExtension({
             target.rcUniqueId = uniqueId;
             const state = ensureState(target);
             state.baseImage = output.base_image?.[0] || null;
-            state.previewImage = null;
             state.selectedPreset = output.selected_preset?.[0] || "";
             state.browserState = output.browser_state?.[0] || "{}";
             state.rootDir = output.root_dir?.[0] || "";
@@ -515,6 +517,16 @@ app.registerExtension({
             state.listLoaded = false;
             state.status = state.hasRoot ? "" : t("NoRoot");
             state.lastSessionStamp = Date.now();
+            const previewFromServer = output.preview_image?.[0];
+            if (previewFromServer) {
+                state.previewImage = previewFromServer;
+            } else if (!state.previewImage) {
+                state.previewImage = state.baseImage;
+            }
+
+            updateSelectedPresetWidget(target, state.selectedPreset);
+            const parsedState = safeParseState(state.browserState);
+            updateBrowserStateWidget(target, parsedState.currentPath || "");
 
             if (target._rcPresetUI) {
                 updateRootLabel(target);

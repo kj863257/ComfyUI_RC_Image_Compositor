@@ -150,14 +150,42 @@ class RC_LRPreset:
     def _cache_session(cls, node_id: str, image_np: np.ndarray, preset_directory: str,
                        browser_state: str):
         cls._prune_sessions()
+        existing = cls.SESSION_CACHE.get(node_id, {})
+        resolved_dir = cls._resolve_root_dir(preset_directory)
+
+        preserved = {}
+        if existing and existing.get("root_dir") == resolved_dir:
+            preserved = {
+                "selected_preset": existing.get("selected_preset"),
+                "browser_state": existing.get("browser_state", "{}"),
+                "current_path": existing.get("current_path", ""),
+                "selected_preview": existing.get("selected_preview"),
+                "last_preview_b64": existing.get("last_preview_b64"),
+            }
+
         cached = {
             "image_np": image_np.copy(),
             "base64": cls._numpy_to_base64(image_np),
-            "root_dir": cls._resolve_root_dir(preset_directory),
+            "root_dir": resolved_dir,
             "display_dir": preset_directory or "",
-            "browser_state": browser_state or "{}",
+            "browser_state": browser_state or preserved.get("browser_state", "{}") or "{}",
+            "current_path": preserved.get("current_path", ""),
+            "selected_preset": preserved.get("selected_preset"),
+            "selected_preview": preserved.get("selected_preview"),
+            "last_preview_b64": preserved.get("last_preview_b64"),
             "timestamp": time.time(),
         }
+
+        if browser_state:
+            cached["browser_state"] = browser_state
+            try:
+                parsed = json.loads(browser_state)
+                cached["current_path"] = parsed.get("currentPath", cached.get("current_path", ""))
+            except Exception:
+                pass
+        if (not cached["browser_state"] or cached["browser_state"] == "{}") and cached.get("current_path"):
+            cached["browser_state"] = json.dumps({"currentPath": cached["current_path"]})
+
         cls.SESSION_CACHE[node_id] = cached
         return cached
 
@@ -185,13 +213,21 @@ class RC_LRPreset:
         if not node_id or PromptServer.instance is None:
             return
 
+        selected_for_ui = selected_preset or session.get("selected_preset") or ""
+        browser_state = session.get("browser_state") or "{}"
+        if (not browser_state or browser_state == "{}") and session.get("current_path"):
+            browser_state = json.dumps({"currentPath": session.get("current_path")})
+
+        preview_image = session.get("last_preview_b64", "")
+
         ui_payload = {
             "base_image": [session.get("base64")],
             "root_dir": [session.get("display_dir", "")],
             "has_root": [bool(session.get("root_dir"))],
-            "selected_preset": [selected_preset or ""],
-            "browser_state": [session.get("browser_state", "{}")],
+            "selected_preset": [selected_for_ui],
+            "browser_state": [browser_state],
             "strength": [float(strength)],
+            "preview_image": [preview_image or ""],
         }
 
         detail = {"output": ui_payload, "node": node_id}
@@ -224,12 +260,20 @@ class RC_LRPreset:
         node_key = str(node_id or "")
         base_np = self._tensor_to_numpy(image)
         cache = self._cache_session(node_key, base_np, preset_directory, browser_state)
-        self._send_ui_event(node_key, cache, selected_preset, strength)
 
-        if not selected_preset:
+        selected_value = (selected_preset or "").strip()
+        if not selected_value:
+            selected_value = cache.get("selected_preset") or cache.get("selected_preview") or ""
+
+        if selected_value:
+            cache["selected_preset"] = selected_value
+
+        self._send_ui_event(node_key, cache, selected_value, strength)
+
+        if not selected_value:
             raise RuntimeError(MISSING_SELECTION_MESSAGE)
 
-        preset_path = self._resolve_preset_path(cache.get("root_dir", ""), selected_preset)
+        preset_path = self._resolve_preset_path(cache.get("root_dir", ""), selected_value)
         if not preset_path:
             raise RuntimeError("Selected preset cannot be resolved inside the configured directory.")
 
@@ -616,6 +660,7 @@ async def list_presets(request):
                 })
 
         session["current_path"] = rel_path
+        session["browser_state"] = json.dumps({"currentPath": rel_path})
 
         return web.json_response({
             "status": "success",
@@ -658,7 +703,9 @@ async def preview_preset(request):
         preview_b64 = instance._numpy_to_base64(preview_np)
 
         session["last_preview"] = preview_np
+        session["last_preview_b64"] = preview_b64
         session["selected_preview"] = preset_rel
+        session["selected_preset"] = preset_rel
 
         return web.json_response({
             "status": "success",

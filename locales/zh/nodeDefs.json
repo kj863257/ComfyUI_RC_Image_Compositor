@@ -854,7 +854,11 @@
       },
       "channel": {
         "name": "通道",
-        "tooltip": "调整通道：\n- RGB：同时调整全部通道\n- Red/Green/Blue：分别调整单独颜色通道"
+        "tooltip": "调整通道：\n- RGB：同时调整全部通道\n- 红/绿/蓝：分别调整单独颜色通道"
+      },
+      "levels_state": {
+        "name": "色阶状态",
+        "tooltip": "交互式色阶UI的JSON状态（自动维护，无需手动修改）。"
       }
     },
     "presets": {

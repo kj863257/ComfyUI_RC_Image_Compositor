@@ -65,7 +65,7 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 - **LR/ACR Preset Loader** - Interactive preset browser for Lightroom (.lrtemplate) and Camera Raw (.xmp) presets with real-time preview, directory scanning, adjustable strength, and complete color grading pipeline (exposure, contrast, highlights/shadows, tone curves, HSL adjustments, split toning, vibrance)
 - **Hue/Saturation Adjustment** - Photoshop-like targeted color editing with **intelligent presets** (Cyanotype, Sepia, Vibrance, etc.)
 - **Opacity Control** - Precise transparency adjustment with alpha channel support
-- **Levels Adjustment** - Input/output levels with gamma correction and **quick-access presets** (Increase Contrast, Lighten, Darken, High Contrast)
+- **Levels Adjustment** - Photoshop-style interactive levels control with draggable handles for input/output adjustment, gamma midtone control, per-channel editing (RGB/Red/Green/Blue), and visual gradient preview
 - **Curves Adjustment** - Photoshop-style multi-channel curves with interactive editor, natural cubic spline interpolation, RGB/individual channel support, and preset library
 - **Brightness/Contrast** - Professional brightness and contrast control
 - **Color Balance** - CMY color balance with tonal range selection
