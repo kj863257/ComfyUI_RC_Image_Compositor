@@ -77,7 +77,7 @@ class RC_ShineRemoval:
         l_channel = lab[:, :, 0] / 100.0  # Normalize to 0-1
 
         # Primary detection: high luminosity with softer threshold
-        lum_mask = np.clip((l_channel - threshold) / (0.9 - threshold + 0.001), 0, 1)
+        lum_mask = np.clip((l_channel - threshold) / (1.0 - threshold + 0.001), 0, 1)
 
         # Apply power function to enhance bright areas
         lum_mask = np.power(lum_mask, 0.7)  # Makes detection more aggressive

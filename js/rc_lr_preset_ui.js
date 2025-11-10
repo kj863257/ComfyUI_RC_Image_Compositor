@@ -490,12 +490,47 @@ const setupNode = (node) => {
 
     const selectedWidget = node.widgets?.find((w) => w.name === "selected_preset");
     const stateWidget = node.widgets?.find((w) => w.name === "browser_state");
+    const directoryWidget = node.widgets?.find((w) => w.name === "preset_directory");
+    const strengthWidget = node.widgets?.find((w) => w.name === "strength");
+
     hideWidget(node, selectedWidget);
     hideWidget(node, stateWidget);
 
+    // Initialize state from saved widget values (for browser refresh)
+    const state = ensureState(node);
+    if (selectedWidget?.value) {
+        state.selectedPreset = selectedWidget.value;
+    }
+    if (stateWidget?.value) {
+        state.browserState = stateWidget.value;
+        const parsed = safeParseState(stateWidget.value);
+        state.currentPath = parsed.currentPath || "";
+    }
+    if (directoryWidget?.value) {
+        state.rootDir = directoryWidget.value;
+        state.hasRoot = !!directoryWidget.value;
+    }
+    if (strengthWidget?.value !== undefined) {
+        state.strength = Number(strengthWidget.value);
+    }
+
     setupDom(node);
+    updateRootLabel(node);
+    updateStrengthLabel(node);
     updateImages(node);
     renderListing(node);
+
+    // Load directory listing if preset directory is set
+    if (state.hasRoot && state.currentPath !== undefined) {
+        // Delay to ensure DOM is ready and node has rcUniqueId
+        setTimeout(() => {
+            if (!node.rcUniqueId) {
+                // Generate a temporary ID for API calls before workflow execution
+                node.rcUniqueId = node.id;
+            }
+            requestListing(node, state.currentPath);
+        }, 100);
+    }
 };
 
 app.registerExtension({
