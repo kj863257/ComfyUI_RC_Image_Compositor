@@ -123,12 +123,12 @@ class RC_GradientGenerator:
         # Calculate gradient positions based on type
         if gradient_type == "linear":
             rad = np.radians(angle)
-            x_rot = (x_grid - 0.5) * np.cos(rad) - (y_grid - 0.5) * np.sin(rad)
+            x_rot = (x_grid - center_x) * np.cos(rad) - (y_grid - center_y) * np.sin(rad)
             positions = (x_rot / scale + 0.5)
-            
+
         elif gradient_type == "reflected":
             rad = np.radians(angle)
-            x_rot = (x_grid - 0.5) * np.cos(rad) - (y_grid - 0.5) * np.sin(rad)
+            x_rot = (x_grid - center_x) * np.cos(rad) - (y_grid - center_y) * np.sin(rad)
             positions = np.abs(x_rot / scale) * 2
             
         elif gradient_type == "radial":
