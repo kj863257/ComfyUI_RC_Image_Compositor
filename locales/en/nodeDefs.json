@@ -1256,6 +1256,41 @@
     }
   },
   "_messages": {
-    "enable_pass_forward": "Please adjust the composition, then enable Pass Forward to continue."
+  },
+  "RC_ColorMatch": {
+    "display_name": "RC Color Match",
+    "inputs": {
+      "target": {
+        "name": "Target",
+        "tooltip": "Target image to be color matched"
+      },
+      "reference": {
+        "name": "Reference",
+        "tooltip": "Reference image to match colors from"
+      },
+      "method": {
+        "name": "Method",
+        "tooltip": "Color matching algorithm:\n- lab_statistics: LAB statistical matching (PS-style, fastest, most accurate)\n- lab_histogram: LAB histogram matching (better detail preservation)\n- mkl_transfer: MKL linear transfer (natural, smooth)\n- wavelet_hybrid: Wavelet hybrid (best for textures)"
+      },
+      "strength": {
+        "name": "Strength",
+        "tooltip": "Blend strength between original and matched (0=original, 1=fully matched)"
+      },
+      "preserve_luminosity": {
+        "name": "Preserve Luminosity",
+        "tooltip": "Preserve original luminosity (only match colors, not brightness)"
+      },
+      "neutralize": {
+        "name": "Neutralize",
+        "tooltip": "Neutralize gray tones in target image to remove color cast"
+      },
+      "variance_scale": {
+        "name": "Variance Scale",
+        "tooltip": "Scale the variance/contrast of the match (1.0=exact match)"
+      }
+    }
+  },
+  "_messages": {
+    "enable_pass_forward": "Please adjust position and enable Pass Forward to continue"
   }
 }

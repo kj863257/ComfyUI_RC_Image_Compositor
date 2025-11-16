@@ -56,6 +56,9 @@ from .nodes.adjustments.gradient_map import RC_GradientMap
 # Import LR preset loader
 from .nodes.adjustments.lr_preset import RC_LRPreset
 
+# Import color match
+from .nodes.adjustments.color_match import RC_ColorMatch
+
 # Import interactive compositor
 from .nodes.utilities.rc_compositor import RC_InteractiveCompositor
 
@@ -97,6 +100,7 @@ NODE_CLASS_MAPPINGS = {
     "RC_Threshold": RC_Threshold,
     "RC_Vibrance": RC_Vibrance,
     "RC_LRPreset": RC_LRPreset,
+    "RC_ColorMatch": RC_ColorMatch,
 
     # Channel operations
     "RC_ChannelExtractor": RC_ChannelExtractor,
@@ -156,6 +160,7 @@ NODE_DISPLAY_NAME_MAPPINGS = {
     "RC_Threshold": "RC Threshold",
     "RC_Vibrance": "RC Vibrance",
     "RC_LRPreset": "RC LR/ACR Preset",
+    "RC_ColorMatch": "RC Color Match",
 
     # Channel operations
     "RC_ChannelExtractor": "RC Channel Extractor",

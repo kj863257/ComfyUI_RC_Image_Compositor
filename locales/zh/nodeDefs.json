@@ -1256,6 +1256,41 @@
     }
   },
   "_messages": {
+  },
+  "RC_ColorMatch": {
+    "display_name": "RC 色调匹配",
+    "inputs": {
+      "target": {
+        "name": "目标",
+        "tooltip": "需要进行色调匹配的目标图像"
+      },
+      "reference": {
+        "name": "参考",
+        "tooltip": "作为色调参考的源图像"
+      },
+      "method": {
+        "name": "匹配方法",
+        "tooltip": "色调匹配算法：\n- lab_statistics: LAB统计匹配（PS风格，最快最准）\n- lab_histogram: LAB直方图匹配（细节保留更好）\n- mkl_transfer: MKL线性传递（自然平滑）\n- wavelet_hybrid: 小波混合（纹理效果最佳）"
+      },
+      "strength": {
+        "name": "强度",
+        "tooltip": "匹配强度（0=原始，1=完全匹配）"
+      },
+      "preserve_luminosity": {
+        "name": "保留亮度",
+        "tooltip": "保留原始亮度（仅匹配颜色，不改变明暗）"
+      },
+      "neutralize": {
+        "name": "中性化",
+        "tooltip": "中性化目标图像中的灰色调，移除色偏"
+      },
+      "variance_scale": {
+        "name": "方差缩放",
+        "tooltip": "缩放匹配的方差/对比度（1.0=精确匹配）"
+      }
+    }
+  },
+  "_messages": {
     "enable_pass_forward": "请调整好位置后打开向后传递以继续"
   }
 }
