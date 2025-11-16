@@ -188,64 +188,75 @@ class RC_HighLowFrequencySkinSmoothing:
                            skin_tone_protection, preserve_fine_details, edge_protection,
                            method, mask=None):
 
-        # Convert to numpy
-        img = (image[0].cpu().numpy() * 255).astype(np.uint8)
-        has_alpha = img.shape[2] == 4
+        batch_size = image.shape[0]
+        mask_batch_size = mask.shape[0] if mask is not None else 0
+        results = []
 
-        if has_alpha:
-            rgb = img[:, :, :3]
-            alpha = img[:, :, 3]
-        else:
-            rgb = img
+        for i in range(batch_size):
+            # Convert to numpy for each image in the batch
+            img = (image[i].cpu().numpy() * 255).astype(np.uint8)
+            has_alpha = img.shape[2] == 4
 
-        # Process the RGB channels
-        if method == "frequency_separation":
-            processed = self.frequency_separation_method(rgb, low_frequency_radius, high_frequency_strength)
-        elif method == "surface_blur":
-            processed = self.surface_blur_method(rgb, low_frequency_radius)
-        elif method == "selective_gaussian":
-            processed = self.selective_gaussian_method(rgb, low_frequency_radius)
-        else:
-            processed = rgb.astype(np.float32)
+            if has_alpha:
+                rgb = img[:, :, :3]
+                alpha = img[:, :, 3]
+            else:
+                rgb = img
 
-        processed = np.clip(processed, 0, 255).astype(np.uint8)
+            # Process the RGB channels
+            if method == "frequency_separation":
+                processed = self.frequency_separation_method(rgb, low_frequency_radius, high_frequency_strength)
+            elif method == "surface_blur":
+                processed = self.surface_blur_method(rgb, low_frequency_radius)
+            elif method == "selective_gaussian":
+                processed = self.selective_gaussian_method(rgb, low_frequency_radius)
+            else:
+                processed = rgb.astype(np.float32)
 
-        # Create combination mask
-        final_mask = np.ones((rgb.shape[0], rgb.shape[1]), dtype=np.float32)
+            processed = np.clip(processed, 0, 255).astype(np.uint8)
 
-        # Apply skin tone protection
-        if skin_tone_protection > 0:
-            skin_mask = self.detect_skin_tone_mask(rgb)
-            final_mask *= (skin_mask * skin_tone_protection + (1 - skin_tone_protection))
+            # Create combination mask
+            final_mask = np.ones((rgb.shape[0], rgb.shape[1]), dtype=np.float32)
 
-        # Apply edge protection
-        if edge_protection > 0 and preserve_fine_details:
-            edge_mask = self.create_edge_mask(rgb, edge_protection)
-            final_mask *= edge_mask
+            # Apply skin tone protection
+            if skin_tone_protection > 0:
+                skin_mask = self.detect_skin_tone_mask(rgb)
+                final_mask *= (skin_mask * skin_tone_protection + (1 - skin_tone_protection))
 
-        # Apply user-provided mask if available
-        if mask is not None:
-            # ComfyUI MASK type is (batch, height, width) in range [0, 1]
-            user_mask = mask[0].cpu().numpy().astype(np.float32)
-            # Ensure the mask has the same dimensions as the image
-            if user_mask.shape != (rgb.shape[0], rgb.shape[1]):
-                user_mask = cv2.resize(user_mask, (rgb.shape[1], rgb.shape[0]), interpolation=cv2.INTER_LINEAR)
-            final_mask *= user_mask
+            # Apply edge protection
+            if edge_protection > 0 and preserve_fine_details:
+                edge_mask = self.create_edge_mask(rgb, edge_protection)
+                final_mask *= edge_mask
 
-        # Expand mask to match RGB channels
-        final_mask_3d = np.expand_dims(final_mask, axis=2)
+            # Apply user-provided mask if available
+            if mask is not None:
+                # Cycle through mask if needed
+                mask_idx = i % mask_batch_size
+                # ComfyUI MASK type is (batch, height, width) in range [0, 1]
+                user_mask = mask[mask_idx].cpu().numpy().astype(np.float32)
+                # Ensure the mask has the same dimensions as the image
+                if user_mask.shape != (rgb.shape[0], rgb.shape[1]):
+                    user_mask = cv2.resize(user_mask, (rgb.shape[1], rgb.shape[0]), interpolation=cv2.INTER_LINEAR)
+                final_mask *= user_mask
 
-        # Blend original and processed based on final mask
-        result_rgb = (rgb.astype(np.float32) * (1 - final_mask_3d) +
-                     processed.astype(np.float32) * final_mask_3d)
-        result_rgb = np.clip(result_rgb, 0, 255).astype(np.uint8)
+            # Expand mask to match RGB channels
+            final_mask_3d = np.expand_dims(final_mask, axis=2)
 
-        # Reassemble with alpha if needed
-        if has_alpha:
-            result = np.dstack([result_rgb, alpha])
-        else:
-            result = result_rgb
+            # Blend original and processed based on final mask
+            result_rgb = (rgb.astype(np.float32) * (1 - final_mask_3d) +
+                         processed.astype(np.float32) * final_mask_3d)
+            result_rgb = np.clip(result_rgb, 0, 255).astype(np.uint8)
 
-        # Convert back to tensor
-        result_tensor = torch.from_numpy(result.astype(np.float32) / 255.0).unsqueeze(0)
-        return (result_tensor,)
+            # Reassemble with alpha if needed
+            if has_alpha:
+                result = np.dstack([result_rgb, alpha])
+            else:
+                result = result_rgb
+
+            # Convert back to tensor for this image
+            result_tensor = torch.from_numpy(result.astype(np.float32) / 255.0)
+            results.append(result_tensor)
+
+        # Stack all results to create a batch tensor
+        batch_result = torch.stack(results, dim=0)
+        return (batch_result,)

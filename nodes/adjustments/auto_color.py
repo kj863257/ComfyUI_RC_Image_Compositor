@@ -239,32 +239,40 @@ class RC_AutoColor:
                           target_midtone_r, target_midtone_g, target_midtone_b,
                           target_highlight_r, target_highlight_g, target_highlight_b):
 
-        # Convert to numpy
-        img = image[0].cpu().numpy()
+        batch_size = image.shape[0]
+        results = []
 
         target_shadow = [target_shadow_r, target_shadow_g, target_shadow_b]
         target_midtone = [target_midtone_r, target_midtone_g, target_midtone_b]
         target_highlight = [target_highlight_r, target_highlight_g, target_highlight_b]
 
-        # Apply selected algorithm
-        if algorithm == "enhance_monochromatic":
-            result = self.enhance_monochromatic_contrast(img, shadow_clip, highlight_clip)
-        elif algorithm == "enhance_per_channel":
-            result = self.enhance_per_channel_contrast(img, shadow_clip, highlight_clip)
-        elif algorithm == "find_dark_light_colors":
-            result = self.find_dark_light_colors(img, shadow_clip, highlight_clip, target_shadow, target_highlight)
-        elif algorithm == "enhance_brightness_contrast":
-            result = self.enhance_brightness_contrast(img, shadow_clip, highlight_clip)
-        else:
-            result = img
+        for i in range(batch_size):
+            # Convert to numpy for each image in the batch
+            img = image[i].cpu().numpy()
 
-        # Apply midtone neutralization if enabled
-        if neutralize_midtones:
-            result = self.neutralize_midtones_func(result, target_midtone)
+            # Apply selected algorithm
+            if algorithm == "enhance_monochromatic":
+                result = self.enhance_monochromatic_contrast(img, shadow_clip, highlight_clip)
+            elif algorithm == "enhance_per_channel":
+                result = self.enhance_per_channel_contrast(img, shadow_clip, highlight_clip)
+            elif algorithm == "find_dark_light_colors":
+                result = self.find_dark_light_colors(img, shadow_clip, highlight_clip, target_shadow, target_highlight)
+            elif algorithm == "enhance_brightness_contrast":
+                result = self.enhance_brightness_contrast(img, shadow_clip, highlight_clip)
+            else:
+                result = img
 
-        # Convert back to tensor
-        result_tensor = torch.from_numpy(result.astype(np.float32)).unsqueeze(0)
-        return (result_tensor,)
+            # Apply midtone neutralization if enabled
+            if neutralize_midtones:
+                result = self.neutralize_midtones_func(result, target_midtone)
+
+            # Convert back to tensor for this image
+            result_tensor = torch.from_numpy(result.astype(np.float32))
+            results.append(result_tensor)
+
+        # Stack all results to create a batch tensor
+        batch_result = torch.stack(results, dim=0)
+        return (batch_result,)
 
 
 NODE_CLASS_MAPPINGS = {

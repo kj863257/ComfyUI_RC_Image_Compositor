@@ -258,6 +258,7 @@ class RC_LRPreset:
     def apply_preset(self, image, preset_directory, strength=100.0, pass_forward=False,
                      selected_preset="", browser_state="{}", node_id=None):
         node_key = str(node_id or "")
+        # Use first frame for preview/cache
         base_np = self._tensor_to_numpy(image)
         cache = self._cache_session(node_key, base_np, preset_directory, browser_state)
 
@@ -280,14 +281,33 @@ class RC_LRPreset:
         if not pass_forward:
             raise RuntimeError(PASS_FORWARD_MESSAGE)
 
+        # Load preset parameters once
         params = self.load_preset_params(preset_path)
-        processed = self.process_pipeline(base_np, params)
 
-        if strength < 100.0:
-            alpha = np.clip(strength / 100.0, 0.0, 1.0)
-            processed = base_np * (1 - alpha) + processed * alpha
+        # Process all frames in the batch
+        batch_size = image.shape[0]
+        results = []
 
-        return (self._numpy_to_tensor(processed),)
+        for i in range(batch_size):
+            # Convert each frame to numpy
+            frame_np = image[i].detach().cpu().numpy()
+            frame_np = np.clip(frame_np, 0.0, 1.0).astype(np.float32)
+
+            # Apply preset to this frame
+            processed = self.process_pipeline(frame_np, params)
+
+            # Apply strength blending
+            if strength < 100.0:
+                alpha = np.clip(strength / 100.0, 0.0, 1.0)
+                processed = frame_np * (1 - alpha) + processed * alpha
+
+            # Convert back to tensor for this frame
+            result_tensor = torch.from_numpy(np.clip(processed, 0.0, 1.0).astype(np.float32))
+            results.append(result_tensor)
+
+        # Stack all results to create a batch tensor
+        batch_result = torch.stack(results, dim=0)
+        return (batch_result,)
 
     def parse_xmp(self, filepath):
         """Parse Adobe Camera Raw XMP preset file."""

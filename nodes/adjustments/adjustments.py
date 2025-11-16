@@ -35,33 +35,41 @@ class RC_OpacityAdjust:
         }
 
     def adjust_opacity(self, image, opacity, ensure_alpha):
-        # Convert to numpy
-        img = (image[0].cpu().numpy() * 255).astype(np.uint8)
-        h, w = img.shape[:2]
-        has_alpha = img.shape[2] == 4
+        batch_size = image.shape[0]
+        results = []
 
-        if has_alpha:
-            # Image already has alpha channel
-            rgb = img[:, :, :3]
-            alpha = img[:, :, 3].astype(np.float32)
+        for i in range(batch_size):
+            # Convert to numpy for each image in the batch
+            img = (image[i].cpu().numpy() * 255).astype(np.uint8)
+            h, w = img.shape[:2]
+            has_alpha = img.shape[2] == 4
 
-            # Apply opacity to existing alpha
-            new_alpha = (alpha * opacity).astype(np.uint8)
-            result = np.dstack([rgb, new_alpha])
+            if has_alpha:
+                # Image already has alpha channel
+                rgb = img[:, :, :3]
+                alpha = img[:, :, 3].astype(np.float32)
 
-        else:
-            # RGB image
-            if ensure_alpha or opacity < 1.0:
-                # Add alpha channel
-                alpha = np.full((h, w), int(opacity * 255), dtype=np.uint8)
-                result = np.dstack([img, alpha])
+                # Apply opacity to existing alpha
+                new_alpha = (alpha * opacity).astype(np.uint8)
+                result = np.dstack([rgb, new_alpha])
+
             else:
-                # Keep as RGB
-                result = img
+                # RGB image
+                if ensure_alpha or opacity < 1.0:
+                    # Add alpha channel
+                    alpha = np.full((h, w), int(opacity * 255), dtype=np.uint8)
+                    result = np.dstack([img, alpha])
+                else:
+                    # Keep as RGB
+                    result = img
 
-        # Convert back to tensor
-        result_tensor = torch.from_numpy(result.astype(np.float32) / 255.0).unsqueeze(0)
-        return (result_tensor,)
+            # Convert back to tensor for this image
+            result_tensor = torch.from_numpy(result.astype(np.float32) / 255.0)
+            results.append(result_tensor)
+
+        # Stack all results to create a batch tensor
+        batch_result = torch.stack(results, dim=0)
+        return (batch_result,)
 
 
 class RC_LevelsAdjust:
@@ -121,53 +129,61 @@ class RC_LevelsAdjust:
             output_black = 0.0
             output_white = 1.0
 
-        # Convert to numpy
-        img = (image[0].cpu().numpy() * 255).astype(np.uint8)
-        has_alpha = img.shape[2] == 4
+        batch_size = image.shape[0]
+        results = []
 
-        if has_alpha:
-            rgb = img[:, :, :3].astype(np.float32) / 255.0
-            alpha = img[:, :, 3]
-        else:
-            rgb = img.astype(np.float32) / 255.0
+        for i in range(batch_size):
+            # Convert to numpy for each image in the batch
+            img = (image[i].cpu().numpy() * 255).astype(np.uint8)
+            has_alpha = img.shape[2] == 4
 
-        # Apply levels adjustment
-        def apply_levels_to_channel(channel_data):
-            # Input levels adjustment
-            # Clamp input range
-            adjusted = np.clip((channel_data - input_black) / (input_white - input_black), 0.0, 1.0)
+            if has_alpha:
+                rgb = img[:, :, :3].astype(np.float32) / 255.0
+                alpha = img[:, :, 3]
+            else:
+                rgb = img.astype(np.float32) / 255.0
 
-            # Gamma correction
-            adjusted = np.power(adjusted, 1.0 / gamma)
+            # Apply levels adjustment
+            def apply_levels_to_channel(channel_data):
+                # Input levels adjustment
+                # Clamp input range
+                adjusted = np.clip((channel_data - input_black) / (input_white - input_black), 0.0, 1.0)
 
-            # Output levels adjustment
-            adjusted = adjusted * (output_white - output_black) + output_black
+                # Gamma correction
+                adjusted = np.power(adjusted, 1.0 / gamma)
 
-            return np.clip(adjusted, 0.0, 1.0)
+                # Output levels adjustment
+                adjusted = adjusted * (output_white - output_black) + output_black
 
-        if channel == "RGB":
-            # Apply to all channels
-            rgb_adjusted = apply_levels_to_channel(rgb)
-        else:
-            # Apply to specific channel
-            rgb_adjusted = rgb.copy()
-            if channel == "Red":
-                rgb_adjusted[:, :, 0] = apply_levels_to_channel(rgb[:, :, 0])
-            elif channel == "Green":
-                rgb_adjusted[:, :, 1] = apply_levels_to_channel(rgb[:, :, 1])
-            elif channel == "Blue":
-                rgb_adjusted[:, :, 2] = apply_levels_to_channel(rgb[:, :, 2])
+                return np.clip(adjusted, 0.0, 1.0)
 
-        # Reassemble image
-        rgb_adjusted = (rgb_adjusted * 255).astype(np.uint8)
-        if has_alpha:
-            result = np.dstack([rgb_adjusted, alpha])
-        else:
-            result = rgb_adjusted
+            if channel == "RGB":
+                # Apply to all channels
+                rgb_adjusted = apply_levels_to_channel(rgb)
+            else:
+                # Apply to specific channel
+                rgb_adjusted = rgb.copy()
+                if channel == "Red":
+                    rgb_adjusted[:, :, 0] = apply_levels_to_channel(rgb[:, :, 0])
+                elif channel == "Green":
+                    rgb_adjusted[:, :, 1] = apply_levels_to_channel(rgb[:, :, 1])
+                elif channel == "Blue":
+                    rgb_adjusted[:, :, 2] = apply_levels_to_channel(rgb[:, :, 2])
 
-        # Convert back to tensor
-        result_tensor = torch.from_numpy(result.astype(np.float32) / 255.0).unsqueeze(0)
-        return (result_tensor,)
+            # Reassemble image
+            rgb_adjusted = (rgb_adjusted * 255).astype(np.uint8)
+            if has_alpha:
+                result = np.dstack([rgb_adjusted, alpha])
+            else:
+                result = rgb_adjusted
+
+            # Convert back to tensor for this image
+            result_tensor = torch.from_numpy(result.astype(np.float32) / 255.0)
+            results.append(result_tensor)
+
+        # Stack all results to create a batch tensor
+        batch_result = torch.stack(results, dim=0)
+        return (batch_result,)
 
 
 class RC_BrightnessContrast:
@@ -202,61 +218,69 @@ class RC_BrightnessContrast:
         }
 
     def adjust_brightness_contrast(self, image, brightness, contrast, method):
-        # Convert to numpy
-        img = (image[0].cpu().numpy() * 255).astype(np.uint8)
-        has_alpha = img.shape[2] == 4
+        batch_size = image.shape[0]
+        results = []
 
-        if has_alpha:
-            rgb = img[:, :, :3]
-            alpha = img[:, :, 3]
-        else:
-            rgb = img
+        for i in range(batch_size):
+            # Convert to numpy for each image in the batch
+            img = (image[i].cpu().numpy() * 255).astype(np.uint8)
+            has_alpha = img.shape[2] == 4
 
-        if method == "PIL":
-            # Use PIL enhancers
-            pil_img = Image.fromarray(rgb, 'RGB')
+            if has_alpha:
+                rgb = img[:, :, :3]
+                alpha = img[:, :, 3]
+            else:
+                rgb = img
 
-            # Brightness adjustment
-            if brightness != 0:
-                brightness_factor = 1.0 + (brightness / 100.0)
-                enhancer = ImageEnhance.Brightness(pil_img)
-                pil_img = enhancer.enhance(brightness_factor)
+            if method == "PIL":
+                # Use PIL enhancers
+                pil_img = Image.fromarray(rgb, 'RGB')
 
-            # Contrast adjustment
-            if contrast != 0:
-                contrast_factor = 1.0 + (contrast / 100.0)
-                enhancer = ImageEnhance.Contrast(pil_img)
-                pil_img = enhancer.enhance(contrast_factor)
+                # Brightness adjustment
+                if brightness != 0:
+                    brightness_factor = 1.0 + (brightness / 100.0)
+                    enhancer = ImageEnhance.Brightness(pil_img)
+                    pil_img = enhancer.enhance(brightness_factor)
 
-            rgb_adjusted = np.array(pil_img)
+                # Contrast adjustment
+                if contrast != 0:
+                    contrast_factor = 1.0 + (contrast / 100.0)
+                    enhancer = ImageEnhance.Contrast(pil_img)
+                    pil_img = enhancer.enhance(contrast_factor)
 
-        else:  # OpenCV
-            # Convert to float for precise calculation
-            rgb_float = rgb.astype(np.float32)
+                rgb_adjusted = np.array(pil_img)
 
-            # Apply brightness (additive)
-            if brightness != 0:
-                brightness_value = (brightness / 100.0) * 255.0
-                rgb_float = rgb_float + brightness_value
+            else:  # OpenCV
+                # Convert to float for precise calculation
+                rgb_float = rgb.astype(np.float32)
 
-            # Apply contrast (multiplicative)
-            if contrast != 0:
-                contrast_factor = 1.0 + (contrast / 100.0)
-                # Apply contrast around 128 (middle gray)
-                rgb_float = (rgb_float - 128) * contrast_factor + 128
+                # Apply brightness (additive)
+                if brightness != 0:
+                    brightness_value = (brightness / 100.0) * 255.0
+                    rgb_float = rgb_float + brightness_value
 
-            # Clamp to valid range
-            rgb_adjusted = np.clip(rgb_float, 0, 255).astype(np.uint8)
+                # Apply contrast (multiplicative)
+                if contrast != 0:
+                    contrast_factor = 1.0 + (contrast / 100.0)
+                    # Apply contrast around 128 (middle gray)
+                    rgb_float = (rgb_float - 128) * contrast_factor + 128
 
-        # Reassemble image
-        if has_alpha:
-            result = np.dstack([rgb_adjusted, alpha])
-        else:
-            result = rgb_adjusted
+                # Clamp to valid range
+                rgb_adjusted = np.clip(rgb_float, 0, 255).astype(np.uint8)
 
-        # Convert back to tensor
-        result_tensor = torch.from_numpy(result.astype(np.float32) / 255.0).unsqueeze(0)
-        return (result_tensor,)
+            # Reassemble image
+            if has_alpha:
+                result = np.dstack([rgb_adjusted, alpha])
+            else:
+                result = rgb_adjusted
+
+            # Convert back to tensor for this image
+            result_tensor = torch.from_numpy(result.astype(np.float32) / 255.0)
+            results.append(result_tensor)
+
+        # Stack all results to create a batch tensor
+        batch_result = torch.stack(results, dim=0)
+        return (batch_result,)
 
 
 class RC_ColorBalance:
@@ -304,98 +328,106 @@ class RC_ColorBalance:
         }
 
     def adjust_color_balance(self, image, cyan_red, magenta_green, yellow_blue, tone_range, preserve_luminosity):
-        # Convert to numpy, stay in float32 throughout processing
-        img = image[0].cpu().numpy()
-        has_alpha = img.shape[2] == 4
+        batch_size = image.shape[0]
+        results = []
 
-        if has_alpha:
-            rgb = img[:, :, :3]
-            alpha = img[:, :, 3]
-        else:
-            rgb = img
+        for i in range(batch_size):
+            # Convert to numpy, stay in float32 throughout processing
+            img = image[i].cpu().numpy()
+            has_alpha = img.shape[2] == 4
 
-        # Calculate luminosity once and reuse (avoid redundant calculations)
-        luminosity_weights = np.array([0.299, 0.587, 0.114], dtype=np.float32)
-        luminosity = np.dot(rgb, luminosity_weights)
+            if has_alpha:
+                rgb = img[:, :, :3]
+                alpha = img[:, :, 3]
+            else:
+                rgb = img
 
-        # Store original luminosity for restoration
-        original_luminosity = luminosity if preserve_luminosity else None
+            # Calculate luminosity once and reuse (avoid redundant calculations)
+            luminosity_weights = np.array([0.299, 0.587, 0.114], dtype=np.float32)
+            luminosity = np.dot(rgb, luminosity_weights)
 
-        # Create tone mask based on range (optimized calculations)
-        if tone_range == "shadows":
-            mask = 1.0 - np.power(luminosity, 0.5)
-        elif tone_range == "highlights":
-            mask = np.power(luminosity, 0.5)
-        else:  # midtones
-            mask = 1.0 - np.abs(luminosity - 0.5) * 2.0
-            mask = np.power(mask, 0.5)
+            # Store original luminosity for restoration
+            original_luminosity = luminosity if preserve_luminosity else None
 
-        # Expand mask for broadcasting to RGB channels
-        mask_3d = np.expand_dims(mask, axis=2)
+            # Create tone mask based on range (optimized calculations)
+            if tone_range == "shadows":
+                mask = 1.0 - np.power(luminosity, 0.5)
+            elif tone_range == "highlights":
+                mask = np.power(luminosity, 0.5)
+            else:  # midtones
+                mask = 1.0 - np.abs(luminosity - 0.5) * 2.0
+                mask = np.power(mask, 0.5)
 
-        # Convert adjustments to factors
-        cyan_red_factor = cyan_red / 100.0
-        magenta_green_factor = magenta_green / 100.0
-        yellow_blue_factor = yellow_blue / 100.0
+            # Expand mask for broadcasting to RGB channels
+            mask_3d = np.expand_dims(mask, axis=2)
 
-        # Vectorized color adjustments (eliminate conditional branches and copies)
-        rgb_adjusted = rgb.copy()
+            # Convert adjustments to factors
+            cyan_red_factor = cyan_red / 100.0
+            magenta_green_factor = magenta_green / 100.0
+            yellow_blue_factor = yellow_blue / 100.0
 
-        # Cyan-Red adjustment (vectorized)
-        if cyan_red_factor != 0:
-            red_adjustment = np.where(cyan_red_factor > 0,
-                                    mask_3d * cyan_red_factor * 0.3, 0)
-            cyan_adjustment = np.where(cyan_red_factor < 0,
-                                     mask_3d * abs(cyan_red_factor) * 0.2, 0)
+            # Vectorized color adjustments (eliminate conditional branches and copies)
+            rgb_adjusted = rgb.copy()
 
-            rgb_adjusted[:, :, 0] += red_adjustment.squeeze()
-            rgb_adjusted[:, :, 1] += cyan_adjustment.squeeze()
-            rgb_adjusted[:, :, 2] += cyan_adjustment.squeeze()
+            # Cyan-Red adjustment (vectorized)
+            if cyan_red_factor != 0:
+                red_adjustment = np.where(cyan_red_factor > 0,
+                                        mask_3d * cyan_red_factor * 0.3, 0)
+                cyan_adjustment = np.where(cyan_red_factor < 0,
+                                         mask_3d * abs(cyan_red_factor) * 0.2, 0)
 
-        # Magenta-Green adjustment (vectorized)
-        if magenta_green_factor != 0:
-            green_adjustment = np.where(magenta_green_factor > 0,
-                                      mask_3d * magenta_green_factor * 0.3, 0)
-            magenta_adjustment = np.where(magenta_green_factor < 0,
-                                        mask_3d * abs(magenta_green_factor) * 0.2, 0)
+                rgb_adjusted[:, :, 0] += red_adjustment.squeeze()
+                rgb_adjusted[:, :, 1] += cyan_adjustment.squeeze()
+                rgb_adjusted[:, :, 2] += cyan_adjustment.squeeze()
 
-            rgb_adjusted[:, :, 1] += green_adjustment.squeeze()
-            rgb_adjusted[:, :, 0] += magenta_adjustment.squeeze()
-            rgb_adjusted[:, :, 2] += magenta_adjustment.squeeze()
+            # Magenta-Green adjustment (vectorized)
+            if magenta_green_factor != 0:
+                green_adjustment = np.where(magenta_green_factor > 0,
+                                          mask_3d * magenta_green_factor * 0.3, 0)
+                magenta_adjustment = np.where(magenta_green_factor < 0,
+                                            mask_3d * abs(magenta_green_factor) * 0.2, 0)
 
-        # Yellow-Blue adjustment (vectorized)
-        if yellow_blue_factor != 0:
-            blue_adjustment = np.where(yellow_blue_factor > 0,
-                                     mask_3d * yellow_blue_factor * 0.3, 0)
-            yellow_adjustment = np.where(yellow_blue_factor < 0,
-                                       mask_3d * abs(yellow_blue_factor) * 0.2, 0)
+                rgb_adjusted[:, :, 1] += green_adjustment.squeeze()
+                rgb_adjusted[:, :, 0] += magenta_adjustment.squeeze()
+                rgb_adjusted[:, :, 2] += magenta_adjustment.squeeze()
 
-            rgb_adjusted[:, :, 2] += blue_adjustment.squeeze()
-            rgb_adjusted[:, :, 0] += yellow_adjustment.squeeze()
-            rgb_adjusted[:, :, 1] += yellow_adjustment.squeeze()
+            # Yellow-Blue adjustment (vectorized)
+            if yellow_blue_factor != 0:
+                blue_adjustment = np.where(yellow_blue_factor > 0,
+                                         mask_3d * yellow_blue_factor * 0.3, 0)
+                yellow_adjustment = np.where(yellow_blue_factor < 0,
+                                           mask_3d * abs(yellow_blue_factor) * 0.2, 0)
 
-        # Clamp values
-        rgb_adjusted = np.clip(rgb_adjusted, 0.0, 1.0)
+                rgb_adjusted[:, :, 2] += blue_adjustment.squeeze()
+                rgb_adjusted[:, :, 0] += yellow_adjustment.squeeze()
+                rgb_adjusted[:, :, 1] += yellow_adjustment.squeeze()
 
-        # Restore luminosity if requested (optimized)
-        if preserve_luminosity and original_luminosity is not None:
-            new_luminosity = np.dot(rgb_adjusted, luminosity_weights)
-            # Vectorized division with safe handling
-            scale = np.where(new_luminosity > 0.001,
-                           original_luminosity / new_luminosity, 1.0)
-            scale_3d = np.expand_dims(scale, axis=2)
-            rgb_adjusted *= scale_3d
+            # Clamp values
             rgb_adjusted = np.clip(rgb_adjusted, 0.0, 1.0)
 
-        # Reassemble image (avoid unnecessary conversions)
-        if has_alpha:
-            result = np.dstack([rgb_adjusted, alpha])
-        else:
-            result = rgb_adjusted
+            # Restore luminosity if requested (optimized)
+            if preserve_luminosity and original_luminosity is not None:
+                new_luminosity = np.dot(rgb_adjusted, luminosity_weights)
+                # Vectorized division with safe handling
+                scale = np.where(new_luminosity > 0.001,
+                               original_luminosity / new_luminosity, 1.0)
+                scale_3d = np.expand_dims(scale, axis=2)
+                rgb_adjusted *= scale_3d
+                rgb_adjusted = np.clip(rgb_adjusted, 0.0, 1.0)
 
-        # Convert back to tensor
-        result_tensor = torch.from_numpy(result).unsqueeze(0)
-        return (result_tensor,)
+            # Reassemble image (avoid unnecessary conversions)
+            if has_alpha:
+                result = np.dstack([rgb_adjusted, alpha])
+            else:
+                result = rgb_adjusted
+
+            # Convert back to tensor for this image
+            result_tensor = torch.from_numpy(result)
+            results.append(result_tensor)
+
+        # Stack all results to create a batch tensor
+        batch_result = torch.stack(results, dim=0)
+        return (batch_result,)
 
 
 class RC_ChannelMixer:
@@ -464,58 +496,66 @@ class RC_ChannelMixer:
     def mix_channels(self, image, red_from_red, red_from_green, red_from_blue,
                     green_from_red, green_from_green, green_from_blue,
                     blue_from_red, blue_from_green, blue_from_blue, monochrome):
-        # Convert to numpy
-        img = (image[0].cpu().numpy() * 255).astype(np.uint8)
-        has_alpha = img.shape[2] == 4
+        batch_size = image.shape[0]
+        results = []
 
-        if has_alpha:
-            rgb = img[:, :, :3].astype(np.float32) / 255.0
-            alpha = img[:, :, 3]
-        else:
-            rgb = img.astype(np.float32) / 255.0
+        for i in range(batch_size):
+            # Convert to numpy for each image in the batch
+            img = (image[i].cpu().numpy() * 255).astype(np.uint8)
+            has_alpha = img.shape[2] == 4
 
-        # Extract individual channels
-        r_channel = rgb[:, :, 0]
-        g_channel = rgb[:, :, 1]
-        b_channel = rgb[:, :, 2]
+            if has_alpha:
+                rgb = img[:, :, :3].astype(np.float32) / 255.0
+                alpha = img[:, :, 3]
+            else:
+                rgb = img.astype(np.float32) / 255.0
 
-        # Calculate new channels based on mixing ratios
-        new_r = (r_channel * red_from_red / 100.0 +
-                g_channel * red_from_green / 100.0 +
-                b_channel * red_from_blue / 100.0)
+            # Extract individual channels
+            r_channel = rgb[:, :, 0]
+            g_channel = rgb[:, :, 1]
+            b_channel = rgb[:, :, 2]
 
-        if monochrome:
-            # In monochrome mode, all channels use the red channel mixing
-            new_g = new_r.copy()
-            new_b = new_r.copy()
-        else:
-            new_g = (r_channel * green_from_red / 100.0 +
-                    g_channel * green_from_green / 100.0 +
-                    b_channel * green_from_blue / 100.0)
+            # Calculate new channels based on mixing ratios
+            new_r = (r_channel * red_from_red / 100.0 +
+                    g_channel * red_from_green / 100.0 +
+                    b_channel * red_from_blue / 100.0)
 
-            new_b = (r_channel * blue_from_red / 100.0 +
-                    g_channel * blue_from_green / 100.0 +
-                    b_channel * blue_from_blue / 100.0)
+            if monochrome:
+                # In monochrome mode, all channels use the red channel mixing
+                new_g = new_r.copy()
+                new_b = new_r.copy()
+            else:
+                new_g = (r_channel * green_from_red / 100.0 +
+                        g_channel * green_from_green / 100.0 +
+                        b_channel * green_from_blue / 100.0)
 
-        # Clamp values and recombine
-        rgb_mixed = np.stack([
-            np.clip(new_r, 0.0, 1.0),
-            np.clip(new_g, 0.0, 1.0),
-            np.clip(new_b, 0.0, 1.0)
-        ], axis=2)
+                new_b = (r_channel * blue_from_red / 100.0 +
+                        g_channel * blue_from_green / 100.0 +
+                        b_channel * blue_from_blue / 100.0)
 
-        # Convert back to uint8
-        rgb_mixed = (rgb_mixed * 255).astype(np.uint8)
+            # Clamp values and recombine
+            rgb_mixed = np.stack([
+                np.clip(new_r, 0.0, 1.0),
+                np.clip(new_g, 0.0, 1.0),
+                np.clip(new_b, 0.0, 1.0)
+            ], axis=2)
 
-        # Reassemble image
-        if has_alpha:
-            result = np.dstack([rgb_mixed, alpha])
-        else:
-            result = rgb_mixed
+            # Convert back to uint8
+            rgb_mixed = (rgb_mixed * 255).astype(np.uint8)
 
-        # Convert back to tensor
-        result_tensor = torch.from_numpy(result.astype(np.float32) / 255.0).unsqueeze(0)
-        return (result_tensor,)
+            # Reassemble image
+            if has_alpha:
+                result = np.dstack([rgb_mixed, alpha])
+            else:
+                result = rgb_mixed
+
+            # Convert back to tensor for this image
+            result_tensor = torch.from_numpy(result.astype(np.float32) / 255.0)
+            results.append(result_tensor)
+
+        # Stack all results to create a batch tensor
+        batch_result = torch.stack(results, dim=0)
+        return (batch_result,)
 
 
 class RC_CurvesAdjust:
@@ -962,34 +1002,42 @@ class RC_CurvesAdjust:
         final_blue_lut = self._compose_luts([combined_lut, blue_lut])
         final_alpha_lut = self._compose_luts([combined_lut, alpha_lut]) if apply_alpha else None
 
-        input_tensor = image[0].cpu().numpy()
-        input_tensor = np.clip(input_tensor, 0.0, 1.0)
+        batch_size = image.shape[0]
+        results = []
 
-        has_alpha = input_tensor.shape[2] == 4
+        for i in range(batch_size):
+            input_tensor = image[i].cpu().numpy()
+            input_tensor = np.clip(input_tensor, 0.0, 1.0)
 
-        rgb = (input_tensor[:, :, :3] * 255.0).round().astype(np.uint8)
-        adjusted_rgb = np.empty_like(rgb)
-        adjusted_rgb[:, :, 0] = final_red_lut[rgb[:, :, 0]]
-        adjusted_rgb[:, :, 1] = final_green_lut[rgb[:, :, 1]]
-        adjusted_rgb[:, :, 2] = final_blue_lut[rgb[:, :, 2]]
+            has_alpha = input_tensor.shape[2] == 4
 
-        adjusted_rgb = adjusted_rgb.astype(np.float32) / 255.0
-        blended_rgb = (1.0 - mix) * input_tensor[:, :, :3] + mix * adjusted_rgb
-        blended_rgb = np.clip(blended_rgb, 0.0, 1.0)
+            rgb = (input_tensor[:, :, :3] * 255.0).round().astype(np.uint8)
+            adjusted_rgb = np.empty_like(rgb)
+            adjusted_rgb[:, :, 0] = final_red_lut[rgb[:, :, 0]]
+            adjusted_rgb[:, :, 1] = final_green_lut[rgb[:, :, 1]]
+            adjusted_rgb[:, :, 2] = final_blue_lut[rgb[:, :, 2]]
 
-        if has_alpha:
-            alpha_channel = input_tensor[:, :, 3]
-            if apply_alpha and final_alpha_lut is not None:
-                alpha_u8 = (alpha_channel * 255.0).round().astype(np.uint8)
-                adjusted_alpha = final_alpha_lut[alpha_u8].astype(np.float32) / 255.0
-                alpha_channel = (1.0 - mix) * alpha_channel + mix * adjusted_alpha
-            alpha_channel = np.clip(alpha_channel, 0.0, 1.0)
-            result = np.dstack([blended_rgb, alpha_channel])
-        else:
-            result = blended_rgb
+            adjusted_rgb = adjusted_rgb.astype(np.float32) / 255.0
+            blended_rgb = (1.0 - mix) * input_tensor[:, :, :3] + mix * adjusted_rgb
+            blended_rgb = np.clip(blended_rgb, 0.0, 1.0)
 
-        result_tensor = torch.from_numpy(result.astype(np.float32)).unsqueeze(0)
-        return (result_tensor,)
+            if has_alpha:
+                alpha_channel = input_tensor[:, :, 3]
+                if apply_alpha and final_alpha_lut is not None:
+                    alpha_u8 = (alpha_channel * 255.0).round().astype(np.uint8)
+                    adjusted_alpha = final_alpha_lut[alpha_u8].astype(np.float32) / 255.0
+                    alpha_channel = (1.0 - mix) * alpha_channel + mix * adjusted_alpha
+                alpha_channel = np.clip(alpha_channel, 0.0, 1.0)
+                result = np.dstack([blended_rgb, alpha_channel])
+            else:
+                result = blended_rgb
+
+            result_tensor = torch.from_numpy(result.astype(np.float32))
+            results.append(result_tensor)
+
+        # Stack all results to create a batch tensor
+        batch_result = torch.stack(results, dim=0)
+        return (batch_result,)
 
 
 class RC_Threshold:
@@ -1025,49 +1073,57 @@ class RC_Threshold:
         }
 
     def adjust_threshold(self, image, threshold, method, invert):
-        # Convert to numpy
-        img = image[0].cpu().numpy()
-        has_alpha = img.shape[2] == 4
+        batch_size = image.shape[0]
+        results = []
 
-        if has_alpha:
-            rgb = img[:, :, :3]
-            alpha = img[:, :, 3]
-        else:
-            rgb = img
+        for i in range(batch_size):
+            # Convert to numpy for each image in the batch
+            img = image[i].cpu().numpy()
+            has_alpha = img.shape[2] == 4
 
-        # Optimized grayscale conversion using pre-computed weights
-        if method == "luminance":
-            # Vectorized perceptual luminance (fastest matrix multiplication)
-            luminance_weights = np.array([0.299, 0.587, 0.114], dtype=np.float32)
-            gray = np.dot(rgb, luminance_weights)
-        elif method == "average":
-            # Optimized average using sum and division
-            gray = np.sum(rgb, axis=2) / 3.0
-        elif method == "red":
-            gray = rgb[:, :, 0]
-        elif method == "green":
-            gray = rgb[:, :, 1]
-        elif method == "blue":
-            gray = rgb[:, :, 2]
+            if has_alpha:
+                rgb = img[:, :, :3]
+                alpha = img[:, :, 3]
+            else:
+                rgb = img
 
-        # Vectorized threshold comparison
-        mask = gray >= threshold
-        if invert:
-            mask = ~mask
+            # Optimized grayscale conversion using pre-computed weights
+            if method == "luminance":
+                # Vectorized perceptual luminance (fastest matrix multiplication)
+                luminance_weights = np.array([0.299, 0.587, 0.114], dtype=np.float32)
+                gray = np.dot(rgb, luminance_weights)
+            elif method == "average":
+                # Optimized average using sum and division
+                gray = np.sum(rgb, axis=2) / 3.0
+            elif method == "red":
+                gray = rgb[:, :, 0]
+            elif method == "green":
+                gray = rgb[:, :, 1]
+            elif method == "blue":
+                gray = rgb[:, :, 2]
 
-        # Efficient broadcast operation for RGB channels
-        mask_3d = np.expand_dims(mask, axis=2)
-        result_rgb = np.where(mask_3d, 1.0, 0.0)
+            # Vectorized threshold comparison
+            mask = gray >= threshold
+            if invert:
+                mask = ~mask
 
-        # Reassemble image
-        if has_alpha:
-            result = np.dstack([result_rgb, alpha])
-        else:
-            result = result_rgb
+            # Efficient broadcast operation for RGB channels
+            mask_3d = np.expand_dims(mask, axis=2)
+            result_rgb = np.where(mask_3d, 1.0, 0.0)
 
-        # Convert back to tensor (already float32)
-        result_tensor = torch.from_numpy(result).unsqueeze(0)
-        return (result_tensor,)
+            # Reassemble image
+            if has_alpha:
+                result = np.dstack([result_rgb, alpha])
+            else:
+                result = result_rgb
+
+            # Convert back to tensor (already float32) for this image
+            result_tensor = torch.from_numpy(result)
+            results.append(result_tensor)
+
+        # Stack all results to create a batch tensor
+        batch_result = torch.stack(results, dim=0)
+        return (batch_result,)
 
 
 class RC_Vibrance:
@@ -1110,72 +1166,80 @@ class RC_Vibrance:
         if vibrance == 0 and saturation == 0:
             return (image,)
 
-        # Convert to numpy, stay in float32 for better performance
-        img = image[0].cpu().numpy()
-        has_alpha = img.shape[2] == 4
-
-        if has_alpha:
-            rgb = img[:, :, :3]
-            alpha = img[:, :, 3]
-        else:
-            rgb = img
+        batch_size = image.shape[0]
+        results = []
 
         # Convert factors once
         vibrance_factor = vibrance / 100.0
         saturation_factor = saturation / 100.0
 
-        # Optimized RGB to HSV conversion (avoid unnecessary uint8 conversion)
-        rgb_clamped = np.clip(rgb, 0, 1)
-        hsv = cv2.cvtColor(rgb_clamped, cv2.COLOR_RGB2HSV)
-        h, s, v = hsv[:, :, 0], hsv[:, :, 1], hsv[:, :, 2]
+        for i in range(batch_size):
+            # Convert to numpy, stay in float32 for better performance
+            img = image[i].cpu().numpy()
+            has_alpha = img.shape[2] == 4
 
-        # Vibrance processing with enhanced skin protection
-        if vibrance_factor != 0:
-            # Vectorized saturation protection (avoid division)
-            saturation_protection = 1.0 - s
-
-            # Enhanced skin tone protection with adjustable strength
-            if protect_skin_tones:
-                # Optimized skin tone detection with expanded range and smoother falloff
-                # Skin tones: 5-35 degrees (OpenCV hue range 0-360)
-                skin_hue_center = 20.0  # Orange-yellow skin tone center
-                skin_hue_range = 15.0   # ±15 degrees range
-
-                # Smooth falloff function for skin protection
-                hue_distance = np.minimum(
-                    np.abs(h - skin_hue_center),
-                    360.0 - np.abs(h - skin_hue_center)  # Handle hue wrap-around
-                )
-                skin_mask = np.maximum(0.0, 1.0 - (hue_distance / skin_hue_range))
-
-                # Apply protection strength parameter
-                protection_amount = 1.0 - (skin_protection_strength * skin_mask)
-                skin_protection = protection_amount
+            if has_alpha:
+                rgb = img[:, :, :3]
+                alpha = img[:, :, 3]
             else:
-                skin_protection = 1.0
+                rgb = img
 
-            # Vectorized vibrance application
-            vibrance_multiplier = 1.0 + (vibrance_factor * saturation_protection * skin_protection)
-            s = s * vibrance_multiplier
+            # Optimized RGB to HSV conversion (avoid unnecessary uint8 conversion)
+            rgb_clamped = np.clip(rgb, 0, 1)
+            hsv = cv2.cvtColor(rgb_clamped, cv2.COLOR_RGB2HSV)
+            h, s, v = hsv[:, :, 0], hsv[:, :, 1], hsv[:, :, 2]
 
-        # Regular saturation adjustment (vectorized)
-        if saturation_factor != 0:
-            s = s * (1.0 + saturation_factor)
+            # Vibrance processing with enhanced skin protection
+            if vibrance_factor != 0:
+                # Vectorized saturation protection (avoid division)
+                saturation_protection = 1.0 - s
 
-        # Clamp and reconstruct (stay in float32)
-        s = np.clip(s, 0.0, 1.0)
-        hsv_adjusted = np.stack([h, s, v], axis=2)
+                # Enhanced skin tone protection with adjustable strength
+                if protect_skin_tones:
+                    # Optimized skin tone detection with expanded range and smoother falloff
+                    # Skin tones: 5-35 degrees (OpenCV hue range 0-360)
+                    skin_hue_center = 20.0  # Orange-yellow skin tone center
+                    skin_hue_range = 15.0   # ±15 degrees range
 
-        # Convert back to RGB
-        rgb_adjusted = cv2.cvtColor(hsv_adjusted, cv2.COLOR_HSV2RGB)
-        rgb_adjusted = np.clip(rgb_adjusted, 0.0, 1.0)
+                    # Smooth falloff function for skin protection
+                    hue_distance = np.minimum(
+                        np.abs(h - skin_hue_center),
+                        360.0 - np.abs(h - skin_hue_center)  # Handle hue wrap-around
+                    )
+                    skin_mask = np.maximum(0.0, 1.0 - (hue_distance / skin_hue_range))
 
-        # Reassemble image
-        if has_alpha:
-            result = np.dstack([rgb_adjusted, alpha])
-        else:
-            result = rgb_adjusted
+                    # Apply protection strength parameter
+                    protection_amount = 1.0 - (skin_protection_strength * skin_mask)
+                    skin_protection = protection_amount
+                else:
+                    skin_protection = 1.0
 
-        # Convert back to tensor
-        result_tensor = torch.from_numpy(result).unsqueeze(0)
-        return (result_tensor,)
+                # Vectorized vibrance application
+                vibrance_multiplier = 1.0 + (vibrance_factor * saturation_protection * skin_protection)
+                s = s * vibrance_multiplier
+
+            # Regular saturation adjustment (vectorized)
+            if saturation_factor != 0:
+                s = s * (1.0 + saturation_factor)
+
+            # Clamp and reconstruct (stay in float32)
+            s = np.clip(s, 0.0, 1.0)
+            hsv_adjusted = np.stack([h, s, v], axis=2)
+
+            # Convert back to RGB
+            rgb_adjusted = cv2.cvtColor(hsv_adjusted, cv2.COLOR_HSV2RGB)
+            rgb_adjusted = np.clip(rgb_adjusted, 0.0, 1.0)
+
+            # Reassemble image
+            if has_alpha:
+                result = np.dstack([rgb_adjusted, alpha])
+            else:
+                result = rgb_adjusted
+
+            # Convert back to tensor for this image
+            result_tensor = torch.from_numpy(result)
+            results.append(result_tensor)
+
+        # Stack all results to create a batch tensor
+        batch_result = torch.stack(results, dim=0)
+        return (batch_result,)

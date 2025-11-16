@@ -216,55 +216,64 @@ class RC_PatternTiling:
         crop_left,
         reference_image=None,
     ):
-        pattern_tensor = pattern_image[0].detach().cpu().numpy()
-        pattern_tensor = self._apply_crop(
-            pattern_tensor,
-            crop_top,
-            crop_right,
-            crop_bottom,
-            crop_left,
-        )
+        batch_size = pattern_image.shape[0]
+        results = []
 
-        out_w, out_h = self._determine_output_size(size_mode, width, height, reference_image)
-
-        if pattern_tensor.size == 0 or pattern_tensor.shape[0] == 0 or pattern_tensor.shape[1] == 0:
-            empty = torch.zeros(
-                (1, out_h, out_w, 4),
-                dtype=pattern_image.dtype,
-                device=pattern_image.device,
+        for i in range(batch_size):
+            # Process each pattern image in the batch
+            pattern_tensor = pattern_image[i].detach().cpu().numpy()
+            pattern_tensor = self._apply_crop(
+                pattern_tensor,
+                crop_top,
+                crop_right,
+                crop_bottom,
+                crop_left,
             )
-            return (empty,)
 
-        pattern = self._transform_pattern(pattern_tensor, pattern_scale, rotation)
+            out_w, out_h = self._determine_output_size(size_mode, width, height, reference_image)
 
-        canvas_rgb, canvas_alpha = self._build_tiled_canvas(
-            pattern,
-            out_w,
-            out_h,
-            spacing_x,
-            spacing_y,
-            offset_x,
-            offset_y,
-        )
+            if pattern_tensor.size == 0 or pattern_tensor.shape[0] == 0 or pattern_tensor.shape[1] == 0:
+                empty = torch.zeros(
+                    (out_h, out_w, 4),
+                    dtype=pattern_image.dtype,
+                    device=pattern_image.device,
+                )
+                results.append(empty)
+                continue
 
-        alpha = np.clip(canvas_alpha, 0.0, 1.0)
+            pattern = self._transform_pattern(pattern_tensor, pattern_scale, rotation)
 
-        rgb = np.zeros_like(canvas_rgb)
-        non_zero = alpha > 1e-6
-        np.divide(canvas_rgb, alpha, out=rgb, where=non_zero)
-        if np.any(~non_zero):
-            rgb[np.repeat(~non_zero, 3, axis=2)] = 0.0
+            canvas_rgb, canvas_alpha = self._build_tiled_canvas(
+                pattern,
+                out_w,
+                out_h,
+                spacing_x,
+                spacing_y,
+                offset_x,
+                offset_y,
+            )
 
-        np.clip(rgb, 0.0, 1.0, out=rgb)
+            alpha = np.clip(canvas_alpha, 0.0, 1.0)
 
-        rgba = np.concatenate([rgb, alpha], axis=2)
-        rgba[..., 3] = np.clip(rgba[..., 3] * opacity, 0.0, 1.0)
+            rgb = np.zeros_like(canvas_rgb)
+            non_zero = alpha > 1e-6
+            np.divide(canvas_rgb, alpha, out=rgb, where=non_zero)
+            if np.any(~non_zero):
+                rgb[np.repeat(~non_zero, 3, axis=2)] = 0.0
 
-        rgba = np.ascontiguousarray(rgba, dtype=np.float32)
+            np.clip(rgb, 0.0, 1.0, out=rgb)
 
-        image_out = torch.from_numpy(rgba).unsqueeze(0)
+            rgba = np.concatenate([rgb, alpha], axis=2)
+            rgba[..., 3] = np.clip(rgba[..., 3] * opacity, 0.0, 1.0)
 
-        return (image_out,)
+            rgba = np.ascontiguousarray(rgba, dtype=np.float32)
+
+            image_tensor = torch.from_numpy(rgba)
+            results.append(image_tensor)
+
+        # Stack all results to create a batch tensor
+        batch_result = torch.stack(results, dim=0)
+        return (batch_result,)
 
 
 NODE_CLASS_MAPPINGS = {

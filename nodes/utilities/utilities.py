@@ -75,112 +75,121 @@ class RC_CanvasPadding:
 
     def apply_padding(self, image, top, bottom, left, right, fill_mode,
                      fill_color_r, fill_color_g, fill_color_b, background_alpha):
-        # Convert to numpy
-        img = (image[0].cpu().numpy() * 255).astype(np.uint8)
-        h, w = img.shape[:2]
-        has_alpha = img.shape[2] == 4
+        batch_size = image.shape[0]
+        results = []
 
-        # Force RGBA output if background is not fully opaque
-        output_rgba = background_alpha < 1.0 or fill_mode == "transparent"
-
-        # Handle cropping (negative values)
-        crop_top = max(0, -top)
-        crop_bottom = max(0, -bottom)
-        crop_left = max(0, -left)
-        crop_right = max(0, -right)
-
-        # Apply cropping first if needed
-        if crop_top > 0 or crop_bottom > 0 or crop_left > 0 or crop_right > 0:
-            crop_h_end = h - crop_bottom if crop_bottom > 0 else h
-            crop_w_end = w - crop_right if crop_right > 0 else w
-            img = img[crop_top:crop_h_end, crop_left:crop_w_end]
+        for i in range(batch_size):
+            # Convert to numpy for each image in the batch
+            img = (image[i].cpu().numpy() * 255).astype(np.uint8)
             h, w = img.shape[:2]
+            has_alpha = img.shape[2] == 4
 
-        # Convert to RGBA if needed
-        if output_rgba and not has_alpha:
-            img_rgba = np.zeros((h, w, 4), dtype=np.uint8)
-            img_rgba[:, :, :3] = img
-            img_rgba[:, :, 3] = 255
-            img = img_rgba
-            has_alpha = True
+            # Force RGBA output if background is not fully opaque
+            output_rgba = background_alpha < 1.0 or fill_mode == "transparent"
 
-        # Calculate padding (only positive values)
-        pad_top = max(0, top)
-        pad_bottom = max(0, bottom)
-        pad_left = max(0, left)
-        pad_right = max(0, right)
+            # Handle cropping (negative values)
+            crop_top = max(0, -top)
+            crop_bottom = max(0, -bottom)
+            crop_left = max(0, -left)
+            crop_right = max(0, -right)
 
-        # If no padding needed, return cropped image
-        if pad_top == 0 and pad_bottom == 0 and pad_left == 0 and pad_right == 0:
-            result_tensor = torch.from_numpy(img.astype(np.float32) / 255.0).unsqueeze(0)
-            return (result_tensor,)
+            # Apply cropping first if needed
+            if crop_top > 0 or crop_bottom > 0 or crop_left > 0 or crop_right > 0:
+                crop_h_end = h - crop_bottom if crop_bottom > 0 else h
+                crop_w_end = w - crop_right if crop_right > 0 else w
+                img = img[crop_top:crop_h_end, crop_left:crop_w_end]
+                h, w = img.shape[:2]
 
-        # Calculate new dimensions
-        new_h = h + pad_top + pad_bottom
-        new_w = w + pad_left + pad_right
+            # Convert to RGBA if needed
+            if output_rgba and not has_alpha:
+                img_rgba = np.zeros((h, w, 4), dtype=np.uint8)
+                img_rgba[:, :, :3] = img
+                img_rgba[:, :, 3] = 255
+                img = img_rgba
+                has_alpha = True
 
-        # Calculate background alpha as integer (0-255)
-        bg_alpha = int(background_alpha * 255)
+            # Calculate padding (only positive values)
+            pad_top = max(0, top)
+            pad_bottom = max(0, bottom)
+            pad_left = max(0, left)
+            pad_right = max(0, right)
 
-        if fill_mode == "color":
-            # Fill with solid color (RGB values are already 0-255)
-            if output_rgba:
-                fill_color = [fill_color_r, fill_color_g, fill_color_b, bg_alpha]
-                padded = np.full((new_h, new_w, 4), fill_color, dtype=np.uint8)
-            else:
-                fill_color = [fill_color_r, fill_color_g, fill_color_b]
-                padded = np.full((new_h, new_w, 3), fill_color, dtype=np.uint8)
+            # If no padding needed, return cropped image
+            if pad_top == 0 and pad_bottom == 0 and pad_left == 0 and pad_right == 0:
+                result_tensor = torch.from_numpy(img.astype(np.float32) / 255.0)
+                results.append(result_tensor)
+                continue
 
-            # Place original image
-            padded[pad_top:pad_top+h, pad_left:pad_left+w] = img
+            # Calculate new dimensions
+            new_h = h + pad_top + pad_bottom
+            new_w = w + pad_left + pad_right
 
-        elif fill_mode == "transparent":
-            # Transparent fill (always RGBA)
-            padded = np.zeros((new_h, new_w, 4), dtype=np.uint8)
-            # Background is transparent (alpha=0), ignore background_alpha parameter for transparent mode
-            padded[pad_top:pad_top+h, pad_left:pad_left+w] = img
+            # Calculate background alpha as integer (0-255)
+            bg_alpha = int(background_alpha * 255)
 
-        elif fill_mode == "edge":
-            # Edge extension using cv2.copyMakeBorder
-            padded = cv2.copyMakeBorder(img, pad_top, pad_bottom, pad_left, pad_right,
-                                      cv2.BORDER_REPLICATE)
+            if fill_mode == "color":
+                # Fill with solid color (RGB values are already 0-255)
+                if output_rgba:
+                    fill_color = [fill_color_r, fill_color_g, fill_color_b, bg_alpha]
+                    padded = np.full((new_h, new_w, 4), fill_color, dtype=np.uint8)
+                else:
+                    fill_color = [fill_color_r, fill_color_g, fill_color_b]
+                    padded = np.full((new_h, new_w, 3), fill_color, dtype=np.uint8)
 
-            # Apply background alpha to padding area if needed
-            if output_rgba and background_alpha < 1.0:
-                # Ensure RGBA format
-                if padded.shape[2] == 3:
-                    padded_rgba = np.zeros((new_h, new_w, 4), dtype=np.uint8)
-                    padded_rgba[:, :, :3] = padded
-                    padded_rgba[:, :, 3] = 255
-                    padded = padded_rgba
-                # Create mask for padding area
-                mask = np.ones((new_h, new_w), dtype=bool)
-                mask[pad_top:pad_top+h, pad_left:pad_left+w] = False
-                # Set alpha channel in padding area
-                padded[mask, 3] = bg_alpha
+                # Place original image
+                padded[pad_top:pad_top+h, pad_left:pad_left+w] = img
 
-        else:  # mirror
-            # Mirror padding using cv2.copyMakeBorder
-            padded = cv2.copyMakeBorder(img, pad_top, pad_bottom, pad_left, pad_right,
-                                      cv2.BORDER_REFLECT_101)
+            elif fill_mode == "transparent":
+                # Transparent fill (always RGBA)
+                padded = np.zeros((new_h, new_w, 4), dtype=np.uint8)
+                # Background is transparent (alpha=0), ignore background_alpha parameter for transparent mode
+                padded[pad_top:pad_top+h, pad_left:pad_left+w] = img
 
-            # Apply background alpha to padding area if needed
-            if output_rgba and background_alpha < 1.0:
-                # Ensure RGBA format
-                if padded.shape[2] == 3:
-                    padded_rgba = np.zeros((new_h, new_w, 4), dtype=np.uint8)
-                    padded_rgba[:, :, :3] = padded
-                    padded_rgba[:, :, 3] = 255
-                    padded = padded_rgba
-                # Create mask for padding area
-                mask = np.ones((new_h, new_w), dtype=bool)
-                mask[pad_top:pad_top+h, pad_left:pad_left+w] = False
-                # Set alpha channel in padding area
-                padded[mask, 3] = bg_alpha
+            elif fill_mode == "edge":
+                # Edge extension using cv2.copyMakeBorder
+                padded = cv2.copyMakeBorder(img, pad_top, pad_bottom, pad_left, pad_right,
+                                          cv2.BORDER_REPLICATE)
 
-        # Convert back to tensor
-        result_tensor = torch.from_numpy(padded.astype(np.float32) / 255.0).unsqueeze(0)
-        return (result_tensor,)
+                # Apply background alpha to padding area if needed
+                if output_rgba and background_alpha < 1.0:
+                    # Ensure RGBA format
+                    if padded.shape[2] == 3:
+                        padded_rgba = np.zeros((new_h, new_w, 4), dtype=np.uint8)
+                        padded_rgba[:, :, :3] = padded
+                        padded_rgba[:, :, 3] = 255
+                        padded = padded_rgba
+                    # Create mask for padding area
+                    mask = np.ones((new_h, new_w), dtype=bool)
+                    mask[pad_top:pad_top+h, pad_left:pad_left+w] = False
+                    # Set alpha channel in padding area
+                    padded[mask, 3] = bg_alpha
+
+            else:  # mirror
+                # Mirror padding using cv2.copyMakeBorder
+                padded = cv2.copyMakeBorder(img, pad_top, pad_bottom, pad_left, pad_right,
+                                          cv2.BORDER_REFLECT_101)
+
+                # Apply background alpha to padding area if needed
+                if output_rgba and background_alpha < 1.0:
+                    # Ensure RGBA format
+                    if padded.shape[2] == 3:
+                        padded_rgba = np.zeros((new_h, new_w, 4), dtype=np.uint8)
+                        padded_rgba[:, :, :3] = padded
+                        padded_rgba[:, :, 3] = 255
+                        padded = padded_rgba
+                    # Create mask for padding area
+                    mask = np.ones((new_h, new_w), dtype=bool)
+                    mask[pad_top:pad_top+h, pad_left:pad_left+w] = False
+                    # Set alpha channel in padding area
+                    padded[mask, 3] = bg_alpha
+
+            # Convert back to tensor for this image
+            result_tensor = torch.from_numpy(padded.astype(np.float32) / 255.0)
+            results.append(result_tensor)
+
+        # Stack all results to create a batch tensor
+        batch_result = torch.stack(results, dim=0)
+        return (batch_result,)
 
 
 class RC_ImageScale:
@@ -238,16 +247,8 @@ class RC_ImageScale:
 
     def scale_image(self, image, scale_method, scale_factor, width, height,
                    resampling, keep_aspect_ratio):
-        # Convert to numpy and PIL
-        img = (image[0].cpu().numpy() * 255).astype(np.uint8)
-        h, w = img.shape[:2]
-        has_alpha = img.shape[2] == 4
-
-        # Convert to PIL
-        if has_alpha:
-            pil_img = Image.fromarray(img, 'RGBA')
-        else:
-            pil_img = Image.fromarray(img, 'RGB')
+        batch_size = image.shape[0]
+        results = []
 
         # Get resampling filter
         resample_map = {
@@ -258,64 +259,80 @@ class RC_ImageScale:
         }
         resample_filter = resample_map[resampling]
 
-        # Calculate target dimensions based on scale method
-        if scale_method == "percentage":
-            new_w = int(w * scale_factor)
-            new_h = int(h * scale_factor)
+        for i in range(batch_size):
+            # Convert to numpy and PIL for each image in the batch
+            img = (image[i].cpu().numpy() * 255).astype(np.uint8)
+            h, w = img.shape[:2]
+            has_alpha = img.shape[2] == 4
 
-        elif scale_method == "dimensions":
-            if keep_aspect_ratio:
-                # Calculate scale factor to fit within target dimensions
-                scale_w = width / w
-                scale_h = height / h
-                scale = min(scale_w, scale_h)
-                new_w = int(w * scale)
-                new_h = int(h * scale)
+            # Convert to PIL
+            if has_alpha:
+                pil_img = Image.fromarray(img, 'RGBA')
             else:
-                new_w = width
-                new_h = height
+                pil_img = Image.fromarray(img, 'RGB')
 
-        elif scale_method == "fit_width":
-            scale = width / w
-            new_w = width
-            new_h = int(h * scale)
+            # Calculate target dimensions based on scale method
+            if scale_method == "percentage":
+                new_w = int(w * scale_factor)
+                new_h = int(h * scale_factor)
 
-        elif scale_method == "fit_height":
-            scale = height / h
-            new_w = int(w * scale)
-            new_h = height
+            elif scale_method == "dimensions":
+                if keep_aspect_ratio:
+                    # Calculate scale factor to fit within target dimensions
+                    scale_w = width / w
+                    scale_h = height / h
+                    scale = min(scale_w, scale_h)
+                    new_w = int(w * scale)
+                    new_h = int(h * scale)
+                else:
+                    new_w = width
+                    new_h = height
 
-        elif scale_method == "fit_longest":
-            if w > h:  # Width is longer
+            elif scale_method == "fit_width":
                 scale = width / w
                 new_w = width
                 new_h = int(h * scale)
-            else:  # Height is longer
+
+            elif scale_method == "fit_height":
                 scale = height / h
                 new_w = int(w * scale)
                 new_h = height
 
-        else:  # fit_shortest
-            if w < h:  # Width is shorter
-                scale = width / w
-                new_w = width
-                new_h = int(h * scale)
-            else:  # Height is shorter
-                scale = height / h
-                new_w = int(w * scale)
-                new_h = height
+            elif scale_method == "fit_longest":
+                if w > h:  # Width is longer
+                    scale = width / w
+                    new_w = width
+                    new_h = int(h * scale)
+                else:  # Height is longer
+                    scale = height / h
+                    new_w = int(w * scale)
+                    new_h = height
 
-        # Ensure minimum size
-        new_w = max(1, new_w)
-        new_h = max(1, new_h)
+            else:  # fit_shortest
+                if w < h:  # Width is shorter
+                    scale = width / w
+                    new_w = width
+                    new_h = int(h * scale)
+                else:  # Height is shorter
+                    scale = height / h
+                    new_w = int(w * scale)
+                    new_h = height
 
-        # Resize image
-        resized_pil = pil_img.resize((new_w, new_h), resample_filter)
-        resized = np.array(resized_pil)
+            # Ensure minimum size
+            new_w = max(1, new_w)
+            new_h = max(1, new_h)
 
-        # Convert back to tensor
-        result_tensor = torch.from_numpy(resized.astype(np.float32) / 255.0).unsqueeze(0)
-        return (result_tensor,)
+            # Resize image
+            resized_pil = pil_img.resize((new_w, new_h), resample_filter)
+            resized = np.array(resized_pil)
+
+            # Convert back to tensor for this image
+            result_tensor = torch.from_numpy(resized.astype(np.float32) / 255.0)
+            results.append(result_tensor)
+
+        # Stack all results to create a batch tensor
+        batch_result = torch.stack(results, dim=0)
+        return (batch_result,)
 
 
 class RC_ImageCrop:
@@ -367,61 +384,69 @@ class RC_ImageCrop:
         }
 
     def crop_image(self, image, crop_method, x, y, width, height, aspect_width, aspect_height):
-        # Convert to numpy
-        img = (image[0].cpu().numpy() * 255).astype(np.uint8)
-        img_h, img_w = img.shape[:2]
+        batch_size = image.shape[0]
+        results = []
 
-        if crop_method == "manual":
-            # Manual crop with coordinates
-            x1 = max(0, min(x, img_w))
-            y1 = max(0, min(y, img_h))
-            x2 = max(x1 + 1, min(x + width, img_w))
-            y2 = max(y1 + 1, min(y + height, img_h))
+        for i in range(batch_size):
+            # Convert to numpy for each image in the batch
+            img = (image[i].cpu().numpy() * 255).astype(np.uint8)
+            img_h, img_w = img.shape[:2]
 
-            cropped = img[y1:y2, x1:x2]
+            if crop_method == "manual":
+                # Manual crop with coordinates
+                x1 = max(0, min(x, img_w))
+                y1 = max(0, min(y, img_h))
+                x2 = max(x1 + 1, min(x + width, img_w))
+                y2 = max(y1 + 1, min(y + height, img_h))
 
-        elif crop_method == "center":
-            # Center crop to specified dimensions
-            crop_w = min(width, img_w)
-            crop_h = min(height, img_h)
+                cropped = img[y1:y2, x1:x2]
 
-            center_x = img_w // 2
-            center_y = img_h // 2
+            elif crop_method == "center":
+                # Center crop to specified dimensions
+                crop_w = min(width, img_w)
+                crop_h = min(height, img_h)
 
-            x1 = max(0, center_x - crop_w // 2)
-            y1 = max(0, center_y - crop_h // 2)
-            x2 = min(img_w, x1 + crop_w)
-            y2 = min(img_h, y1 + crop_h)
+                center_x = img_w // 2
+                center_y = img_h // 2
 
-            cropped = img[y1:y2, x1:x2]
+                x1 = max(0, center_x - crop_w // 2)
+                y1 = max(0, center_y - crop_h // 2)
+                x2 = min(img_w, x1 + crop_w)
+                y2 = min(img_h, y1 + crop_h)
 
-        else:  # aspect_ratio
-            # Crop by aspect ratio (centered)
-            target_aspect = aspect_width / aspect_height
-            img_aspect = img_w / img_h
+                cropped = img[y1:y2, x1:x2]
 
-            if img_aspect > target_aspect:
-                # Image is wider, crop width
-                crop_h = img_h
-                crop_w = int(crop_h * target_aspect)
-            else:
-                # Image is taller, crop height
-                crop_w = img_w
-                crop_h = int(crop_w / target_aspect)
+            else:  # aspect_ratio
+                # Crop by aspect ratio (centered)
+                target_aspect = aspect_width / aspect_height
+                img_aspect = img_w / img_h
 
-            center_x = img_w // 2
-            center_y = img_h // 2
+                if img_aspect > target_aspect:
+                    # Image is wider, crop width
+                    crop_h = img_h
+                    crop_w = int(crop_h * target_aspect)
+                else:
+                    # Image is taller, crop height
+                    crop_w = img_w
+                    crop_h = int(crop_w / target_aspect)
 
-            x1 = max(0, center_x - crop_w // 2)
-            y1 = max(0, center_y - crop_h // 2)
-            x2 = min(img_w, x1 + crop_w)
-            y2 = min(img_h, y1 + crop_h)
+                center_x = img_w // 2
+                center_y = img_h // 2
 
-            cropped = img[y1:y2, x1:x2]
+                x1 = max(0, center_x - crop_w // 2)
+                y1 = max(0, center_y - crop_h // 2)
+                x2 = min(img_w, x1 + crop_w)
+                y2 = min(img_h, y1 + crop_h)
 
-        # Convert back to tensor
-        result_tensor = torch.from_numpy(cropped.astype(np.float32) / 255.0).unsqueeze(0)
-        return (result_tensor,)
+                cropped = img[y1:y2, x1:x2]
+
+            # Convert back to tensor for this image
+            result_tensor = torch.from_numpy(cropped.astype(np.float32) / 255.0)
+            results.append(result_tensor)
+
+        # Stack all results to create a batch tensor
+        batch_result = torch.stack(results, dim=0)
+        return (batch_result,)
 
 
 class RC_CanvasResize:
@@ -486,58 +511,70 @@ class RC_CanvasResize:
 
     def resize_canvas(self, image, new_width, new_height, anchor, x_offset, y_offset,
                      background_color_r, background_color_g, background_color_b):
-        # Convert to numpy
-        img = (image[0].cpu().numpy() * 255).astype(np.uint8)
-        img_h, img_w = img.shape[:2]
-        has_alpha = img.shape[2] == 4
+        batch_size = image.shape[0]
+        results = []
 
-        # Create new canvas
-        if has_alpha:
-            bg_color = [background_color_r * 255, background_color_g * 255,
-                       background_color_b * 255, 255]
-            canvas = np.full((new_height, new_width, 4), bg_color, dtype=np.uint8)
-        else:
-            bg_color = [background_color_r * 255, background_color_g * 255,
-                       background_color_b * 255]
-            canvas = np.full((new_height, new_width, 3), bg_color, dtype=np.uint8)
-
-        # Calculate position based on anchor
+        # Calculate position based on anchor (this is the same for all images)
         anchor_positions = {
-            "center": (new_width // 2 - img_w // 2, new_height // 2 - img_h // 2),
+            "center": (new_width // 2, new_height // 2),
             "top_left": (0, 0),
-            "top_center": (new_width // 2 - img_w // 2, 0),
-            "top_right": (new_width - img_w, 0),
-            "middle_left": (0, new_height // 2 - img_h // 2),
-            "middle_right": (new_width - img_w, new_height // 2 - img_h // 2),
-            "bottom_left": (0, new_height - img_h),
-            "bottom_center": (new_width // 2 - img_w // 2, new_height - img_h),
-            "bottom_right": (new_width - img_w, new_height - img_h),
+            "top_center": (new_width // 2, 0),
+            "top_right": (new_width - 1, 0),
+            "middle_left": (0, new_height // 2),
+            "middle_right": (new_width - 1, new_height // 2),
+            "bottom_left": (0, new_height - 1),
+            "bottom_center": (new_width // 2, new_height - 1),
+            "bottom_right": (new_width - 1, new_height - 1),
         }
 
-        pos_x, pos_y = anchor_positions[anchor]
-        pos_x += x_offset
-        pos_y += y_offset
+        for i in range(batch_size):
+            # Convert to numpy for each image in the batch
+            img = (image[i].cpu().numpy() * 255).astype(np.uint8)
+            img_h, img_w = img.shape[:2]
+            has_alpha = img.shape[2] == 4
 
-        # Place image on canvas
-        # Calculate valid region
-        start_x = max(0, pos_x)
-        start_y = max(0, pos_y)
-        end_x = min(new_width, pos_x + img_w)
-        end_y = min(new_height, pos_y + img_h)
+            # Create new canvas
+            if has_alpha:
+                bg_color = [background_color_r * 255, background_color_g * 255,
+                           background_color_b * 255, 255]
+                canvas = np.full((new_height, new_width, 4), bg_color, dtype=np.uint8)
+            else:
+                bg_color = [background_color_r * 255, background_color_g * 255,
+                           background_color_b * 255]
+                canvas = np.full((new_height, new_width, 3), bg_color, dtype=np.uint8)
 
-        if start_x < end_x and start_y < end_y:
-            # Calculate source region
-            src_start_x = max(0, -pos_x)
-            src_start_y = max(0, -pos_y)
-            src_end_x = src_start_x + (end_x - start_x)
-            src_end_y = src_start_y + (end_y - start_y)
+            # Calculate position based on anchor and image dimensions
+            center_offset_x = img_w // 2
+            center_offset_y = img_h // 2
 
-            # Copy image region to canvas
-            canvas[start_y:end_y, start_x:end_x] = img[src_start_y:src_end_y, src_start_x:src_end_x]
+            base_x, base_y = anchor_positions[anchor]
+            pos_x = base_x - center_offset_x + x_offset
+            pos_y = base_y - center_offset_y + y_offset
 
-        # Convert back to tensor
-        result_tensor = torch.from_numpy(canvas.astype(np.float32) / 255.0).unsqueeze(0)
-        return (result_tensor,)
+            # Place image on canvas
+            # Calculate valid region
+            start_x = max(0, pos_x)
+            start_y = max(0, pos_y)
+            end_x = min(new_width, pos_x + img_w)
+            end_y = min(new_height, pos_y + img_h)
+
+            if start_x < end_x and start_y < end_y:
+                # Calculate source region
+                src_start_x = max(0, -pos_x)
+                src_start_y = max(0, -pos_y)
+                src_end_x = src_start_x + (end_x - start_x)
+                src_end_y = src_start_y + (end_y - start_y)
+
+                # Copy image region to canvas
+                canvas[start_y:end_y, start_x:end_x] = img[src_start_y:src_end_y, src_start_x:src_end_x]
+
+            # Convert back to tensor for this image
+            result_tensor = torch.from_numpy(canvas.astype(np.float32) / 255.0)
+            results.append(result_tensor)
+
+        # Stack all results to create a batch tensor
+        batch_result = torch.stack(results, dim=0)
+        return (batch_result,)
 
 
 class RC_SaveImageNoMetadata(BaseSaveImage):

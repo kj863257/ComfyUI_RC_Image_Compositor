@@ -221,233 +221,259 @@ class RC_ImageCompositor:
                   rotation=0.0, opacity=0.7,
                   blend_mode="normal", flip_h=False, flip_v=False,
                   blend_if_data='{"channel": "gray", "this_layer": {"black": [0.0, 0.0], "white": [1.0, 1.0]}, "underlying_layer": {"black": [0.0, 0.0], "white": [1.0, 1.0]}}'):
-        # Convert overlay to numpy first to get dimensions
-        fg = (overlay[0].cpu().numpy() * 255).astype(np.uint8)
-        fg_h_orig, fg_w_orig = fg.shape[:2]
 
-        # === 1. Compute target size for overlay ===
-        if scale_mode == "relative_to_overlay":
-            new_w = int(fg_w_orig * scale)
-            new_h = int(fg_h_orig * scale)
-        elif scale_mode == "relative_to_background_width":
+        # Determine the output batch size: max(background_frames, overlay_frames)
+        # This allows processing videos where either input can be shorter and will loop
+        bg_frames = background.shape[0] if background is not None else 1
+        fg_frames = overlay.shape[0]
+        batch_size = max(bg_frames, fg_frames)
+
+        results = []
+
+        for i in range(batch_size):
+            # Get the background image for compositing - cycle if needed
             if background is not None:
-                bg_temp = (background[0].cpu().numpy() * 255).astype(np.uint8)
-                bg_w_temp = bg_temp.shape[1]
-                target_width = int(bg_w_temp * scale)
+                bg_idx = i % bg_frames
+                bg = (background[bg_idx].cpu().numpy() * 255).astype(np.uint8)
+                bg_h, bg_w = bg.shape[:2]
+                has_alpha_bg = bg.shape[2] == 4
             else:
-                target_width = int(fg_w_orig * scale)
-            scale_factor = target_width / fg_w_orig if fg_w_orig > 0 else 1.0
-            new_w = target_width
-            new_h = int(fg_h_orig * scale_factor)
-        elif scale_mode == "relative_to_background_height":
-            if background is not None:
-                bg_temp = (background[0].cpu().numpy() * 255).astype(np.uint8)
-                bg_h_temp = bg_temp.shape[0]
-                target_height = int(bg_h_temp * scale)
+                # If no background, create transparent background
+                bg_h, bg_w = 256, 256  # Default size, will be adjusted later
+                has_alpha_bg = True
+                bg = np.zeros((bg_h, bg_w, 4), dtype=np.uint8)
+
+            # Get the overlay image - cycle through overlay if needed
+            fg_idx = i % fg_frames
+            fg = (overlay[fg_idx].cpu().numpy() * 255).astype(np.uint8)
+            fg_h_orig, fg_w_orig = fg.shape[:2]
+
+            # === 1. Compute target size for overlay ===
+            if scale_mode == "relative_to_overlay":
+                new_w = int(fg_w_orig * scale)
+                new_h = int(fg_h_orig * scale)
+            elif scale_mode == "relative_to_background_width":
+                if background is not None:
+                    target_width = int(bg_w * scale)
+                else:
+                    target_width = int(fg_w_orig * scale)
+                scale_factor = target_width / fg_w_orig if fg_w_orig > 0 else 1.0
+                new_w = target_width
+                new_h = int(fg_h_orig * scale_factor)
+            elif scale_mode == "relative_to_background_height":
+                if background is not None:
+                    target_height = int(bg_h * scale)
+                else:
+                    target_height = int(fg_h_orig * scale)
+                scale_factor = target_height / fg_h_orig if fg_h_orig > 0 else 1.0
+                new_h = target_height
+                new_w = int(fg_w_orig * scale_factor)
             else:
-                target_height = int(fg_h_orig * scale)
-            scale_factor = target_height / fg_h_orig if fg_h_orig > 0 else 1.0
-            new_h = target_height
-            new_w = int(fg_w_orig * scale_factor)
-        else:
-            new_w, new_h = fg_w_orig, fg_h_orig
+                new_w, new_h = fg_w_orig, fg_h_orig
 
-        if new_w <= 0 or new_h <= 0:
-            # Return empty transparent image
-            empty = torch.zeros(1, fg_h_orig, fg_w_orig, 4)
-            return (empty,)
+            if new_w <= 0 or new_h <= 0:
+                # If we have a background, return it, otherwise return empty transparent image
+                if background is not None:
+                    result = bg.copy()
+                else:
+                    result = np.zeros((bg_h, bg_w, 4), dtype=np.uint8)
+                result_tensor = torch.from_numpy(result.astype(np.float32) / 255.0)
+                results.append(result_tensor)
+                continue
 
-        # === 2. Resize overlay ===
-        if fg.shape[2] == 4:
-            rgb = Image.fromarray(fg[:, :, :3], 'RGB')
-            a = Image.fromarray(fg[:, :, 3], 'L')
-            rgb = rgb.resize((new_w, new_h), Image.LANCZOS)
-            a = a.resize((new_w, new_h), Image.LANCZOS)
-            fg_resized = np.dstack([np.array(rgb), np.array(a)])
-        else:
-            fg_resized = np.array(Image.fromarray(fg, 'RGB').resize((new_w, new_h), Image.LANCZOS))
+            # === 2. Resize overlay ===
+            if fg.shape[2] == 4:
+                rgb = Image.fromarray(fg[:, :, :3], 'RGB')
+                a = Image.fromarray(fg[:, :, 3], 'L')
+                rgb = rgb.resize((new_w, new_h), Image.LANCZOS)
+                a = a.resize((new_w, new_h), Image.LANCZOS)
+                fg_resized = np.dstack([np.array(rgb), np.array(a)])
+            else:
+                fg_resized = np.array(Image.fromarray(fg, 'RGB').resize((new_w, new_h), Image.LANCZOS))
 
-        # === 3. Flip ===
-        if flip_h:
-            fg_resized = np.fliplr(fg_resized)
-        if flip_v:
-            fg_resized = np.flipud(fg_resized)
+            # === 3. Flip ===
+            if flip_h:
+                fg_resized = np.fliplr(fg_resized)
+            if flip_v:
+                fg_resized = np.flipud(fg_resized)
 
-        # === 4. Rotate ===
-        if abs(rotation) > 1e-6:
-            pil_img = Image.fromarray(fg_resized)
-            rotated = pil_img.rotate(rotation, resample=Image.BICUBIC, expand=True)
-            fg_resized = np.array(rotated)
+            # === 4. Rotate ===
+            if abs(rotation) > 1e-6:
+                pil_img = Image.fromarray(fg_resized)
+                rotated = pil_img.rotate(rotation, resample=Image.BICUBIC, expand=True)
+                fg_resized = np.array(rotated)
 
-        # If no background provided, create transparent background large enough to contain overlay
-        if background is None:
+            # If no background provided, create transparent background large enough to contain overlay
+            if background is None:
+                fg_h, fg_w = fg_resized.shape[:2]
+
+                # For transparent background, create canvas based on actual positioning needs
+                # Calculate required canvas size based on final position
+
+                # First, determine potential position ranges
+                if x_align == "from_left":
+                    pos_x = x_offset
+                else:  # from_right
+                    pos_x = -x_offset
+
+                if y_align == "from_top":
+                    pos_y = y_offset
+                else:  # from_bottom
+                    pos_y = -y_offset
+
+                # Calculate minimum canvas size needed
+                min_x = min(0, pos_x)
+                max_x = max(fg_w, fg_w + pos_x)
+                min_y = min(0, pos_y)
+                max_y = max(fg_h, fg_h + pos_y)
+
+                canvas_w = max_x - min_x
+                canvas_h = max_y - min_y
+
+                # If no offset, keep original size
+                if x_offset == 0 and y_offset == 0:
+                    canvas_w = fg_w
+                    canvas_h = fg_h
+
+                # Create transparent background (RGBA with alpha=0, RGB=0)
+                bg = np.zeros((canvas_h, canvas_w, 4), dtype=np.uint8)
+
+                # Calculate final position on canvas
+                start_x = -min_x + (pos_x if pos_x > 0 else 0)
+                start_y = -min_y + (pos_y if pos_y > 0 else 0)
+
+                # For no offset case, center the image
+                if x_offset == 0 and y_offset == 0:
+                    start_x = 0
+                    start_y = 0
+
+                # Make sure we don't go out of bounds
+                start_x = max(0, min(start_x, canvas_w - fg_w))
+                start_y = max(0, min(start_y, canvas_h - fg_h))
+
+                # Now we need to do proper compositing with blend modes even for transparent background
+                # The difference is that transparent background RGB = (0,0,0)
+                bg_positioned = bg.copy()  # This will be our result
+                bg_h, bg_w = bg.shape[:2]
+            else:
+                # If background exists, create a copy to work with
+                bg_positioned = bg.copy()
+
+            # === 5. Position with improved alignment system ===
+            bg_h, bg_w = bg.shape[:2]
             fg_h, fg_w = fg_resized.shape[:2]
 
-            # For transparent background, create canvas based on actual positioning needs
-            # Calculate required canvas size based on final position
+            if background is not None:
+                # For existing background, use original positioning logic
+                # Calculate base position from percentage
+                x_base = int((bg_w - fg_w) * x_percent / 100)
+                y_base = int((bg_h - fg_h) * y_percent / 100)
 
-            # First, determine potential position ranges
-            if x_align == "from_left":
-                pos_x = x_offset
-            else:  # from_right
-                pos_x = -x_offset
+                # Apply offset based on alignment direction
+                if x_align == "from_left":
+                    x = x_base + x_offset
+                else:  # from_right
+                    x = x_base - x_offset
 
-            if y_align == "from_top":
-                pos_y = y_offset
-            else:  # from_bottom
-                pos_y = -y_offset
+                if y_align == "from_top":
+                    y = y_base + y_offset
+                else:  # from_bottom
+                    y = y_base - y_offset
+            else:
+                # For transparent background, use the calculated position
+                x = start_x
+                y = start_y
 
-            # Calculate minimum canvas size needed
-            min_x = min(0, pos_x)
-            max_x = max(fg_w, fg_w + pos_x)
-            min_y = min(0, pos_y)
-            max_y = max(fg_h, fg_h + pos_y)
+            # === 6. Composite ===
+            result = bg_positioned
+            x1, y1 = max(0, x), max(0, y)
+            x2, y2 = min(bg_w, x + fg_w), min(bg_h, y + fg_h)
 
-            canvas_w = max_x - min_x
-            canvas_h = max_y - min_y
-
-            # If no offset, keep original size
-            if x_offset == 0 and y_offset == 0:
-                canvas_w = fg_w
-                canvas_h = fg_h
-
-            # Create transparent background (RGBA with alpha=0, RGB=0)
-            bg = np.zeros((canvas_h, canvas_w, 4), dtype=np.uint8)
-
-            # Calculate final position on canvas
-            start_x = -min_x + (pos_x if pos_x > 0 else 0)
-            start_y = -min_y + (pos_y if pos_y > 0 else 0)
-
-            # For no offset case, center the image
-            if x_offset == 0 and y_offset == 0:
-                start_x = 0
-                start_y = 0
-
-            # Make sure we don't go out of bounds
-            start_x = max(0, min(start_x, canvas_w - fg_w))
-            start_y = max(0, min(start_y, canvas_h - fg_h))
-
-            # Now we need to do proper compositing with blend modes even for transparent background
-            # The difference is that transparent background RGB = (0,0,0)
-            bg_positioned = bg.copy()  # This will be our result
-        else:
-            # Convert existing background to numpy
-            bg = (background[0].cpu().numpy() * 255).astype(np.uint8)
-            bg_positioned = bg.copy()
-            start_x = 0
-            start_y = 0
-
-        # === 5. Position with improved alignment system ===
-        bg_h, bg_w = bg.shape[:2]
-        fg_h, fg_w = fg_resized.shape[:2]
-
-        if background is not None:
-            # For existing background, use original positioning logic
-            # Calculate base position from percentage
-            x_base = int((bg_w - fg_w) * x_percent / 100)
-            y_base = int((bg_h - fg_h) * y_percent / 100)
-
-            # Apply offset based on alignment direction
-            if x_align == "from_left":
-                x = x_base + x_offset
-            else:  # from_right
-                x = x_base - x_offset
-
-            if y_align == "from_top":
-                y = y_base + y_offset
-            else:  # from_bottom
-                y = y_base - y_offset
-        else:
-            # For transparent background, use the calculated position
-            x = start_x
-            y = start_y
-
-        # === 6. Composite ===
-        result = bg_positioned
-        x1, y1 = max(0, x), max(0, y)
-        x2, y2 = min(bg_w, x + fg_w), min(bg_h, y + fg_h)
-
-        if x1 >= x2 or y1 >= y2:
-            pass
-        else:
-            fg_x1 = max(0, -x)
-            fg_y1 = max(0, -y)
-            fg_roi = fg_resized[fg_y1:fg_y1 + (y2 - y1), fg_x1:fg_x1 + (x2 - x1)]
-            bg_roi = result[y1:y2, x1:x2]
-
-            if fg_roi.shape[:2] != bg_roi.shape[:2]:
+            if x1 >= x2 or y1 >= y2:
                 pass
             else:
-                if fg_roi.shape[2] == 4:
-                    rgb = fg_roi[:, :, :3].astype(np.float32) / 255.0
-                    alpha = (fg_roi[:, :, 3:4].astype(np.float32) / 255.0) * opacity
-                else:
-                    rgb = fg_roi.astype(np.float32) / 255.0
-                    alpha = np.full((rgb.shape[0], rgb.shape[1], 1), opacity, dtype=np.float32)
+                fg_x1 = max(0, -x)
+                fg_y1 = max(0, -y)
+                fg_roi = fg_resized[fg_y1:fg_y1 + (y2 - y1), fg_x1:fg_x1 + (x2 - x1)]
+                bg_roi = result[y1:y2, x1:x2]
 
-                bg_f = bg_roi.astype(np.float32) / 255.0
-
-                # Handle channel mismatch: ensure both bg and fg have same number of channels for blending
-                if bg_f.shape[2] == 4 and rgb.shape[2] == 3:
-                    # Background has alpha, foreground doesn't - use only RGB channels for blending
-                    bg_rgb = bg_f[:, :, :3]
-                elif bg_f.shape[2] == 3 and rgb.shape[2] == 4:
-                    # This shouldn't happen in our current logic, but handle it
-                    rgb = rgb[:, :, :3]
-                    bg_rgb = bg_f
-                else:
-                    # Same number of channels, or both RGB
-                    bg_rgb = bg_f[:, :, :3] if bg_f.shape[2] == 4 else bg_f
-
-                # Apply blend mode (only on RGB channels)
-                blended = self.apply_blend_mode(bg_rgb, rgb[:, :, :3] if rgb.shape[2] == 4 else rgb, blend_mode)
-
-                # Apply blend color band logic
-                try:
-                    import json
-                    blend_if_settings = json.loads(blend_if_data)
-                    blend_mask = self.calculate_blend_if_mask(
-                        bg_rgb, rgb[:, :, :3] if rgb.shape[2] == 4 else rgb,
-                        blend_if_settings
-                    )
-                    alpha = alpha * blend_mask
-                except (json.JSONDecodeError, KeyError, ValueError, TypeError) as e:
-                    # If JSON parsing or mask calculation fails, continue without blend if effect
-                    # This ensures graceful degradation rather than complete failure
+                if fg_roi.shape[:2] != bg_roi.shape[:2]:
                     pass
-
-                # Clamp blend results to [0, 1]
-                blended = np.clip(blended, 0.0, 1.0)
-
-                # Composite: handle both RGB and RGBA backgrounds
-                if bg_f.shape[2] == 4:
-                    # RGBA background (including transparent background)
-                    bg_rgb = bg_f[:, :, :3]
-                    bg_alpha = bg_f[:, :, 3:4]
-
-                    # Alpha compositing formula: out_rgb = bg_rgb * (1 - alpha) + blended * alpha
-                    out_rgb = bg_rgb * (1 - alpha) + blended * alpha
-                    out_rgb = np.clip(out_rgb, 0, 1) * 255
-                    out_rgb = out_rgb.astype(np.uint8)
-
-                    # For alpha channel: out_alpha = bg_alpha + fg_alpha * (1 - bg_alpha)
-                    # But for our case, we want: out_alpha = bg_alpha + fg_alpha * (1 - bg_alpha/255)
-                    bg_alpha_f = bg_alpha.astype(np.float32) / 255.0
-                    fg_alpha_f = alpha  # This is already in [0,1] range
-                    out_alpha_f = bg_alpha_f + fg_alpha_f * (1 - bg_alpha_f)
-                    out_alpha = (out_alpha_f * 255).astype(np.uint8)
-
-                    result[y1:y2, x1:x2, :3] = out_rgb
-                    result[y1:y2, x1:x2, 3:4] = out_alpha
                 else:
-                    # RGB background
-                    out = bg_f * (1 - alpha) + blended * alpha
-                    out = np.clip(out, 0, 1) * 255
-                    out = out.astype(np.uint8)
-                    result[y1:y2, x1:x2] = out
+                    if fg_roi.shape[2] == 4:
+                        rgb = fg_roi[:, :, :3].astype(np.float32) / 255.0
+                        alpha = (fg_roi[:, :, 3:4].astype(np.float32) / 255.0) * opacity
+                    else:
+                        rgb = fg_roi.astype(np.float32) / 255.0
+                        alpha = np.full((rgb.shape[0], rgb.shape[1], 1), opacity, dtype=np.float32)
 
-        result_tensor = torch.from_numpy(result.astype(np.float32) / 255.0).unsqueeze(0)
-        return (result_tensor,)
+                    bg_f = bg_roi.astype(np.float32) / 255.0
+
+                    # Handle channel mismatch: ensure both bg and fg have same number of channels for blending
+                    if bg_f.shape[2] == 4 and rgb.shape[2] == 3:
+                        # Background has alpha, foreground doesn't - use only RGB channels for blending
+                        bg_rgb = bg_f[:, :, :3]
+                    elif bg_f.shape[2] == 3 and rgb.shape[2] == 4:
+                        # This shouldn't happen in our current logic, but handle it
+                        rgb = rgb[:, :, :3]
+                        bg_rgb = bg_f
+                    else:
+                        # Same number of channels, or both RGB
+                        bg_rgb = bg_f[:, :, :3] if bg_f.shape[2] == 4 else bg_f
+
+                    # Apply blend mode (only on RGB channels)
+                    blended = self.apply_blend_mode(bg_rgb, rgb[:, :, :3] if rgb.shape[2] == 4 else rgb, blend_mode)
+
+                    # Apply blend color band logic
+                    try:
+                        import json
+                        blend_if_settings = json.loads(blend_if_data)
+                        blend_mask = self.calculate_blend_if_mask(
+                            bg_rgb, rgb[:, :, :3] if rgb.shape[2] == 4 else rgb,
+                            blend_if_settings
+                        )
+                        alpha = alpha * blend_mask
+                    except (json.JSONDecodeError, KeyError, ValueError, TypeError) as e:
+                        # If JSON parsing or mask calculation fails, continue without blend if effect
+                        # This ensures graceful degradation rather than complete failure
+                        pass
+
+                    # Clamp blend results to [0, 1]
+                    blended = np.clip(blended, 0.0, 1.0)
+
+                    # Composite: handle both RGB and RGBA backgrounds
+                    if bg_f.shape[2] == 4:
+                        # RGBA background (including transparent background)
+                        bg_rgb = bg_f[:, :, :3]
+                        bg_alpha = bg_f[:, :, 3:4]
+
+                        # Alpha compositing formula: out_rgb = bg_rgb * (1 - alpha) + blended * alpha
+                        out_rgb = bg_rgb * (1 - alpha) + blended * alpha
+                        out_rgb = np.clip(out_rgb, 0, 1) * 255
+                        out_rgb = out_rgb.astype(np.uint8)
+
+                        # For alpha channel: out_alpha = bg_alpha + fg_alpha * (1 - bg_alpha)
+                        # But for our case, we want: out_alpha = bg_alpha + fg_alpha * (1 - bg_alpha/255)
+                        bg_alpha_f = bg_alpha.astype(np.float32) / 255.0
+                        fg_alpha_f = alpha  # This is already in [0,1] range
+                        out_alpha_f = bg_alpha_f + fg_alpha_f * (1 - bg_alpha_f)
+                        out_alpha = (out_alpha_f * 255).astype(np.uint8)
+
+                        result[y1:y2, x1:x2, :3] = out_rgb
+                        result[y1:y2, x1:x2, 3:4] = out_alpha
+                    else:
+                        # RGB background
+                        out = bg_f * (1 - alpha) + blended * alpha
+                        out = np.clip(out, 0, 1) * 255
+                        out = out.astype(np.uint8)
+                        result[y1:y2, x1:x2] = out
+
+            result_tensor = torch.from_numpy(result.astype(np.float32) / 255.0)
+            results.append(result_tensor)
+
+        # Stack all results to create a batch tensor
+        batch_result = torch.stack(results, dim=0)
+        return (batch_result,)
 
     def apply_blend_mode(self, bg_f, fg_f, blend_mode):
         """Apply blend mode with full Photoshop compatibility"""

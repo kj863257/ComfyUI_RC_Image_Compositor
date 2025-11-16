@@ -202,71 +202,84 @@ class RC_ShineRemoval:
                     brightness_reduction, smoothing_radius, feather_edges,
                     skin_tone_detection, invert_mask, protection_strength, protection_mask=None):
 
-        # Convert to numpy
-        img = (image[0].cpu().numpy() * 255).astype(np.uint8)
-        has_alpha = img.shape[2] == 4
+        batch_size = image.shape[0]
+        mask_batch_size = protection_mask.shape[0] if protection_mask is not None else 0
+        image_results = []
+        mask_results = []
 
-        if has_alpha:
-            rgb = img[:, :, :3]
-            alpha = img[:, :, 3]
-        else:
-            rgb = img
+        for i in range(batch_size):
+            # Convert to numpy for each image in the batch
+            img = (image[i].cpu().numpy() * 255).astype(np.uint8)
+            has_alpha = img.shape[2] == 4
 
-        # Detect shine areas
-        shine_mask = self.detect_shine_areas(rgb, shine_detection_threshold, skin_tone_detection)
-
-        # Apply user-provided protection mask if available
-        if protection_mask is not None:
-            user_mask = protection_mask[0].cpu().numpy().astype(np.float32)
-            if user_mask.shape != (rgb.shape[0], rgb.shape[1]):
-                user_mask = cv2.resize(user_mask, (rgb.shape[1], rgb.shape[0]),
-                                      interpolation=cv2.INTER_LINEAR)
-
-            # Apply protection strength to the mask
-            user_mask = user_mask * protection_strength
-
-            # Apply invert option
-            if invert_mask:
-                # mask=1 means PROTECT (don't process), so multiply by (1-mask)
-                shine_mask = shine_mask * (1.0 - user_mask)
+            if has_alpha:
+                rgb = img[:, :, :3]
+                alpha = img[:, :, 3]
             else:
-                # mask=1 means PROCESS, multiply directly
-                shine_mask *= user_mask
+                rgb = img
 
-        # Feather the shine mask edges
-        if feather_edges > 0:
-            blur_size = int(feather_edges) * 2 + 1
-            shine_mask = cv2.GaussianBlur(shine_mask, (blur_size, blur_size), feather_edges / 3)
+            # Detect shine areas
+            shine_mask = self.detect_shine_areas(rgb, shine_detection_threshold, skin_tone_detection)
 
-        # Apply frequency-based shine removal
-        processed = self.frequency_based_removal(
-            rgb, shine_mask, smoothing_radius,
-            high_frequency_reduction, low_frequency_smoothing, saturation_boost
-        )
+            # Apply user-provided protection mask if available
+            if protection_mask is not None:
+                # Cycle through protection mask if needed
+                mask_idx = i % mask_batch_size
+                user_mask = protection_mask[mask_idx].cpu().numpy().astype(np.float32)
+                if user_mask.shape != (rgb.shape[0], rgb.shape[1]):
+                    user_mask = cv2.resize(user_mask, (rgb.shape[1], rgb.shape[0]),
+                                          interpolation=cv2.INTER_LINEAR)
 
-        processed = np.clip(processed, 0, 255).astype(np.uint8)
+                # Apply protection strength to the mask
+                user_mask = user_mask * protection_strength
 
-        # Apply brightness reduction to reduce highlights
-        if brightness_reduction > 0:
-            processed = self.reduce_brightness(processed, shine_mask, brightness_reduction)
+                # Apply invert option
+                if invert_mask:
+                    # mask=1 means PROTECT (don't process), so multiply by (1-mask)
+                    shine_mask = shine_mask * (1.0 - user_mask)
+                else:
+                    # mask=1 means PROCESS, multiply directly
+                    shine_mask *= user_mask
+
+            # Feather the shine mask edges
+            if feather_edges > 0:
+                blur_size = int(feather_edges) * 2 + 1
+                shine_mask = cv2.GaussianBlur(shine_mask, (blur_size, blur_size), feather_edges / 3)
+
+            # Apply frequency-based shine removal
+            processed = self.frequency_based_removal(
+                rgb, shine_mask, smoothing_radius,
+                high_frequency_reduction, low_frequency_smoothing, saturation_boost
+            )
+
             processed = np.clip(processed, 0, 255).astype(np.uint8)
 
-        # Blend original and processed based on overall strength
-        shine_mask_3d = np.expand_dims(shine_mask * shine_removal_strength, axis=2)
-        result_rgb = (rgb.astype(np.float32) * (1 - shine_mask_3d) +
-                     processed.astype(np.float32) * shine_mask_3d)
-        result_rgb = np.clip(result_rgb, 0, 255).astype(np.uint8)
+            # Apply brightness reduction to reduce highlights
+            if brightness_reduction > 0:
+                processed = self.reduce_brightness(processed, shine_mask, brightness_reduction)
+                processed = np.clip(processed, 0, 255).astype(np.uint8)
 
-        # Reassemble with alpha if needed
-        if has_alpha:
-            result = np.dstack([result_rgb, alpha])
-        else:
-            result = result_rgb
+            # Blend original and processed based on overall strength
+            shine_mask_3d = np.expand_dims(shine_mask * shine_removal_strength, axis=2)
+            result_rgb = (rgb.astype(np.float32) * (1 - shine_mask_3d) +
+                         processed.astype(np.float32) * shine_mask_3d)
+            result_rgb = np.clip(result_rgb, 0, 255).astype(np.uint8)
 
-        # Convert back to tensor
-        result_tensor = torch.from_numpy(result.astype(np.float32) / 255.0).unsqueeze(0)
+            # Reassemble with alpha if needed
+            if has_alpha:
+                result = np.dstack([result_rgb, alpha])
+            else:
+                result = result_rgb
 
-        # Return shine mask for debugging
-        shine_mask_tensor = torch.from_numpy(shine_mask).unsqueeze(0)
+            # Convert back to tensor for this image
+            result_tensor = torch.from_numpy(result.astype(np.float32) / 255.0)
+            shine_mask_tensor = torch.from_numpy(shine_mask)
 
-        return (result_tensor, shine_mask_tensor)
+            image_results.append(result_tensor)
+            mask_results.append(shine_mask_tensor)
+
+        # Stack all results to create batch tensors
+        batch_image = torch.stack(image_results, dim=0)
+        batch_mask = torch.stack(mask_results, dim=0)
+
+        return (batch_image, batch_mask)

@@ -39,64 +39,72 @@ class RC_GaussianBlur:
         if radius <= 0:
             return (image,)
 
-        # Convert to numpy
-        img = (image[0].cpu().numpy() * 255).astype(np.uint8)
-        h, w = img.shape[:2]
-        has_alpha = img.shape[2] == 4
+        batch_size = image.shape[0]
+        results = []
 
-        if method == "PIL":
-            # Use PIL ImageFilter
-            if has_alpha:
-                rgb_img = Image.fromarray(img[:, :, :3], 'RGB')
-                alpha_img = Image.fromarray(img[:, :, 3], 'L')
+        for i in range(batch_size):
+            # Convert to numpy for each image in the batch
+            img = (image[i].cpu().numpy() * 255).astype(np.uint8)
+            h, w = img.shape[:2]
+            has_alpha = img.shape[2] == 4
 
-                # Apply blur to RGB channels
-                rgb_blurred = rgb_img.filter(ImageFilter.GaussianBlur(radius=radius))
+            if method == "PIL":
+                # Use PIL ImageFilter
+                if has_alpha:
+                    rgb_img = Image.fromarray(img[:, :, :3], 'RGB')
+                    alpha_img = Image.fromarray(img[:, :, 3], 'L')
 
-                if preserve_alpha:
-                    # Keep original alpha
-                    result = np.dstack([np.array(rgb_blurred), np.array(alpha_img)])
+                    # Apply blur to RGB channels
+                    rgb_blurred = rgb_img.filter(ImageFilter.GaussianBlur(radius=radius))
+
+                    if preserve_alpha:
+                        # Keep original alpha
+                        result = np.dstack([np.array(rgb_blurred), np.array(alpha_img)])
+                    else:
+                        # Blur alpha too
+                        alpha_blurred = alpha_img.filter(ImageFilter.GaussianBlur(radius=radius))
+                        result = np.dstack([np.array(rgb_blurred), np.array(alpha_blurred)])
                 else:
-                    # Blur alpha too
-                    alpha_blurred = alpha_img.filter(ImageFilter.GaussianBlur(radius=radius))
-                    result = np.dstack([np.array(rgb_blurred), np.array(alpha_blurred)])
-            else:
-                img_pil = Image.fromarray(img, 'RGB')
-                result = np.array(img_pil.filter(ImageFilter.GaussianBlur(radius=radius)))
+                    img_pil = Image.fromarray(img, 'RGB')
+                    result = np.array(img_pil.filter(ImageFilter.GaussianBlur(radius=radius)))
 
-        else:  # OpenCV
-            if has_alpha:
-                rgb = img[:, :, :3].copy()
-                alpha = img[:, :, 3].copy()
+            else:  # OpenCV
+                if has_alpha:
+                    rgb = img[:, :, :3].copy()
+                    alpha = img[:, :, 3].copy()
 
-                # Calculate kernel size (must be odd)
-                kernel_size = int(radius * 6)
-                if kernel_size % 2 == 0:
-                    kernel_size += 1
-                if kernel_size < 3:
-                    kernel_size = 3
+                    # Calculate kernel size (must be odd)
+                    kernel_size = int(radius * 6)
+                    if kernel_size % 2 == 0:
+                        kernel_size += 1
+                    if kernel_size < 3:
+                        kernel_size = 3
 
-                # Apply Gaussian blur to RGB
-                rgb_blurred = cv2.GaussianBlur(rgb, (kernel_size, kernel_size), radius)
+                    # Apply Gaussian blur to RGB
+                    rgb_blurred = cv2.GaussianBlur(rgb, (kernel_size, kernel_size), radius)
 
-                if preserve_alpha:
-                    # Keep original alpha
-                    result = np.dstack([rgb_blurred, alpha])
+                    if preserve_alpha:
+                        # Keep original alpha
+                        result = np.dstack([rgb_blurred, alpha])
+                    else:
+                        # Blur alpha too
+                        alpha_blurred = cv2.GaussianBlur(alpha, (kernel_size, kernel_size), radius)
+                        result = np.dstack([rgb_blurred, alpha_blurred])
                 else:
-                    # Blur alpha too
-                    alpha_blurred = cv2.GaussianBlur(alpha, (kernel_size, kernel_size), radius)
-                    result = np.dstack([rgb_blurred, alpha_blurred])
-            else:
-                kernel_size = int(radius * 6)
-                if kernel_size % 2 == 0:
-                    kernel_size += 1
-                if kernel_size < 3:
-                    kernel_size = 3
-                result = cv2.GaussianBlur(img, (kernel_size, kernel_size), radius)
+                    kernel_size = int(radius * 6)
+                    if kernel_size % 2 == 0:
+                        kernel_size += 1
+                    if kernel_size < 3:
+                        kernel_size = 3
+                    result = cv2.GaussianBlur(img, (kernel_size, kernel_size), radius)
 
-        # Convert back to tensor
-        result_tensor = torch.from_numpy(result.astype(np.float32) / 255.0).unsqueeze(0)
-        return (result_tensor,)
+            # Convert back to tensor for this image
+            result_tensor = torch.from_numpy(result.astype(np.float32) / 255.0)
+            results.append(result_tensor)
+
+        # Stack all results to create a batch tensor
+        batch_result = torch.stack(results, dim=0)
+        return (batch_result,)
 
 
 class RC_Sharpen:
@@ -139,83 +147,91 @@ class RC_Sharpen:
         if strength <= 0:
             return (image,)
 
-        # Convert to numpy
-        img = (image[0].cpu().numpy() * 255).astype(np.uint8)
-        has_alpha = img.shape[2] == 4
+        batch_size = image.shape[0]
+        results = []
 
-        if has_alpha:
-            rgb = img[:, :, :3]
-            alpha = img[:, :, 3]
-            work_img = rgb
-        else:
-            work_img = img
+        for i in range(batch_size):
+            # Convert to numpy for each image in the batch
+            img = (image[i].cpu().numpy() * 255).astype(np.uint8)
+            has_alpha = img.shape[2] == 4
 
-        if method == "unsharp_mask":
-            # Classic unsharp mask
-            work_float = work_img.astype(np.float32)
-
-            # Create Gaussian blur
-            kernel_size = int(radius * 6)
-            if kernel_size % 2 == 0:
-                kernel_size += 1
-            if kernel_size < 3:
-                kernel_size = 3
-
-            blurred = cv2.GaussianBlur(work_float, (kernel_size, kernel_size), radius)
-
-            # Calculate mask
-            mask = work_float - blurred
-
-            # Apply threshold
-            if threshold > 0:
-                mask_abs = np.abs(mask)
-                threshold_val = threshold * 255.0
-                mask = np.where(mask_abs > threshold_val, mask, 0)
-
-            # Apply sharpening
-            sharpened = work_float + strength * mask
-            sharpened = np.clip(sharpened, 0, 255).astype(np.uint8)
-
-        elif method == "high_pass":
-            # High-pass filter sharpening
-            work_float = work_img.astype(np.float32)
-
-            # Create low-pass (Gaussian blur)
-            kernel_size = int(radius * 4)
-            if kernel_size % 2 == 0:
-                kernel_size += 1
-            if kernel_size < 3:
-                kernel_size = 3
-
-            low_pass = cv2.GaussianBlur(work_float, (kernel_size, kernel_size), radius)
-
-            # High-pass = original - low-pass
-            high_pass = work_float - low_pass
-
-            # Apply sharpening
-            sharpened = work_float + strength * high_pass
-            sharpened = np.clip(sharpened, 0, 255).astype(np.uint8)
-
-        else:  # edge_enhance
-            # Use PIL's edge enhance
-            if len(work_img.shape) == 3:
-                pil_img = Image.fromarray(work_img, 'RGB')
+            if has_alpha:
+                rgb = img[:, :, :3]
+                alpha = img[:, :, 3]
+                work_img = rgb
             else:
-                pil_img = Image.fromarray(work_img, 'L')
+                work_img = img
 
-            enhancer = ImageEnhance.Sharpness(pil_img)
-            enhanced = enhancer.enhance(1.0 + strength)
-            sharpened = np.array(enhanced)
+            if method == "unsharp_mask":
+                # Classic unsharp mask
+                work_float = work_img.astype(np.float32)
 
-        # Reassemble with alpha if needed
-        if has_alpha:
-            result = np.dstack([sharpened, alpha])
-        else:
-            result = sharpened
+                # Create Gaussian blur
+                kernel_size = int(radius * 6)
+                if kernel_size % 2 == 0:
+                    kernel_size += 1
+                if kernel_size < 3:
+                    kernel_size = 3
 
-        # Convert back to tensor
-        result_tensor = torch.from_numpy(result.astype(np.float32) / 255.0).unsqueeze(0)
-        return (result_tensor,)
+                blurred = cv2.GaussianBlur(work_float, (kernel_size, kernel_size), radius)
+
+                # Calculate mask
+                mask = work_float - blurred
+
+                # Apply threshold
+                if threshold > 0:
+                    mask_abs = np.abs(mask)
+                    threshold_val = threshold * 255.0
+                    mask = np.where(mask_abs > threshold_val, mask, 0)
+
+                # Apply sharpening
+                sharpened = work_float + strength * mask
+                sharpened = np.clip(sharpened, 0, 255).astype(np.uint8)
+
+            elif method == "high_pass":
+                # High-pass filter sharpening
+                work_float = work_img.astype(np.float32)
+
+                # Create low-pass (Gaussian blur)
+                kernel_size = int(radius * 4)
+                if kernel_size % 2 == 0:
+                    kernel_size += 1
+                if kernel_size < 3:
+                    kernel_size = 3
+
+                low_pass = cv2.GaussianBlur(work_float, (kernel_size, kernel_size), radius)
+
+                # High-pass = original - low-pass
+                high_pass = work_float - low_pass
+
+                # Apply sharpening
+                sharpened = work_float + strength * high_pass
+                sharpened = np.clip(sharpened, 0, 255).astype(np.uint8)
+
+            else:  # edge_enhance
+                # Use PIL's edge enhance
+                if len(work_img.shape) == 3:
+                    pil_img = Image.fromarray(work_img, 'RGB')
+                else:
+                    pil_img = Image.fromarray(work_img, 'L')
+
+                enhancer = ImageEnhance.Sharpness(pil_img)
+                enhanced = enhancer.enhance(1.0 + strength)
+                sharpened = np.array(enhanced)
+
+            # Reassemble with alpha if needed
+            if has_alpha:
+                result = np.dstack([sharpened, alpha])
+            else:
+                result = sharpened
+
+            # Convert back to tensor for this image
+            result_tensor = torch.from_numpy(result.astype(np.float32) / 255.0)
+            results.append(result_tensor)
+
+        # Stack all results to create a batch tensor
+        batch_result = torch.stack(results, dim=0)
+        return (batch_result,)
 
 
 class RC_HueSaturation:
@@ -318,82 +334,90 @@ class RC_HueSaturation:
     def adjust_hue_saturation(self, image, hue_shift, saturation, lightness, colorize,
                             colorize_hue, colorize_saturation, target_color):
 
-        # Convert to numpy
-        img = (image[0].cpu().numpy() * 255).astype(np.uint8)
-        has_alpha = img.shape[2] == 4
+        batch_size = image.shape[0]
+        results = []
 
-        if has_alpha:
-            rgb = img[:, :, :3]
-            alpha = img[:, :, 3]
-        else:
-            rgb = img
+        for i in range(batch_size):
+            # Convert to numpy for each image in the batch
+            img = (image[i].cpu().numpy() * 255).astype(np.uint8)
+            has_alpha = img.shape[2] == 4
 
-        # Convert RGB to HSV using OpenCV for vectorized processing
-        rgb_float = rgb.astype(np.float32) / 255.0
-        hsv = cv2.cvtColor(rgb_float, cv2.COLOR_RGB2HSV).astype(np.float32)
+            if has_alpha:
+                rgb = img[:, :, :3]
+                alpha = img[:, :, 3]
+            else:
+                rgb = img
 
-        # OpenCV returns hue in degrees (0-360) for float32, saturation/value in 0-1
-        hue = hsv[:, :, 0] / 360.0
-        sat = hsv[:, :, 1]
-        val = hsv[:, :, 2]
+            # Convert RGB to HSV using OpenCV for vectorized processing
+            rgb_float = rgb.astype(np.float32) / 255.0
+            hsv = cv2.cvtColor(rgb_float, cv2.COLOR_RGB2HSV).astype(np.float32)
 
-        hue_degrees = hue * 360.0
+            # OpenCV returns hue in degrees (0-360) for float32, saturation/value in 0-1
+            hue = hsv[:, :, 0] / 360.0
+            sat = hsv[:, :, 1]
+            val = hsv[:, :, 2]
 
-        # Create mask for target color
-        if target_color != "master":
-            color_mask = self.get_color_mask(hue_degrees, target_color)
-        else:
-            color_mask = np.ones_like(hue_degrees)
+            hue_degrees = hue * 360.0
 
-        if colorize:
-            lightness_values = np.dot(rgb_float, [0.299, 0.587, 0.114]).astype(np.float32)
-            result_h = np.full_like(lightness_values, colorize_hue / 360.0)
-            result_s = np.full_like(lightness_values, colorize_saturation / 100.0)
-            result_v = lightness_values
-        else:
-            result_h = hue.copy()
-            result_s = sat.copy()
-            result_v = val.copy()
+            # Create mask for target color
+            if target_color != "master":
+                color_mask = self.get_color_mask(hue_degrees, target_color)
+            else:
+                color_mask = np.ones_like(hue_degrees)
 
-            if hue_shift != 0:
-                hue_shift_norm = (hue_shift / 360.0) % 1.0
-                new_hue = (hue + hue_shift_norm) % 1.0
-                result_h = hue * (1 - color_mask) + new_hue * color_mask
+            if colorize:
+                lightness_values = np.dot(rgb_float, [0.299, 0.587, 0.114]).astype(np.float32)
+                result_h = np.full_like(lightness_values, colorize_hue / 360.0)
+                result_s = np.full_like(lightness_values, colorize_saturation / 100.0)
+                result_v = lightness_values
+            else:
+                result_h = hue.copy()
+                result_s = sat.copy()
+                result_v = val.copy()
 
-            if saturation != 0:
-                sat_factor = (saturation + 100.0) / 100.0
-                new_sat = np.clip(sat * sat_factor, 0.0, 1.0)
-                result_s = sat * (1 - color_mask) + new_sat * color_mask
+                if hue_shift != 0:
+                    hue_shift_norm = (hue_shift / 360.0) % 1.0
+                    new_hue = (hue + hue_shift_norm) % 1.0
+                    result_h = hue * (1 - color_mask) + new_hue * color_mask
 
-            if lightness != 0:
-                light_factor = lightness / 100.0
-                brighter = light_factor > 0
-                new_val = np.where(
-                    brighter,
-                    val + (1.0 - val) * light_factor,
-                    val * (1.0 + light_factor)
-                )
-                new_val = np.clip(new_val, 0.0, 1.0)
-                result_v = val * (1 - color_mask) + new_val * color_mask
+                if saturation != 0:
+                    sat_factor = (saturation + 100.0) / 100.0
+                    new_sat = np.clip(sat * sat_factor, 0.0, 1.0)
+                    result_s = sat * (1 - color_mask) + new_sat * color_mask
 
-        hsv_adjusted = np.stack([
-            np.clip(result_h * 360.0, 0.0, 360.0),
-            np.clip(result_s, 0.0, 1.0),
-            np.clip(result_v, 0.0, 1.0)
-        ], axis=2).astype(np.float32)
+                if lightness != 0:
+                    light_factor = lightness / 100.0
+                    brighter = light_factor > 0
+                    new_val = np.where(
+                        brighter,
+                        val + (1.0 - val) * light_factor,
+                        val * (1.0 + light_factor)
+                    )
+                    new_val = np.clip(new_val, 0.0, 1.0)
+                    result_v = val * (1 - color_mask) + new_val * color_mask
 
-        result_rgb = cv2.cvtColor(hsv_adjusted, cv2.COLOR_HSV2RGB)
-        result_rgb = np.clip(result_rgb * 255.0, 0, 255).astype(np.uint8)
+            hsv_adjusted = np.stack([
+                np.clip(result_h * 360.0, 0.0, 360.0),
+                np.clip(result_s, 0.0, 1.0),
+                np.clip(result_v, 0.0, 1.0)
+            ], axis=2).astype(np.float32)
 
-        # Reassemble with alpha if needed
-        if has_alpha:
-            result = np.dstack([result_rgb, alpha])
-        else:
-            result = result_rgb
+            result_rgb = cv2.cvtColor(hsv_adjusted, cv2.COLOR_HSV2RGB)
+            result_rgb = np.clip(result_rgb * 255.0, 0, 255).astype(np.uint8)
 
-        # Convert back to tensor
-        result_tensor = torch.from_numpy(result.astype(np.float32) / 255.0).unsqueeze(0)
-        return (result_tensor,)
+            # Reassemble with alpha if needed
+            if has_alpha:
+                result = np.dstack([result_rgb, alpha])
+            else:
+                result = result_rgb
+
+            # Convert back to tensor for this image
+            result_tensor = torch.from_numpy(result.astype(np.float32) / 255.0)
+            results.append(result_tensor)
+
+        # Stack all results to create a batch tensor
+        batch_result = torch.stack(results, dim=0)
+        return (batch_result,)
 
 
 class RC_AddNoise:
@@ -443,117 +467,125 @@ class RC_AddNoise:
         if amount == 0:
             return (image,)
 
-        # Convert to numpy
-        img = image[0].cpu().numpy()
-        has_alpha = img.shape[2] == 4
+        batch_size = image.shape[0]
+        results = []
 
-        if has_alpha:
-            rgb = img[:, :, :3]
-            alpha = img[:, :, 3]
-        else:
-            rgb = img
+        for i in range(batch_size):
+            # Convert to numpy for each image in the batch
+            img = image[i].cpu().numpy()
+            has_alpha = img.shape[2] == 4
 
-        h, w = rgb.shape[:2]
-        noise_factor = amount / 100.0
-
-        # Pre-compute noise shape for optimization
-        if monochromatic:
-            noise_shape = (h, w, 1)
-        else:
-            noise_shape = (h, w, 3)
-
-        # Generate noise based on type (optimized)
-        if noise_type == "gaussian":
-            # Vectorized sharp Gaussian noise generation
-            noise = np.random.normal(0, noise_factor * 0.3, noise_shape)
-            if monochromatic:
-                noise = np.broadcast_to(noise, (h, w, 3))
-            result_rgb = rgb + noise
-
-        elif noise_type == "gaussian_blur":
-            # Smooth Gaussian distributed noise with blur
-            noise = np.random.normal(0, noise_factor * 0.4, noise_shape)
-            if monochromatic:
-                noise = np.broadcast_to(noise, (h, w, 3))
-
-            # Apply Gaussian blur to noise for smoother appearance
-            blur_kernel_size = max(3, int(noise_factor * 10))
-            if blur_kernel_size % 2 == 0:
-                blur_kernel_size += 1  # Ensure odd kernel size
-
-            # Blur each channel
-            noise_blurred = np.zeros_like(noise)
-            for c in range(3):
-                noise_blurred[:, :, c] = cv2.GaussianBlur(
-                    noise[:, :, c],
-                    (blur_kernel_size, blur_kernel_size),
-                    noise_factor * 2.0
-                )
-
-            result_rgb = rgb + noise_blurred
-
-        elif noise_type == "uniform":
-            # Vectorized uniform noise generation
-            noise = np.random.uniform(-noise_factor * 0.5, noise_factor * 0.5, noise_shape)
-            if monochromatic:
-                noise = np.broadcast_to(noise, (h, w, 3))
-            result_rgb = rgb + noise
-
-        elif noise_type == "salt_pepper":
-            # Optimized salt and pepper noise
-            result_rgb = rgb.copy()
-
-            # Vectorized salt/pepper generation
-            if monochromatic:
-                # Single mask for all channels
-                noise_probability = noise_factor * 0.01
-                noise_mask = np.random.random((h, w)) < noise_probability
-                salt_mask = np.random.random((h, w)) < 0.5
-
-                # Vectorized assignment using broadcasting
-                salt_pixels = noise_mask & salt_mask
-                pepper_pixels = noise_mask & ~salt_mask
-
-                result_rgb[salt_pixels] = 1.0    # White (salt)
-                result_rgb[pepper_pixels] = 0.0  # Black (pepper)
+            if has_alpha:
+                rgb = img[:, :, :3]
+                alpha = img[:, :, 3]
             else:
-                # Optimized per-channel processing
-                noise_probability = noise_factor * 0.01
-                for channel in range(3):
-                    channel_noise_mask = np.random.random((h, w)) < noise_probability
-                    channel_salt_mask = np.random.random((h, w)) < 0.5
+                rgb = img
 
-                    salt_pixels = channel_noise_mask & channel_salt_mask
-                    pepper_pixels = channel_noise_mask & ~channel_salt_mask
+            h, w = rgb.shape[:2]
+            noise_factor = amount / 100.0
 
-                    result_rgb[salt_pixels, channel] = 1.0
-                    result_rgb[pepper_pixels, channel] = 0.0
-
-        elif noise_type == "speckle":
-            # Optimized speckle noise (multiplicative)
-            noise = np.random.normal(1.0, noise_factor * 0.2, noise_shape)
+            # Pre-compute noise shape for optimization
             if monochromatic:
-                noise = np.broadcast_to(noise, (h, w, 3))
-            result_rgb = rgb * noise
-
-        # Single clamp operation
-        result_rgb = np.clip(result_rgb, 0.0, 1.0)
-
-        # Optimized image reassembly
-        if has_alpha:
-            if preserve_alpha:
-                result = np.dstack([result_rgb, alpha])
+                noise_shape = (h, w, 1)
             else:
-                # Optimized alpha noise application
-                if noise_type in ["gaussian", "uniform"]:
-                    alpha_noise = np.random.normal(0, noise_factor * 0.1, alpha.shape)
-                    result_alpha = np.clip(alpha + alpha_noise, 0.0, 1.0)
+                noise_shape = (h, w, 3)
+
+            # Generate noise based on type (optimized)
+            if noise_type == "gaussian":
+                # Vectorized sharp Gaussian noise generation
+                noise = np.random.normal(0, noise_factor * 0.3, noise_shape)
+                if monochromatic:
+                    noise = np.broadcast_to(noise, (h, w, 3))
+                result_rgb = rgb + noise
+
+            elif noise_type == "gaussian_blur":
+                # Smooth Gaussian distributed noise with blur
+                noise = np.random.normal(0, noise_factor * 0.4, noise_shape)
+                if monochromatic:
+                    noise = np.broadcast_to(noise, (h, w, 3))
+
+                # Apply Gaussian blur to noise for smoother appearance
+                blur_kernel_size = max(3, int(noise_factor * 10))
+                if blur_kernel_size % 2 == 0:
+                    blur_kernel_size += 1  # Ensure odd kernel size
+
+                # Blur each channel
+                noise_blurred = np.zeros_like(noise)
+                for c in range(3):
+                    noise_blurred[:, :, c] = cv2.GaussianBlur(
+                        noise[:, :, c],
+                        (blur_kernel_size, blur_kernel_size),
+                        noise_factor * 2.0
+                    )
+
+                result_rgb = rgb + noise_blurred
+
+            elif noise_type == "uniform":
+                # Vectorized uniform noise generation
+                noise = np.random.uniform(-noise_factor * 0.5, noise_factor * 0.5, noise_shape)
+                if monochromatic:
+                    noise = np.broadcast_to(noise, (h, w, 3))
+                result_rgb = rgb + noise
+
+            elif noise_type == "salt_pepper":
+                # Optimized salt and pepper noise
+                result_rgb = rgb.copy()
+
+                # Vectorized salt/pepper generation
+                if monochromatic:
+                    # Single mask for all channels
+                    noise_probability = noise_factor * 0.01
+                    noise_mask = np.random.random((h, w)) < noise_probability
+                    salt_mask = np.random.random((h, w)) < 0.5
+
+                    # Vectorized assignment using broadcasting
+                    salt_pixels = noise_mask & salt_mask
+                    pepper_pixels = noise_mask & ~salt_mask
+
+                    result_rgb[salt_pixels] = 1.0    # White (salt)
+                    result_rgb[pepper_pixels] = 0.0  # Black (pepper)
                 else:
-                    result_alpha = alpha  # Keep original for other noise types
-                result = np.dstack([result_rgb, result_alpha])
-        else:
-            result = result_rgb
+                    # Optimized per-channel processing
+                    noise_probability = noise_factor * 0.01
+                    for channel in range(3):
+                        channel_noise_mask = np.random.random((h, w)) < noise_probability
+                        channel_salt_mask = np.random.random((h, w)) < 0.5
 
-        # Convert back to tensor (already float32)
-        result_tensor = torch.from_numpy(result).unsqueeze(0)
-        return (result_tensor,)
+                        salt_pixels = channel_noise_mask & channel_salt_mask
+                        pepper_pixels = channel_noise_mask & ~channel_salt_mask
+
+                        result_rgb[salt_pixels, channel] = 1.0
+                        result_rgb[pepper_pixels, channel] = 0.0
+
+            elif noise_type == "speckle":
+                # Optimized speckle noise (multiplicative)
+                noise = np.random.normal(1.0, noise_factor * 0.2, noise_shape)
+                if monochromatic:
+                    noise = np.broadcast_to(noise, (h, w, 3))
+                result_rgb = rgb * noise
+
+            # Single clamp operation
+            result_rgb = np.clip(result_rgb, 0.0, 1.0)
+
+            # Optimized image reassembly
+            if has_alpha:
+                if preserve_alpha:
+                    result = np.dstack([result_rgb, alpha])
+                else:
+                    # Optimized alpha noise application
+                    if noise_type in ["gaussian", "uniform"]:
+                        alpha_noise = np.random.normal(0, noise_factor * 0.1, alpha.shape)
+                        result_alpha = np.clip(alpha + alpha_noise, 0.0, 1.0)
+                    else:
+                        result_alpha = alpha  # Keep original for other noise types
+                    result = np.dstack([result_rgb, result_alpha])
+            else:
+                result = result_rgb
+
+            # Convert back to tensor (already float32) for this image
+            result_tensor = torch.from_numpy(result)
+            results.append(result_tensor)
+
+        # Stack all results to create a batch tensor
+        batch_result = torch.stack(results, dim=0)
+        return (batch_result,)
