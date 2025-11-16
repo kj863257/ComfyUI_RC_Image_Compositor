@@ -1,6 +1,6 @@
 # RC Image Compositor 🎨
 
-A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style layer effects** and **advanced compositing capabilities** to your workflows. The collection now ships with **35 production-ready nodes** spanning compositing, adjustments, generation, utilities, and channel tools. Recent updates add a Lightroom/Camera Raw preset browser with interactive preview, clearer Blend-If interface, high-precision curves display under ComfyUI zoom, draggable gradient stops for faster toning workflows, a high-performance pattern tiling generator with pre-tiling crop controls, workflow metadata transfer nodes for seamless metadata management, and a brand-new interactive canvas for real-time foreground placement.
+A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style layer effects** and **advanced compositing capabilities** to your workflows. The collection now ships with **36 production-ready nodes** spanning compositing, adjustments, generation, utilities, and channel tools. Recent updates add full video (multi-frame) processing support, a Photoshop-quality color matching node with 4 advanced algorithms, a Lightroom/Camera Raw preset browser with interactive preview, clearer Blend-If interface, high-precision curves display under ComfyUI zoom, draggable gradient stops for faster toning workflows, a high-performance pattern tiling generator with pre-tiling crop controls, workflow metadata transfer nodes for seamless metadata management, and a brand-new interactive canvas for real-time foreground placement.
 
 [中文版 README](README_zh.md)
 
@@ -136,6 +136,7 @@ A comprehensive ComfyUI plugin suite that brings **professional Photoshop-style 
 - `RC Vibrance` - Smart saturation boost with skin protection controls
 - `RC Auto Color Correction` - Four automatic correction algorithms (monochromatic, channel-aware, shadows/highlights, dynamic contrast)
 - `RC LR/ACR Preset` - Interactive Lightroom/Camera Raw preset browser with real-time preview, directory scanning, and adjustable strength
+- `RC Color Match` - Photoshop-quality color matching with 4 advanced algorithms (LAB Statistics, LAB Histogram, MKL Transfer, Wavelet Hybrid), strength control, luminosity preservation, neutralization, and full video batch processing support
 
 ### **RC/Utilities** - Canvas & Transform
 - `RC Canvas Padding` - Canvas expansion with multiple padding modes
